@@ -1,6 +1,8 @@
 from aiogram import types, Dispatcher, filters
 from Create_bot import bot, MY_ID
 from Keyboards import KB_Reply
+from FSMStates.FSMTests import FSMTest
+from aiogram.dispatcher import FSMContext
 
 
 async def send_welcome(message: types.Message):
@@ -17,12 +19,17 @@ async def send_welcome(message: types.Message):
         await message.answer(text="Что-то пошло не так, попробуй ещё раз.")
 
 
-async def select_test(message: types.Message):
+async def select_test(message: types.Message, state: FSMContext):
     try:
         await bot.send_message(chat_id=message.chat.id,
                                text='Выберите тест',
                                reply_markup=KB_Reply.set_IKB_select_survey())
         # print('end select test in message handler')
+        async with state.proxy() as data:
+            data['id_user'] = message.from_user.id
+            print(data)
+        await FSMTest.test_handler.set()
+
     except Exception as error_exeption:
         await bot.send_message(chat_id=MY_ID,
                                text=f"Ошибка в боте:{error_exeption}")

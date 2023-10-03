@@ -37,8 +37,8 @@ class SQL_COM:
             WHERE {column_condition} = '{value}';
             """
             result_list = list()
+            print(f'Выполнено выражение:\n{query}')
             self.cursor.execute(query)
-            # print(f'Выполнено выражение:\n{query}')
             result = self.cursor.fetchall()
             for i in result:
                 result_list.append(i[0])
@@ -75,7 +75,7 @@ class SQL_COM:
             condition_txt += f" and {i} = {condition[i]}"
 
         try:
-            # result_list = list()
+            result_list = list()
             query = f"""
                     SELECT * FROM {table}
                     WHERE 1=1 {condition_txt};
@@ -83,14 +83,18 @@ class SQL_COM:
             # print(f'Выполнено выражение:\n{query}')
             self.cursor.execute(query)
             result = self.cursor.fetchall()
-            # for i in result:
-            #     result_list.append(i[0])
+            for i in result:
+                result_list.append(list(i))
             # print('Send result list')
             # print('End select_table_with_condition')
-            return list(result[0]) #result_list
+            return list(result_list)
         except Exception as error_exeption:
             print('Error select_table_with_condition')
             print(error_exeption)
+
+    def select_table_with_condition_first_row(self, table: str, condition: dict):
+        result_list = self.select_table_with_condition(table, condition)[0]
+        return result_list
 
     def insert_row_in_table(self, table: str, columns: tuple, values: tuple) -> None:
         # print('Start insert_row_in_table')
@@ -100,9 +104,37 @@ class SQL_COM:
                         INSERT INTO {table} ({', '.join(columns)})
                         VALUES {values};
                     """
+            print(f'Выполнено выражение:\n{query}')
             self.cursor.execute(query)
             self.conn.commit()
-            # print(f'Выполнено выражение:\n{query}')
+            # print('Finish insert')
+            # print('End insert_row_in_table')
+        except Exception as error_exeption:
+            print('Error insert_row_in_table')
+            print('Error insert')
+            print(error_exeption)
+
+    def update_table(self, table: str, change_values: dict, conditions: dict) -> None:
+        try:
+            change_values_txt = ''
+            condition_txt = ''
+            for condition in conditions:
+                print(condition, conditions[condition], conditions)
+                condition_txt += f" and {condition} = {conditions[condition]}"
+            print(condition_txt)
+            j = 1
+            for value in change_values:
+                print(j, value, change_values[value], change_values)
+                change_values_txt += f" {value} = {change_values[value]}"
+                print(len(change_values))
+                if j != len(change_values):
+                    change_values_txt += ','
+                j += 1
+            print(change_values_txt)
+            query = f"""UPDATE {table}  SET {change_values_txt} WHERE 1=1 {condition_txt};"""
+            print(f'Выражение:\n{query}')
+            self.cursor.execute(query)
+            self.conn.commit()
             # print('Finish insert')
             # print('End insert_row_in_table')
         except Exception as error_exeption:
@@ -170,9 +202,7 @@ class SQL_COM:
 if __name__ == '__main__':
     try:
         sql = SQL_COM()
-        cond = {'SURVEY_ID': 28, 'NUMBER_QUESTION': 1}
-        r = sql.select_table_with_condition('SURVEYS_ANSWERS', cond)
-        print(r)
+        print(sql.select_cell_from_table('USER_SURVEYS', 'ID_USER', 'ID_SURVEY', '809916411'))
     except Exception as error_exeption:
         print('Error main file')
         print(error_exeption)
