@@ -11,5 +11,3 @@ MY_ID = sql_bot.get_constant('MY_ID')
 
 bot = Bot(API_TOKEN)
 dp = Dispatcher(bot=bot, storage=storage)
-
-

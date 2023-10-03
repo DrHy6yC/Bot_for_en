@@ -29,7 +29,7 @@ async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None
 
 
 async def test_run(callback: types.CallbackQuery, state: FSMContext) -> None:
-    # Отправить в БД ид теста
+    # TODO получать из бд информацию о пользователе и тесте
     try:
         question = 'First question'
         answers = ['1', '2', '3', '4']
@@ -54,9 +54,9 @@ async def test_run(callback: types.CallbackQuery, state: FSMContext) -> None:
 
 
 async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> None:
-    # получить из бд ид теста
+    # TODO получить и отправить из бд
     try:
-
+        print(callback.from_user.id)
         async with state.proxy() as data:
             data['question_num'] += 1
             print(data)
@@ -72,6 +72,7 @@ async def test_revoked(callback: types.CallbackQuery):
         message_id=callback.message.message_id,
         reply_markup=None
     )
+    # TODO Добавить возможность продолжить или перезапустить тест
     await bot.send_message(chat_id=callback.message.chat.id,
                            text='Тест прерван',
                            reply_markup=None)
@@ -92,5 +93,3 @@ def register_call_handlers_user(dp: Dispatcher) -> None:
     dp.register_callback_query_handler(test_progress, text='3', state=FSMTest.test_progressed)
     dp.register_callback_query_handler(test_progress, text='4', state=FSMTest.test_progressed)
     dp.register_callback_query_handler(test_revoked, text='0', state=FSMTest.test_progressed)
-
-

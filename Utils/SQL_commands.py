@@ -190,14 +190,6 @@ class SQL_COM:
             print('Error insert survey to bd')
             print(error_exeption)
 
-    # def export_survey(self, string: str) -> dict:
-    #     result = json.loads(string)
-    #     return result
-    #
-    # def import_survey(self, dictionary: dict) -> str:
-    #     result = json.dumps(dictionary)
-    #     return result
-
 
 if __name__ == '__main__':
     try:

@@ -14,4 +14,3 @@ def detect_en_simbol(text_check: str) -> bool:
 if __name__ == '__main__':
     text = 'лтвлтувлту'
     print(detect_en_simbol(text))
-

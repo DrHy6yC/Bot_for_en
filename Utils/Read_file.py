@@ -15,6 +15,5 @@ if __name__ == "__main__":
 
     name = 'miniTest.csv'
     path = Path(__file__).parent/f"../{name}"
-    print(path)
-    c = import_csv(path)
-
+    print(str(path))
+    c = import_csv(str(path))

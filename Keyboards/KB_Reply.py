@@ -2,7 +2,6 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMar
 from Create_bot import sql_bot
 
 
-
 def set_but_start() -> ReplyKeyboardMarkup:
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
     b1 = KeyboardButton(text="Помощь")
@@ -49,3 +48,6 @@ def set_IKB_select_survey() -> InlineKeyboardMarkup:
         print('Error in ikb')
         print(error_exeption)
     return ikb
+
+
+# TODO добавить клавиатуру для продолжения, перезапуска или окончательной отмены теста
