@@ -20,7 +20,7 @@ async def inline_echo(inline_query: types.InlineQuery) -> None:
             title=str(translate_text)
         )
         # print(result_id)
-        await inline_query.answer([item], cache_time=1, is_personal=True)
+        await inline_query.answer([item], cache_time=5, is_personal=True)
     except Exception as error_exception:
         print(error_exception)
 

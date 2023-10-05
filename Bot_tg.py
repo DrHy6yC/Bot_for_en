@@ -1,5 +1,5 @@
-from aiogram.utils import executor
-from Create_bot import dp, sql_bot
+from Create_bot import dp, sql, bot
+from aiogram import executor
 from Handlers import Callback_handlers as ch
 from Handlers import Message_handler as mh
 from Handlers import Inline_handlers as ih
@@ -17,10 +17,9 @@ if __name__ == '__main__':
         mh.register_handlers_user(dp)
         ch.register_call_handlers_user(dp)
         ih.register_inline_handler(dp)
-
         executor.start_polling(dp, skip_updates=True, on_startup=on_startup, on_shutdown=on_shutdown)
-    except Exception as error_exeption:
+    except Exception as error_exception:
         print('Bot error')
-        print(error_exeption)
+        print(error_exception)
     finally:
-        sql_bot.end_con()
+        sql.end_con()

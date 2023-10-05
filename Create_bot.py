@@ -1,13 +1,18 @@
 from aiogram import Bot, Dispatcher
-from Utils.SQL_commands import SQL_COM
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+
+# from aiogram.fsm.storage.memory import MemoryStorage
+
+# from aiogram.contrib.fsm_storage.memory import MemoryStorage
+
+from Utils.SQL_actions import SQLAction as sql
+from Utils import SQL_querys as query
 
 storage = MemoryStorage()
 
-sql_bot = SQL_COM()
-
-API_TOKEN = sql_bot.get_constant('API_TOKEN')
-MY_ID = sql_bot.get_constant('MY_ID')
+sql = sql()
+API_TOKEN = sql.select_db_one(query.select_all_from_CONSTANTS_by_CONSTANT_NAMES, {'CONSTANT_NAMES': 'API_TOKEN_TG'})
+MY_ID = sql.select_db_one(query.select_all_from_CONSTANTS_by_CONSTANT_NAMES, {'CONSTANT_NAMES': 'MY_ID'})
 
 bot = Bot(API_TOKEN)
 dp = Dispatcher(bot=bot, storage=storage)
