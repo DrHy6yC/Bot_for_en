@@ -40,6 +40,7 @@ async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None
 # TODO получать из бд информацию о пользователе и тесте
 async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> None:
     # # TODO получить и отправить из бд
+    # TODO проверку на послудний вопрос
     id_chat = callback.message.chat.id
     data = await state.get_data()
     test_id = data['id_test']
@@ -47,19 +48,27 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
     question_num += 1
     answer_user = str(callback.data)
     await state.update_data(question_num=question_num, answer_user=answer_user)
-    answers = ['1', '2', '3', '4']
+    answers_list = sql.select_db_one(
+        query.select_ANSWERS_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
+        {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num})
+    answers = answers_list
     question_list = sql.select_db_one(
         query.select_SURVEY_QUESTION_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
         {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num})
+
     new_question = question_list[0]
     question = data.get('question', new_question)
     print(question)
+    answer_user_text = sql.select_db_one(
+        query.select_ANSWER_USER_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID_and_ANSWER,
+        {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num})
     text_q = question.replace('______', f'<u><em>{answer_user}</em></u>')
     print('question_num: ', question_num)
     await bot.edit_message_reply_markup(
         chat_id=id_chat,
         message_id=callback.message.message_id,
         reply_markup=None)
+    await state.update_data(question=new_question)
     print(text_q)
     if question_num != 1:
         await bot.edit_message_text(
@@ -73,7 +82,6 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
             await bot.send_message(chat_id=id_chat,
                                    text=new_question,
                                    reply_markup=KB_Reply.set_IKB_Survey(answers))
-            await state.update_data(question=new_question)
         else:
             await FSMTest.test_revoked.set()
     else:
