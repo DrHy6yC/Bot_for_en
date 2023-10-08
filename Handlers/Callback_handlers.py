@@ -22,7 +22,7 @@ async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None
     id_test = sql.select_db_one(
         query=query.select_SURVEY_ID_from_SURVEY_by_SURVEY_NAME,
         data={'SURVEY_NAME': name_test}
-    )[0]
+    )
     await state.update_data(name_test=name_test, id_test=id_test)
     await bot.edit_message_text(
         chat_id=callback.message.chat.id,
@@ -39,7 +39,6 @@ async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None
 
 # TODO получать из бд информацию о пользователе и тесте
 async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> None:
-    # # TODO получить и отправить из бд
     # TODO проверку на послудний вопрос
     id_chat = callback.message.chat.id
     data = await state.get_data()
@@ -48,21 +47,22 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
     question_num += 1
     answer_user = str(callback.data)
     await state.update_data(question_num=question_num, answer_user=answer_user)
-    answers_list = sql.select_db_one(
+    answers_list = sql.select_db(
         query.select_ANSWERS_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
         {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num})
-    answers = answers_list
-    question_list = sql.select_db_one(
+    answers = list()
+    for i in answers_list:
+        answers.append(i[0])
+
+    new_question = sql.select_db_one(
         query.select_SURVEY_QUESTION_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
         {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num})
-
-    new_question = question_list[0]
     question = data.get('question', new_question)
     print(question)
     answer_user_text = sql.select_db_one(
-        query.select_ANSWER_USER_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID_and_ANSWER,
-        {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num})
-    text_q = question.replace('______', f'<u><em>{answer_user}</em></u>')
+        query.select_ANSWER_USER_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID_and_NUMBER_ANSWER,
+        {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num, 'NUMBER_ANSWER': answer_user})
+    text_q = question.replace('______', f'<u><em>{answer_user_text}</em></u>')
     print('question_num: ', question_num)
     await bot.edit_message_reply_markup(
         chat_id=id_chat,

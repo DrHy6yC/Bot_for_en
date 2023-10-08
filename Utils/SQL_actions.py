@@ -51,8 +51,9 @@ if __name__ == '__main__':
     sql = None
     try:
         sql = SQLAction()
-        result_select =sql.select_db_one(querys.select_all_from_CONSTANTS_by_CONSTANT_NAMES,
-                                         {'CONSTANT_NAMES': 'API_TOKEN_TG'})
+        result_select = sql.select_db_one(
+        querys.select_SURVEY_QUESTION_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
+        {'SURVEY_ID': 1, 'NUMBER_QUESTION': 1})
 
         print(result_select)
 

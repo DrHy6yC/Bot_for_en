@@ -16,7 +16,7 @@ async def send_welcome(message: types.Message):
     await bot.send_message(chat_id=message.chat.id,
                            text=sql.select_db_one(
                                query=query.select_all_from_CONSTANTS_by_CONSTANT_NAMES,
-                               data={'CONSTANT_NAMES': 'TEXT_HI'})[0],
+                               data={'CONSTANT_NAMES': 'TEXT_HI'}),
                            reply_markup=reply_markup)
 
 
@@ -34,7 +34,7 @@ async def help_command(message: types.Message):
     await message.delete()
     await bot.send_message(chat_id=message.chat.id,
                            text=sql.select_db_one(query=query.select_all_from_CONSTANTS_by_CONSTANT_NAMES,
-                                                  data={'CONSTANT_NAMES': 'TEXT_HELP'})[0],
+                                                  data={'CONSTANT_NAMES': 'TEXT_HELP'}),
                            reply_markup=KB_Reply.set_IKB_one_but('Ok', 'delete_message'))
 
 
