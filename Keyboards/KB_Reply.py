@@ -20,6 +20,14 @@ def set_IKB_one_but(text, call_data) -> InlineKeyboardMarkup:
     return ikb
 
 
+def set_IKB_many_but(dictionary: dict) -> InlineKeyboardMarkup:
+    ikb = InlineKeyboardMarkup(row_width=1)
+    for text, call in dictionary.items():
+        ikb.add(InlineKeyboardButton(text=text,
+                                     callback_data=call))
+    return ikb
+
+
 def set_IKB_Survey(answers: list) -> InlineKeyboardMarkup:
     dictionary = dict()
     list_answers = answers
@@ -43,20 +51,6 @@ def set_IKB_select_survey() -> InlineKeyboardMarkup:
     return ikb
 
 
-def set_IKB_many_but(dictionary: dict) -> InlineKeyboardMarkup:
-    ikb = InlineKeyboardMarkup(row_width=1)
-    for text, call in dictionary.items():
-        ikb.add(InlineKeyboardButton(text=text,
-                                     callback_data=call))
-    return ikb
-
-
-# TODO добавить клавиатуру для продолжения, перезапуска или окончательной отмены теста
 def set_IKB_continue_finish() -> InlineKeyboardMarkup:
-    ikb = InlineKeyboardMarkup(row_width=1)
-    ib1 = InlineKeyboardButton(text=f'Остановить тест',
-                               callback_data='-1')
-    ib2 = InlineKeyboardButton(text=f'Продолжить тест',
-                               callback_data='0')
-    ikb.add(ib1, ib2)
-    return ikb
+    dict_but = {'Остановить тест': '-1', 'Продолжить тест': '0', 'Перезапустить тест': 'r'}
+    return set_IKB_many_but(dict_but)

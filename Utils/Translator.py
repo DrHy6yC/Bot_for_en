@@ -27,7 +27,7 @@ def translate_text(text: str, en_ru=False) -> str:
     If is_detect = False, en-ru disable
     :param text:
     :param en_ru: Switches translate en -> ru
-    :return: translete in str
+    :return: translate in str
     """
     lang_elementary = "ru_RU"
     lang_finite = "en_GB"

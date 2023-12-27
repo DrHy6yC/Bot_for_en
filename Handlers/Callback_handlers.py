@@ -1,4 +1,3 @@
-
 from aiogram import types, Dispatcher
 
 from magic_filter import F
@@ -62,25 +61,19 @@ async def get_data_bd(test_id: int, question_num: int, data: dict, answer_user) 
     return {'max_question': max_question, 'text_q': text_q, 'answers_list': answers_list}
 
 
-# TODO получать из бд информацию о пользователе и тесте
+# TODO 1 получать из бд информацию о пользователе и тесте
 async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> None:
     id_chat = callback.message.chat.id
     data = await state.get_data()
-    print(data)
     test_id = data['id_test']
     question_num = data.get('question_num', 0)
-    print(question_num)
     question_num += 1
-    print(question_num)
     answer_user = str(callback.data)
     await state.update_data(question_num=question_num, answer_user=answer_user)
-    print(await state.get_data())
     answers_list = sql.select_db(
         query.select_ANSWERS_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
         {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num})
-    print(answers_list)
     answers = list()
-    print(answers)
     for i in answers_list:
         answers.append(i[0])
     await bot.edit_message_reply_markup(
@@ -88,18 +81,15 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
         message_id=callback.message.message_id,
         reply_markup=None)
     if question_num == 1:
-        print(question_num)
         question = sql.select_db_one(
             query.select_SURVEY_QUESTION_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
             {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num})
         await state.update_data(question=question)
         if answer_user in ['1', '2', '3', '4']:
-            print(question)
             await bot.send_message(chat_id=id_chat,
                                    text=question,
                                    reply_markup=KB_Reply.set_IKB_Survey(answers))
     elif 7 >= question_num > 1:
-        print(question_num)
         new_question = sql.select_db_one(
             query.select_SURVEY_QUESTION_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
             {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num})
@@ -114,16 +104,13 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
             message_id=callback.message.message_id,
             parse_mode="html",
             text=text_q)
-        print('answer_user: ', answer_user)
         if answer_user in ['1', '2', '3', '4']:
-            print(new_question)
             await bot.send_message(chat_id=id_chat,
                                    text=new_question,
                                    reply_markup=KB_Reply.set_IKB_Survey(answers))
         else:
             await FSMTest.test_revoked.set()
     elif question_num == 8:
-        print(question_num)
         question = data.get('question')
         answer_user_text = sql.select_db_one(
             query.select_ANSWER_USER_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID_and_NUMBER_ANSWER,
@@ -134,7 +121,6 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
             message_id=callback.message.message_id,
             parse_mode="html",
             text=text_q)
-        print('answer_user: ', answer_user)
         await FSMTest.test_completed.set()
         await bot.edit_message_reply_markup(
             chat_id=id_chat,
@@ -169,16 +155,9 @@ async def test_canceled(callback: types.CallbackQuery, state: FSMContext) -> Non
     await callback.answer()
 
 
-async def test_continue(callback: types.CallbackQuery) -> None:
+# TODO 2 Реализовать после внедрения сохранения в бд по TODO 1
+async def test_continue(callback: types.CallbackQuery, state: FSMContext) -> None:
     pass
-    # await bot.edit_message_reply_markup(
-    #     chat_id=callback.message.chat.id,
-    #     message_id=callback.message.message_id,
-    #     reply_markup=None)
-    # await FSMTest.test_progressed.set()
-    # await callback.answer()
-    # await bot.send_message(chat_id=callback.message.chat.id,
-    #                        text='Продолжаем тест')
 
 
 async def test_completed(callback: types.CallbackQuery, state: FSMContext) -> None:
@@ -192,12 +171,18 @@ async def test_completed(callback: types.CallbackQuery, state: FSMContext) -> No
     await callback.answer()
 
 
+# TODO 3 Реализовать перезапуск теста, нужен TODO 1
+async def test_restart(callback: types.CallbackQuery, state: FSMContext) -> None:
+    pass
+
+
 def register_call_handlers_user(dp: Dispatcher) -> None:
     dp.register_callback_query_handler(test_handler, F.data.startswith('Run test: '), state=FSMTest.test_handler)
     dp.register_message_handler(test_progress, state=FSMTest.test_progressed)
     dp.register_callback_query_handler(test_revoked, text='-1', state=FSMTest.test_progressed)
     dp.register_callback_query_handler(test_progress, text=['1', '2', '3', '4'], state=FSMTest.test_progressed)
     dp.register_callback_query_handler(test_completed, state=FSMTest.test_completed)
-    # dp.register_callback_query_handler(test_continue, state=FSMTest.test_continue)
-    dp.register_callback_query_handler(test_canceled, state=FSMTest.test_revoked)
+    dp.register_callback_query_handler(test_continue, state=FSMTest.test_revoked, text='0')
+    dp.register_callback_query_handler(test_canceled, state=FSMTest.test_revoked, text='-1')
     dp.register_callback_query_handler(delete_message, state="*", text='delete_message')
+    dp.register_callback_query_handler(test_restart, state=FSMTest.test_revoked, text='r')

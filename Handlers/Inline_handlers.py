@@ -23,4 +23,4 @@ async def inline_translate(inline_query: types.InlineQuery) -> None:
 
 def register_inline_handler(dp: Dispatcher) -> None:
     dp.register_inline_handler(inline_translate)
-    print('Inline registred')
+    print('Inline registered')

@@ -25,7 +25,7 @@ def translate_text(text: str, en_ru=False, is_detected=False) -> str:
     :param text:
     :param en_ru: Switches translate en -> ru
     :param is_detected:
-    :return: translete in str
+    :return: translate in str
     """
     url = "https://google-translate1.p.rapidapi.com/language/translate/v2"
     lang_elementary = 'ru'

@@ -1,5 +1,5 @@
 """
-This is a echo bot.
+This is echo bot.
 It echoes any incoming text messages.
 """
 
@@ -60,7 +60,7 @@ async def inline_echo(inline_query: InlineQuery):
     # so it has to be unique for each result
     # (Unique identifier for this result, 1-64 Bytes)
     # you can set your unique id's
-    # but for example i'll generate it based on text because I know, that
+    # but for example I'll generate it based on text because I know, that
     # only text will be passed in this example
     text = inline_query.query or 'Введи то что хочешь перевести'
     input_content = InputTextMessageContent(text)
