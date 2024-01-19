@@ -1,5 +1,5 @@
-from Create_bot import dp, bot
-from aiogram import executor, types
+from Create_bot import dp
+from aiogram import executor
 from Handlers import Callback_handlers as ch
 from Handlers import Message_handler as mh
 from Handlers import Inline_handlers as ih

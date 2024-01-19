@@ -7,16 +7,25 @@ from Keyboards import KB_Reply
 from Utils import SQL_querys as query
 
 
+# TODO вставить в приветствие имя
 async def send_welcome(message: types.Message):
+    user_tg_id = message.from_user.id
+    user_full_name = f'{message.from_user.full_name}'
+    username = message.from_user.username
+    print(user_tg_id, user_full_name, username)
+    print(message)
     await message.delete()
-    reply_markup = KB_Reply.set_IKB_one_but('Ok', 'delete_message')
-    if message.text == '/start':
-        reply_markup = KB_Reply.set_but_start()
+    reply_markup = KB_Reply.set_but_start()
+    TEXT_HI = sql.select_const_db('TEXT_HI')
+    USER = sql.find_user_bd(user_tg_id)
+
+    if USER:
+        reply_markup = KB_Reply.set_IKB_one_but('Ok', 'delete_message')
+    else:
+        sql.insert_user_bd(user_tg_id, user_full_name, username)
 
     await bot.send_message(chat_id=message.chat.id,
-                           text=sql.select_db_one(
-                               query=query.select_all_from_CONSTANTS_by_CONSTANT_NAMES,
-                               data={'CONSTANT_NAMES': 'TEXT_HI'}),
+                           text=TEXT_HI,
                            reply_markup=reply_markup)
 
 
@@ -24,7 +33,6 @@ async def select_test(message: types.Message, state: FSMContext):
     await bot.send_message(chat_id=message.chat.id,
                            text='Выберите тест',
                            reply_markup=KB_Reply.set_IKB_select_survey())
-    # print('end select test in message handler')
     async with state.proxy() as data:
         data['id_user'] = message.from_user.id
     await FSMTest.test_handler.set()
@@ -33,8 +41,7 @@ async def select_test(message: types.Message, state: FSMContext):
 async def help_command(message: types.Message):
     await message.delete()
     await bot.send_message(chat_id=message.chat.id,
-                           text=sql.select_db_one(query=query.select_all_from_CONSTANTS_by_CONSTANT_NAMES,
-                                                  data={'CONSTANT_NAMES': 'TEXT_HELP'}),
+                           text=sql.select_const_db('TEXT_HELP'),
                            reply_markup=KB_Reply.set_IKB_one_but('Ok', 'delete_message'))
 
 

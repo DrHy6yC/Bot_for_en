@@ -6,7 +6,7 @@ from aiogram.dispatcher import FSMContext
 
 from Create_bot import bot, sql
 from Keyboards import KB_Reply
-from Utils import SQL_querys as query
+from Utils import SQL_querys as querys
 
 
 async def delete_message(callback: types.CallbackQuery) -> None:
@@ -15,18 +15,12 @@ async def delete_message(callback: types.CallbackQuery) -> None:
     return await callback.answer()
 
 
-async def view_result_test(callback: types.CallbackQuery) -> None:
-    await bot.send_message(chat_id=callback.message.chat.id,
-                           text='Результат ХЗ',
-                           reply_markup=None)
-
-
 async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None:
     # # Отправить в БД ид теста
     print(await state.get_state() == 'FSMTest:test_handler')
     name_test = callback.data.replace("Run test: ", "")
     id_test = sql.select_db_one(
-        query=query.select_SURVEY_ID_from_SURVEY_by_SURVEY_NAME,
+        query=querys.select_SURVEY_ID_from_SURVEY_by_SURVEY_NAME,
         data={'SURVEY_NAME': name_test}
     )
     await state.update_data(name_test=name_test, id_test=id_test)
@@ -43,23 +37,6 @@ async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None
     await callback.answer()
 
 
-async def get_data_bd(test_id: int, question_num: int, data: dict, answer_user) -> dict:
-    max_question = sql.select_db_one(
-        query.select_COUNT_QUESTION_from_SURVEYS_QUESTIONS_by_SURVEY_ID,
-        {'SURVEY_ID': test_id})
-    new_question = sql.select_db_one(
-        query.select_SURVEY_QUESTION_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
-        {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num})
-    question = data.get('question', new_question)
-    answer_user_text = sql.select_db_one(
-        query.select_ANSWER_USER_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID_and_NUMBER_ANSWER,
-        {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num, 'NUMBER_ANSWER': answer_user})
-    text_q = question.replace('______', f'<u><em>{answer_user_text}</em></u>')
-    answers_list = sql.select_db(
-        query.select_ANSWERS_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
-        {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num})
-    return {'max_question': max_question, 'text_q': text_q, 'answers_list': answers_list}
-
 
 # TODO 1 получать из бд информацию о пользователе и тесте
 async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> None:
@@ -71,7 +48,7 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
     answer_user = str(callback.data)
     await state.update_data(question_num=question_num, answer_user=answer_user)
     answers_list = sql.select_db(
-        query.select_ANSWERS_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
+        querys.select_ANSWERS_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
         {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num})
     answers = list()
     for i in answers_list:
@@ -82,7 +59,7 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
         reply_markup=None)
     if question_num == 1:
         question = sql.select_db_one(
-            query.select_SURVEY_QUESTION_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
+            querys.select_SURVEY_QUESTION_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
             {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num})
         await state.update_data(question=question)
         if answer_user in ['1', '2', '3', '4']:
@@ -91,12 +68,12 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
                                    reply_markup=KB_Reply.set_IKB_Survey(answers))
     elif 7 >= question_num > 1:
         new_question = sql.select_db_one(
-            query.select_SURVEY_QUESTION_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
+            querys.select_SURVEY_QUESTION_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
             {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num})
         question = data.get('question')
         await state.update_data(question=new_question)
         answer_user_text = sql.select_db_one(
-            query.select_ANSWER_USER_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID_and_NUMBER_ANSWER,
+            querys.select_ANSWER_USER_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID_and_NUMBER_ANSWER,
             {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num - 1, 'NUMBER_ANSWER': answer_user})
         text_q = question.replace('______', f'<u><em>{answer_user_text}</em></u>')
         await bot.edit_message_text(
@@ -113,7 +90,7 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
     elif question_num == 8:
         question = data.get('question')
         answer_user_text = sql.select_db_one(
-            query.select_ANSWER_USER_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID_and_NUMBER_ANSWER,
+            querys.select_ANSWER_USER_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID_and_NUMBER_ANSWER,
             {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num - 1, 'NUMBER_ANSWER': answer_user})
         text_q = question.replace('______', f'<u><em>{answer_user_text}</em></u>')
         await bot.edit_message_text(
