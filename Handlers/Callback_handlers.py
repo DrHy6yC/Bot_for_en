@@ -16,7 +16,7 @@ async def delete_message(callback: types.CallbackQuery) -> None:
 
 
 async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None:
-    # # Отправить в БД ид теста
+    # TODO 5 Отправить в БД ид теста
     print(await state.get_state() == 'FSMTest:test_handler')
     name_test = callback.data.replace("Run test: ", "")
     id_test = sql.select_db_one(

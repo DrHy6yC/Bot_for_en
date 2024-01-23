@@ -60,6 +60,7 @@ class SQLAction:
         except Exception as error_exception_sql:
             print(error_exception_sql)
             return ''
+
     def find_user_bd(self, user_tg_id: str) -> bool:
         USER = self.select_db_one(
             query=query.select_USER_TG_ID_from_USERS_by_USER_TG_ID,

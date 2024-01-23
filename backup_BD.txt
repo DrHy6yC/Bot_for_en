@@ -1,0 +1,1 @@
+mysqldump --databases BOT --user root --password > BOT.sql

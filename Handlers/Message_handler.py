@@ -4,10 +4,9 @@ from FSMStates.FSMTests import FSMTest
 
 from Create_bot import bot, sql
 from Keyboards import KB_Reply
-from Utils import SQL_querys as query
 
 
-# TODO вставить в приветствие имя
+# TODO вставить имя в приветствие (проверить на новых пользователях, первое приветствие не должно убираться)
 async def send_welcome(message: types.Message):
     user_tg_id = message.from_user.id
     user_full_name = f'{message.from_user.full_name}'
@@ -16,13 +15,14 @@ async def send_welcome(message: types.Message):
     print(message)
     await message.delete()
     reply_markup = KB_Reply.set_but_start()
-    TEXT_HI = sql.select_const_db('TEXT_HI')
-    USER = sql.find_user_bd(user_tg_id)
+    TEXT_HI = sql.select_const_db(name_const='TEXT_HI')
+    IS_USER = sql.find_user_bd(user_tg_id=user_tg_id)
 
-    if USER:
+    if IS_USER:
+        # Возможность убирать последующие приветсятвие инлайн кнопкой
         reply_markup = KB_Reply.set_IKB_one_but('Ok', 'delete_message')
     else:
-        sql.insert_user_bd(user_tg_id, user_full_name, username)
+        sql.insert_user_bd(user_tg_id=user_tg_id, user_full_name=user_full_name, username=username)
 
     await bot.send_message(chat_id=message.chat.id,
                            text=TEXT_HI,
@@ -41,7 +41,7 @@ async def select_test(message: types.Message, state: FSMContext):
 async def help_command(message: types.Message):
     await message.delete()
     await bot.send_message(chat_id=message.chat.id,
-                           text=sql.select_const_db('TEXT_HELP'),
+                           text=sql.select_const_db(name_const='TEXT_HELP'),
                            reply_markup=KB_Reply.set_IKB_one_but('Ok', 'delete_message'))
 
 
