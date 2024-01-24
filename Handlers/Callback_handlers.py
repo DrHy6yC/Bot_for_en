@@ -51,6 +51,7 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
         chat_id=id_chat,
         message_id=callback.message.message_id,
         reply_markup=None)
+    # TODO Вывести через процедуру количество вопросов для условия, сделать что бы работали тесты с одним вопросом
     if question_num == 1:
         question = get_question(question_num, test_id)
         await state.update_data(question=question)

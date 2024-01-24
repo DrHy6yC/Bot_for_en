@@ -1,23 +1,16 @@
 from pathlib import Path
 
-from Create_bot import sql
-from Utils import SQL_querys as query
 from Read_file import import_csv
+from Utils.From_DB import set_survey_name_get_id_survey, set_survey
 
 
 def import_survey_csv(path_file: str, description_test: str) -> None:
     path = Path(__file__).parent / f"../{path_file}"
     csv_file = import_csv(path)
     name_test = path_file.replace('.csv', '')
+    # TODO Сделать проверку на то есть ли в бд такое имя теста
 
-    sql.insert_update_delete_db(
-        query=query.insert_SURVEYS_by_SURVEY_NAME_and_SURVEY_DESCRIPTION,
-        data={'SURVEY_NAME': name_test, 'SURVEY_DESCRIPTION': description_test}
-    )
-    id_survey = sql.select_db_one(
-        query=query.select_SURVEY_ID_from_SURVEY_by_SURVEY_NAME,
-        data={'SURVEY_NAME': name_test}
-    )
+    id_survey = set_survey_name_get_id_survey(name_test, description_test)
 
     for i in csv_file:
         num_question = i['NumberQuestion']
@@ -27,32 +20,8 @@ def import_survey_csv(path_file: str, description_test: str) -> None:
         answer_3 = i['Answer3']
         answer_4 = i['Answer4']
         true_answer = i['TrueAnswer']
-        sql.insert_update_delete_db(
-            query=query.insert_SURVEYS_QUESTIONS_by_SURVEY_ID_and_NUMBER_QUESTION_and_SURVEY_QUESTION,
-            data={'SURVEY_ID': id_survey, 'NUMBER_QUESTION': num_question, 'SURVEY_QUESTION': question}
-        )
-        sql.insert_update_delete_db(
-            query=query.insert_SURVEYS_TRUE_ANSWERS_by_SURVEY_ID_and_NUMBER_QUESTION_and_NUMBER_TRUE_ANSWER,
-            data={'SURVEY_ID': id_survey, 'NUMBER_QUESTION': num_question, 'NUMBER_TRUE_ANSWER': true_answer}
-        )
-        print('NUMBER_ANSWER:', 1, 'SURVEY_ID:', id_survey, 'NUMBER_QUESTION:', num_question, 'SURVEY_ANSWER:', answer_1)
-        sql.insert_update_delete_db(
-            query=query.insert_SURVEYS_ANSWERS_by_NUMBER_ANSWER_and_SURVEY_ID_and_NUMBER_QUESTION_and_SURVEY_ANSWER,
-            data={'NUMBER_ANSWER': 1, 'SURVEY_ID': id_survey, 'NUMBER_QUESTION': num_question, 'SURVEY_ANSWER': answer_1}
-        )
-        sql.insert_update_delete_db(
-            query=query.insert_SURVEYS_ANSWERS_by_NUMBER_ANSWER_and_SURVEY_ID_and_NUMBER_QUESTION_and_SURVEY_ANSWER,
-            data={'NUMBER_ANSWER': 2, 'SURVEY_ID': id_survey, 'NUMBER_QUESTION': num_question, 'SURVEY_ANSWER': answer_2}
-        )
-        sql.insert_update_delete_db(
-            query=query.insert_SURVEYS_ANSWERS_by_NUMBER_ANSWER_and_SURVEY_ID_and_NUMBER_QUESTION_and_SURVEY_ANSWER,
-            data={'NUMBER_ANSWER': 3, 'SURVEY_ID': id_survey, 'NUMBER_QUESTION': num_question, 'SURVEY_ANSWER': answer_3}
-        )
-        sql.insert_update_delete_db(
-            query=query.insert_SURVEYS_ANSWERS_by_NUMBER_ANSWER_and_SURVEY_ID_and_NUMBER_QUESTION_and_SURVEY_ANSWER,
-            data={'NUMBER_ANSWER': 4, 'SURVEY_ID': id_survey, 'NUMBER_QUESTION': num_question, 'SURVEY_ANSWER': answer_4}
-        )
+        set_survey(id_survey, num_question, question, answer_1, answer_2, answer_3, answer_4, true_answer)
 
 
 if __name__ == '__main__':
-    import_survey_csv('miniTest.csv', 'Маленький проверочный тест для проверки всего')
+    import_survey_csv('English Level test. Grammar.csv', 'Проверка грамматики')

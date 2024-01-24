@@ -9,7 +9,7 @@ from Utils.From_DB import get_const, find_user_bd, insert_user_in_db
 
 # TODO вставить имя в приветствие (проверить на новых пользователях, первое приветствие не должно убираться)
 async def send_welcome(message: types.Message):
-    user_tg_id = message.from_user.id
+    user_tg_id = int(message.from_user.id)
     user_full_name = f'{message.from_user.full_name}'
     username = message.from_user.username
     print(user_tg_id, user_full_name, username)
