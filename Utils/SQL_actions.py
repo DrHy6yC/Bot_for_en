@@ -24,6 +24,7 @@ class SQLAction:
         try:
             self.cursor.close()
             self.conn.close()
+            print('Connect to Bot: close')
         except Exception as error_except:
             print('Error end_con')
             print('Close connect: FAILED')
@@ -76,19 +77,41 @@ class SQLAction:
             query=query.delete_USER_from_USERS_by_USER_TG_ID,
             data=data)
 
-    def call_procedure_from_db(self, args_proc: list):
-        result_args = self.cursor.callproc('get_is_user_in_bd', args_proc)
+    def call_procedure_return_one_from_db(self, name_proc: str, args_procedure: list) -> str:
+        """
+           Запускает процедуру SQL, результатом которой, является вывод одной ячейки в строку.
+           Так как self.cursor.callproc выдает tuple из всех аргументов процедуры,
+           выходной, нужный нам - последний, поэтому [-1]
+           :param name_proc: Имя процедуры
+           :param args_procedure: Входные и выходные параметры процедуры
+           :return: Одна ячейка таблицы конвертированая в str
+           """
+        result_args = str(self.cursor.callproc(name_proc, args_procedure)[-1])
         return result_args
 
+    def call_procedure_changed_db(self, name_proc: str, args_procedure: list) -> None:
+        self.cursor.callproc(name_proc, args_procedure)
+        self.conn.commit()
+
+    def call_procedure_return_table(self, name_proc: str, args_procedure: list) -> list:
+        result = list()
+        self.cursor.callproc(name_proc, args_procedure)
+        for tables in self.cursor.stored_results():
+            tuples = tables.fetchall()
+            for tuple_select in tuples:
+                result.append(list(tuple_select))
+        return result
+
+
+sql = SQLAction()
 
 if __name__ == '__main__':
-    sql = None
+    from Utils import SQL_querys as querys
     try:
         sql = SQLAction()
-        # sql.select_db_one(query.get_is_user_in_bd, {'USER_TG_ID': '809916411'})
-        args = [809916411, 0]
-        result_select = sql.call_procedure_from_db(args)
-
+        args_proc = [1, 2, 0]
+        r = sql.call_procedure_return_one_from_db('get_question', args_proc)
+        print(r)
 
     except Exception as error_exception:
         print('Error main file')

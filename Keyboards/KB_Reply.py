@@ -1,6 +1,6 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
-from Create_bot import sql
-from Utils import SQL_querys as query
+
+from Utils.From_DB import get_name_survey
 
 
 def set_but_start() -> ReplyKeyboardMarkup:
@@ -42,7 +42,7 @@ def set_IKB_Survey(answers: list) -> InlineKeyboardMarkup:
 
 def set_IKB_select_survey() -> InlineKeyboardMarkup:
     dictionary = dict()
-    list_surveys = sql.select_db(query=query.select_SURVEY_NAME_from_SURVEY, data=dict())
+    list_surveys = get_name_survey()
     for name_test_list in list_surveys:
         name_test = name_test_list[0]
         dictionary[name_test] = f'Run test: {name_test}'

@@ -4,9 +4,9 @@ from magic_filter import F
 from FSMStates.FSMTests import FSMTest
 from aiogram.dispatcher import FSMContext
 
-from Create_bot import bot, sql
+from Create_bot import bot
 from Keyboards import KB_Reply
-from Utils import SQL_querys as querys
+from Utils.From_DB import get_id_survey, get_answer, get_question, get_one_answer
 
 
 async def delete_message(callback: types.CallbackQuery) -> None:
@@ -19,10 +19,7 @@ async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None
     # TODO 5 Отправить в БД ид теста
     print(await state.get_state() == 'FSMTest:test_handler')
     name_test = callback.data.replace("Run test: ", "")
-    id_test = sql.select_db_one(
-        query=querys.select_SURVEY_ID_from_SURVEY_by_SURVEY_NAME,
-        data={'SURVEY_NAME': name_test}
-    )
+    id_test = get_id_survey(name_test)
     await state.update_data(name_test=name_test, id_test=id_test)
     await bot.edit_message_text(
         chat_id=callback.message.chat.id,
@@ -37,7 +34,6 @@ async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None
     await callback.answer()
 
 
-
 # TODO 1 получать из бд информацию о пользователе и тесте
 async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> None:
     id_chat = callback.message.chat.id
@@ -47,9 +43,7 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
     question_num += 1
     answer_user = str(callback.data)
     await state.update_data(question_num=question_num, answer_user=answer_user)
-    answers_list = sql.select_db(
-        querys.select_ANSWERS_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
-        {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num})
+    answers_list = get_answer(question_num, test_id)
     answers = list()
     for i in answers_list:
         answers.append(i[0])
@@ -58,23 +52,17 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
         message_id=callback.message.message_id,
         reply_markup=None)
     if question_num == 1:
-        question = sql.select_db_one(
-            querys.select_SURVEY_QUESTION_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
-            {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num})
+        question = get_question(question_num, test_id)
         await state.update_data(question=question)
         if answer_user in ['1', '2', '3', '4']:
             await bot.send_message(chat_id=id_chat,
                                    text=question,
                                    reply_markup=KB_Reply.set_IKB_Survey(answers))
     elif 7 >= question_num > 1:
-        new_question = sql.select_db_one(
-            querys.select_SURVEY_QUESTION_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID,
-            {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num})
+        new_question = get_question(question_num, test_id)
         question = data.get('question')
         await state.update_data(question=new_question)
-        answer_user_text = sql.select_db_one(
-            querys.select_ANSWER_USER_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID_and_NUMBER_ANSWER,
-            {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num - 1, 'NUMBER_ANSWER': answer_user})
+        answer_user_text = get_one_answer(question_num - 1, test_id, answer_user)
         text_q = question.replace('______', f'<u><em>{answer_user_text}</em></u>')
         await bot.edit_message_text(
             chat_id=id_chat,
@@ -89,9 +77,7 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
             await FSMTest.test_revoked.set()
     elif question_num == 8:
         question = data.get('question')
-        answer_user_text = sql.select_db_one(
-            querys.select_ANSWER_USER_from_SURVEYS_ANSWERS_by_NUMBER_QUESTION_and_SURVEY_ID_and_NUMBER_ANSWER,
-            {'SURVEY_ID': test_id, 'NUMBER_QUESTION': question_num - 1, 'NUMBER_ANSWER': answer_user})
+        answer_user_text = get_one_answer(question_num - 1, test_id, answer_user)
         text_q = question.replace('______', f'<u><em>{answer_user_text}</em></u>')
         await bot.edit_message_text(
             chat_id=id_chat,

@@ -2,9 +2,9 @@ from aiogram import types, Dispatcher, filters
 from aiogram.dispatcher import FSMContext
 from FSMStates.FSMTests import FSMTest
 
-from Create_bot import bot, sql
+from Create_bot import bot
 from Keyboards import KB_Reply
-from Utils.From_DB import find_user_bd
+from Utils.From_DB import get_const, find_user_bd, insert_user_in_db
 
 
 # TODO вставить имя в приветствие (проверить на новых пользователях, первое приветствие не должно убираться)
@@ -16,14 +16,14 @@ async def send_welcome(message: types.Message):
     print(message)
     await message.delete()
     reply_markup = KB_Reply.set_but_start()
-    TEXT_HI = sql.select_const_db(name_const='TEXT_HI')
+    TEXT_HI = get_const('TEXT_HI')
     IS_USER = find_user_bd(user_tg_id)
 
     if IS_USER:
         # Возможность убирать последующие приветсятвие инлайн кнопкой
         reply_markup = KB_Reply.set_IKB_one_but('Ok', 'delete_message')
     else:
-        sql.insert_user_bd(user_tg_id=user_tg_id, user_full_name=user_full_name, username=username)
+        insert_user_in_db(user_tg_id, user_full_name, username)
 
     await bot.send_message(chat_id=message.chat.id,
                            text=TEXT_HI,
@@ -42,7 +42,7 @@ async def select_test(message: types.Message, state: FSMContext):
 async def help_command(message: types.Message):
     await message.delete()
     await bot.send_message(chat_id=message.chat.id,
-                           text=sql.select_const_db(name_const='TEXT_HELP'),
+                           text=get_const('TEXT_HELP'),
                            reply_markup=KB_Reply.set_IKB_one_but('Ok', 'delete_message'))
 
 
