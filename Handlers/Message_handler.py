@@ -4,6 +4,7 @@ from FSMStates.FSMTests import FSMTest
 
 from Create_bot import bot, sql
 from Keyboards import KB_Reply
+from Utils.From_DB import find_user_bd
 
 
 # TODO вставить имя в приветствие (проверить на новых пользователях, первое приветствие не должно убираться)
@@ -16,7 +17,7 @@ async def send_welcome(message: types.Message):
     await message.delete()
     reply_markup = KB_Reply.set_but_start()
     TEXT_HI = sql.select_const_db(name_const='TEXT_HI')
-    IS_USER = sql.find_user_bd(user_tg_id=user_tg_id)
+    IS_USER = find_user_bd(user_tg_id)
 
     if IS_USER:
         # Возможность убирать последующие приветсятвие инлайн кнопкой
