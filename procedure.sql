@@ -136,3 +136,19 @@ BEGIN
      VALUES (4, id_survey, num_question, answer_4);
 END//
 
+
+-------------------------------------------
+DROP PROCEDURE IF EXISTS get_is_name_survey;
+DELIMITER //
+CREATE PROCEDURE get_is_name_survey(
+IN name_survey VARCHAR(50),
+OUT is_survey BIT)
+BEGIN
+	DECLARE id_survey INT;
+	SELECT SURVEY_ID INTO id_survey FROM SURVEYS
+	WHERE SURVEY_NAME = name_survey;
+    IF id_survey IS NOT NULL
+		THEN SET is_survey = 1;
+        ELSE SET is_survey = 0;
+    END IF;
+END//

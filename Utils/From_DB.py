@@ -83,10 +83,16 @@ def set_survey(id_survey: int,
     return answer_list
 
 
+def get_is_name_survey(name_test: str) -> bool:
+    args_proc = [name_test, 0]
+    is_name = sql.call_procedure_return_one_from_db('get_is_name_survey', args_proc)
+    return bool(is_name)
+
+
 if __name__ == '__main__':
     try:
         # set_survey(2, 2, 'Who I am? ______', 'I', 'You', 'Vadim', 'Volan de Mort', 1)
-        VALUE = find_user_bd(5436880841)
+        VALUE = get_is_name_survey('Test1')
         print(VALUE)
     except Exception as error_exception:
         print('Error main file')

@@ -57,6 +57,7 @@ class SQLAction:
         return str(result_args)
 
 
+# TODO реализовать подключение и отключение коннекта в вызовах процедуры
 sql = SQLAction()
 
 if __name__ == '__main__':

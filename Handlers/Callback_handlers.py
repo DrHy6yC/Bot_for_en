@@ -108,6 +108,7 @@ async def test_revoked(callback: types.CallbackQuery) -> None:
     await callback.answer()
 
 
+# TODO 6 Реализация расчета результата
 async def test_canceled(callback: types.CallbackQuery, state: FSMContext) -> None:
     await bot.edit_message_reply_markup(
         chat_id=callback.message.chat.id,
