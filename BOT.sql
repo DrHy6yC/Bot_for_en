@@ -74,7 +74,7 @@ CREATE TABLE `CONSTANTS` (
 
 LOCK TABLES `CONSTANTS` WRITE;
 /*!40000 ALTER TABLE `CONSTANTS` DISABLE KEYS */;
-INSERT INTO `CONSTANTS` VALUES (1,'API_TOKEN_TG','!!!!!СЮДА_ТОКЕН!!!!!!!!!!'),(2,'MY_ID','!!!ID_TG!!!!'),(3,'ID','232352'),(4,'TEXT_HI','Привет, это бот который проверит твои знания по английскому языку, а в будущем еще и научит. Используй кнопку помощи, если хочешь узнать что может бот сейчас. Или переходи сразу к тесту и удивись своему уровню!'),(5,'TEXT_HELP','Этот бот умеет переводить словосочетания в инлайн режиме  если упомянуть @English_bot_help_HW_bot в сообщениях. А так же запускать тесты. В скором времени будет напоминать о тех словах что нужно выучить.'),(6,'TEXT_ERROR','Ошибка в боте');
+INSERT INTO `CONSTANTS` VALUES (1,'API_TOKEN_TG','!!!!!___Менять токен ТУТ_____!!!!!!!!!!'),(2,'MY_ID','11111'),(3,'ID','23123'),(4,'TEXT_HI','Привет, это бот который проверит твои знания по английскому языку, а в будущем еще и научит. Используй кнопку помощи, если хочешь узнать что может бот сейчас. Или переходи сразу к тесту и удивись своему уровню!'),(5,'TEXT_HELP','Этот бот умеет переводить словосочетания в инлайн режиме  если упомянуть @ima_bota в сообщениях. А так же запускать тесты. В скором времени будет напоминать о тех словах что нужно выучить.'),(6,'TEXT_ERROR','Ошибка в боте');
 /*!40000 ALTER TABLE `CONSTANTS` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -139,7 +139,7 @@ CREATE TABLE `SURVEYS` (
   `SURVEY_DESCRIPTION` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`SURVEY_ID`),
   UNIQUE KEY `SURVEY_NAME_UNIQUE` (`SURVEY_NAME`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -148,7 +148,6 @@ CREATE TABLE `SURVEYS` (
 
 LOCK TABLES `SURVEYS` WRITE;
 /*!40000 ALTER TABLE `SURVEYS` DISABLE KEYS */;
-INSERT INTO `SURVEYS` VALUES (1,'miniTest','Маленький проверочный тест для проверки всего');
 /*!40000 ALTER TABLE `SURVEYS` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -166,7 +165,7 @@ CREATE TABLE `SURVEYS_ANSWERS` (
   `NUMBER_QUESTION` int NOT NULL,
   `ANSWER` varchar(100) NOT NULL,
   PRIMARY KEY (`ANSWER_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=370 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -175,7 +174,6 @@ CREATE TABLE `SURVEYS_ANSWERS` (
 
 LOCK TABLES `SURVEYS_ANSWERS` WRITE;
 /*!40000 ALTER TABLE `SURVEYS_ANSWERS` DISABLE KEYS */;
-INSERT INTO `SURVEYS_ANSWERS` VALUES (1,1,1,1,'How do you'),(2,2,1,1,'How are you'),(3,3,1,1,'How you are'),(4,4,1,1,'How is it'),(5,1,1,2,'you'),(6,2,1,2,'your'),(7,3,1,2,'yours'),(8,4,1,2,'you\'re'),(9,1,1,3,'I twenty'),(10,2,1,3,'Me is twenty'),(11,3,1,3,'I\'ve twenty'),(12,4,1,3,'I\'m twenty'),(13,1,1,4,'No, it isn\'t'),(14,2,1,4,'No, isn\'t it'),(15,3,1,4,'No, he isn\'t'),(16,4,1,4,'No, there isn\'t'),(17,1,1,5,'It is'),(18,2,1,5,'Her is'),(19,3,1,5,'He is'),(20,4,1,5,'She is'),(21,1,1,6,'How'),(22,2,1,6,'Who'),(23,3,1,6,'What'),(24,4,1,6,'That'),(25,1,1,7,'His'),(26,2,1,7,'He\'s'),(27,3,1,7,'He'),(28,4,1,7,'Her');
 /*!40000 ALTER TABLE `SURVEYS_ANSWERS` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -194,7 +192,7 @@ CREATE TABLE `SURVEYS_QUESTIONS` (
   PRIMARY KEY (`QUESTION_ID`),
   KEY `SURVEY_ID_idx` (`SURVEY_ID`),
   CONSTRAINT `SURVEY_ID` FOREIGN KEY (`SURVEY_ID`) REFERENCES `SURVEYS` (`SURVEY_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=94 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -203,7 +201,6 @@ CREATE TABLE `SURVEYS_QUESTIONS` (
 
 LOCK TABLES `SURVEYS_QUESTIONS` WRITE;
 /*!40000 ALTER TABLE `SURVEYS_QUESTIONS` DISABLE KEYS */;
-INSERT INTO `SURVEYS_QUESTIONS` VALUES (1,1,1,'\"Hello Sara, ______?\" - \"I\'m very well, thank you.\"'),(2,1,2,'\"What\'s ______ name?\" - \"Jane Edwards.\"'),(3,1,3,'\"How old are you?\" - \"______.\"'),(4,1,4,'\"Is this your book?\" - \"______.\"'),(5,1,5,'\"Where is Anna from?\" - \"______ from Rome.\"'),(6,1,6,'\"______ is your address?\" - \"12, Sundown Street, Bristol.\"'),(7,1,7,'______ name is John Smith.');
 /*!40000 ALTER TABLE `SURVEYS_QUESTIONS` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -220,7 +217,7 @@ CREATE TABLE `SURVEYS_TRUE_ANSWERS` (
   `NUMBER_QUESTION` int NOT NULL,
   `NUMBER_TRUE_ANSWER` int NOT NULL,
   PRIMARY KEY (`TRUE_ANSWER_ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=94 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -229,7 +226,6 @@ CREATE TABLE `SURVEYS_TRUE_ANSWERS` (
 
 LOCK TABLES `SURVEYS_TRUE_ANSWERS` WRITE;
 /*!40000 ALTER TABLE `SURVEYS_TRUE_ANSWERS` DISABLE KEYS */;
-INSERT INTO `SURVEYS_TRUE_ANSWERS` VALUES (1,1,1,2),(2,1,2,2),(3,1,3,4),(4,1,4,1),(5,1,5,4),(6,1,6,3),(7,1,7,1);
 /*!40000 ALTER TABLE `SURVEYS_TRUE_ANSWERS` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -269,7 +265,7 @@ DROP TABLE IF EXISTS `USERS`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `USERS` (
   `USER_ID` int NOT NULL AUTO_INCREMENT,
-  `USER_TG_ID` int NOT NULL,
+  `USER_TG_ID` bigint NOT NULL,
   `USER_FULL_NAME` varchar(45) NOT NULL,
   `USER_LEVEL` int NOT NULL DEFAULT '0',
   `USER_ACCESS` int NOT NULL DEFAULT '0',
@@ -277,7 +273,7 @@ CREATE TABLE `USERS` (
   PRIMARY KEY (`USER_ID`),
   UNIQUE KEY `USER_TG_ID_UNIQUE` (`USER_TG_ID`),
   UNIQUE KEY `USER_LOGIN_UNIQUE` (`USER_LOGIN`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -286,7 +282,6 @@ CREATE TABLE `USERS` (
 
 LOCK TABLES `USERS` WRITE;
 /*!40000 ALTER TABLE `USERS` DISABLE KEYS */;
-INSERT INTO `USERS` VALUES (5,12123123,'LG',0,0,'Dwdwd');
 /*!40000 ALTER TABLE `USERS` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -299,4 +294,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-01-23  9:19:42
+-- Dump completed on 2024-01-25  8:35:47
