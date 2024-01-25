@@ -1,1 +1,3 @@
 mysqldump --databases BOT --user root --password > BOT.sql
+mysqldump -u root -pPASSWORD --routines --no-create-info --no-data --no-create-db --skip-opt BOT > stored_procedures.sql
+
