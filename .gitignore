@@ -167,3 +167,8 @@ Handlers/__pycache__/
 Keyboards/__pycache__/
 Survey/__pycache__/
 Utils/__pycache__/
+.DS_Store/
+FSMStates/.DS_Store/
+.DS_Store
+FSMStates/.DS_Store
+
