@@ -1,7 +1,7 @@
 import mysql.connector
 
 
-# TODO  обработка исключения если запрос выдает пустоту
+# TODO Sql обработка исключения если запрос выдает пустоту
 class SQLAction:
     def __init__(self) -> None:
         self.conn = mysql.connector.connect(host="localhost", user="root", passwd="gfhjkzytn", database="BOT")
@@ -57,7 +57,7 @@ class SQLAction:
         return str(result_args)
 
 
-# TODO реализовать подключение и отключение коннекта в вызовах процедуры
+# TODO Sql реализовать подключение и отключение коннекта в вызовах процедуры
 sql = SQLAction()
 
 if __name__ == '__main__':

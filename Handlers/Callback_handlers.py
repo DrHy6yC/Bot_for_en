@@ -16,7 +16,7 @@ async def delete_message(callback: types.CallbackQuery) -> None:
 
 
 async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None:
-    # TODO 5 Отправить в БД ид теста
+    # TODO Sql+Test 1 получать/сохранять из/и бд информацию о пользователе и тесте
     print(await state.get_state() == 'FSMTest:test_handler')
     name_test = callback.data.replace("Run test: ", "")
     id_test = get_id_survey(name_test)
@@ -34,7 +34,7 @@ async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None
     await callback.answer()
 
 
-# TODO 1 получать из бд информацию о пользователе и тесте
+# TODO Sql+Test 1 получать/сохранять из/и бд информацию о пользователе и тесте
 async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> None:
     id_chat = callback.message.chat.id
     data = await state.get_data()
@@ -110,7 +110,7 @@ async def test_revoked(callback: types.CallbackQuery) -> None:
     await callback.answer()
 
 
-# TODO 6 Реализация расчета результата
+# TODO Bot+Sql+Test 2 Реализация расчета результата
 async def test_canceled(callback: types.CallbackQuery, state: FSMContext) -> None:
     await bot.edit_message_reply_markup(
         chat_id=callback.message.chat.id,
@@ -122,7 +122,7 @@ async def test_canceled(callback: types.CallbackQuery, state: FSMContext) -> Non
     await callback.answer()
 
 
-# TODO 2 Реализовать после внедрения сохранения в бд по TODO 1
+# TODO Sql+Test Реализовать после внедрения сохранения в бд по TODO Sql+Test 1
 async def test_continue(callback: types.CallbackQuery, state: FSMContext) -> None:
     pass
 
@@ -138,7 +138,7 @@ async def test_completed(callback: types.CallbackQuery, state: FSMContext) -> No
     await callback.answer()
 
 
-# TODO 3 Реализовать перезапуск теста, нужен TODO 1
+# TODO Sql+Test Реализовать перезапуск теста, нужен TODO Sql+Test 1
 async def test_restart(callback: types.CallbackQuery, state: FSMContext) -> None:
     pass
 
