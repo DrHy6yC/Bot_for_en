@@ -65,12 +65,13 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
         await state.update_data(question=new_question)
         answer_user_text = get_one_answer(question_num - 1, test_id, answer_user)
         text_q = question.replace('______', f'<u><em>{answer_user_text}</em></u>')
-        # TODO TEST !!! не работает без проверки если сообщение не было изменено.
-        await bot.edit_message_text(
-            chat_id=id_chat,
-            message_id=callback.message.message_id,
-            parse_mode="html",
-            text=text_q)
+        # Ошибка если текст не изменялся
+        if answer_user_text == text_q:
+            await bot.edit_message_text(
+                chat_id=id_chat,
+                message_id=callback.message.message_id,
+                parse_mode="html",
+                text=text_q)
         if answer_user in ['1', '2', '3', '4']:
             await bot.send_message(chat_id=id_chat,
                                    text=new_question,
