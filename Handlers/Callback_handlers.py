@@ -16,10 +16,11 @@ async def delete_message(callback: types.CallbackQuery) -> None:
 
 
 async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None:
-    # TODO Sql+Test 1 получать/сохранять из/и бд информацию о пользователе и тесте
+    # TODO Sql+Test 1. Получать/сохранять из/и бд информацию о пользователе и тесте
     print(await state.get_state() == 'FSMTest:test_handler')
     name_test = callback.data.replace("Run test: ", "")
     id_test = get_id_survey(name_test)
+    # TODO Test 1 -> TODO SQL 1. Убрать state.update_data
     await state.update_data(name_test=name_test, id_test=id_test)
     await bot.edit_message_text(
         chat_id=callback.message.chat.id,
@@ -30,13 +31,16 @@ async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
         reply_markup=KB_Reply.set_IKB_one_but(f'Запустить {name_test}', '1'))
+    # TODO SQL 1. Заполнить USER_SURVEYS
     await FSMTest.test_progressed.set()
     await callback.answer()
 
 
-# TODO Sql+Test 1 получать/сохранять из/и бд информацию о пользователе и тесте
+# TODO Sql+Test 1. получать/сохранять из/и бд информацию о пользователе и тесте
 async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> None:
     id_chat = callback.message.chat.id
+    # TODO Sql 2. вытащить из USER_SURVEYS
+    # TODO Test -> TODO Sql 2. Убрать data
     data = await state.get_data()
     test_id = data['id_test']
     MAX_QUESTION_SURVEY = get_count_question(int(test_id))
@@ -110,7 +114,7 @@ async def test_revoked(callback: types.CallbackQuery) -> None:
     await callback.answer()
 
 
-# TODO Bot+Sql+Test 2 Реализация расчета результата
+# TODO Bot+Sql+Test 2. Реализация расчета результата
 async def test_canceled(callback: types.CallbackQuery, state: FSMContext) -> None:
     await bot.edit_message_reply_markup(
         chat_id=callback.message.chat.id,
@@ -122,7 +126,7 @@ async def test_canceled(callback: types.CallbackQuery, state: FSMContext) -> Non
     await callback.answer()
 
 
-# TODO Sql+Test Реализовать после внедрения сохранения в бд по TODO Sql+Test 1
+# TODO Sql+Test -> TODO Sql+Test 1. Реализовать продолжение теста
 async def test_continue(callback: types.CallbackQuery, state: FSMContext) -> None:
     pass
 
@@ -138,7 +142,7 @@ async def test_completed(callback: types.CallbackQuery, state: FSMContext) -> No
     await callback.answer()
 
 
-# TODO Sql+Test Реализовать перезапуск теста, нужен TODO Sql+Test 1
+# TODO Sql+Test -> TODO Sql+Test 1. Реализовать перезапуск теста
 async def test_restart(callback: types.CallbackQuery, state: FSMContext) -> None:
     pass
 

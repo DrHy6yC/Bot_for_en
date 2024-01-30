@@ -10,7 +10,7 @@ def import_survey_csv(path_file: str, description_test: str) -> None:
     name_test = path_file.replace('.csv', '')
 
     if get_is_name_survey(name_test):
-        # TODO Bot При ошибке отправлялось сообшение в телеграм о неудачной загрузке
+        # TODO Bot. При ошибке отправлялось сообшение в телеграм о неудачной загрузке
         print("Тест с таким именем уже есть")
     else:
         id_survey = set_survey_name_get_id_survey(name_test, description_test)
