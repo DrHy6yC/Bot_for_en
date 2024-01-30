@@ -170,7 +170,7 @@ END//
 DROP PROCEDURE IF EXISTS set_user_survey;
 DELIMITER //
 CREATE PROCEDURE set_user_survey(
-IN user_id INT,
+IN user_id BIGINT,
 IN id_test INT,
 IN status_test INT)
 BEGIN
@@ -183,7 +183,7 @@ END//
 DROP PROCEDURE IF EXISTS get_id_user_survey;
 DELIMITER //
 CREATE PROCEDURE get_id_user_survey(
-IN user_id INT,
+IN user_id BIGINT,
 IN id_test INT,
 IN status_test INT,
 OUT id_user_test INT)
@@ -197,7 +197,7 @@ END//
 DROP PROCEDURE IF EXISTS set_user_survey_get_id_user_survey;
 DELIMITER //
 CREATE PROCEDURE set_user_survey_get_id_user_survey(
-IN user_id INT,
+IN user_id BIGINT,
 IN id_test INT,
 IN status_test INT,
 OUT id_user_test INT)
@@ -212,7 +212,7 @@ END//
 DROP PROCEDURE IF EXISTS get_is_user_status_survey;
 DELIMITER //
 CREATE PROCEDURE get_is_user_status_survey(
-IN user_id INT,
+IN user_id BIGINT,
 IN status INT,
 OUT is_user_selected_survey BIT)
 BEGIN

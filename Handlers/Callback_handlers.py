@@ -6,7 +6,7 @@ from aiogram.dispatcher import FSMContext
 
 from Create_bot import bot
 from Keyboards import KB_Reply
-from Utils.From_DB import get_id_survey, get_answer, get_question, get_one_answer, get_count_question
+from Utils.From_DB import get_id_survey, get_answer, get_question, get_one_answer, get_count_question, get_is_user_status_survey
 
 
 async def delete_message(callback: types.CallbackQuery) -> None:
@@ -19,22 +19,26 @@ async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None
     # TODO Sql+Test 1. Получать/сохранять из/и бд информацию о пользователе и тесте
     name_test = callback.data.replace("Run test: ", "")
     # TODO SQL 1. get_is_user_status_survey(user_id: int, status: int) -> bool
+    user_id = callback.message.from_id
     # TODO Test -> TODO SQL 1.1. Создание условии проверки: у одного пользователя может быть только один активный тест
-    id_test = get_id_survey(name_test)
-    # TODO Test 1 -> TODO SQL 1. Убрать state.update_data
-    await state.update_data(name_test=name_test, id_test=id_test)
-    await bot.edit_message_text(
-        chat_id=callback.message.chat.id,
-        message_id=callback.message.message_id,
-        parse_mode="html",
-        text=f'Выбран тест: {name_test}')
-    await bot.edit_message_reply_markup(
-        chat_id=callback.message.chat.id,
-        message_id=callback.message.message_id,
-        reply_markup=KB_Reply.set_IKB_one_but(f'Запустить {name_test}', '1'))
-    # TODO SQL 1.1. Заполнить USER_SURVEYS
-    await FSMTest.test_progressed.set()
-    await callback.answer()
+    if get_is_user_status_survey(int(user_id), 1):
+        await callback.answer('Тест уже запущен', show_alert=True)
+    else:
+        # TODO SQL 1.2.переделать что бы вставить в USER_SURVEYS (user_id, test_id, status=1)
+        # TODO Test 1 -> TODO SQL 1.2. Убрать state.update_data,
+        id_test = get_id_survey(name_test)
+        await state.update_data(name_test=name_test, id_test=id_test)
+        await bot.edit_message_text(
+            chat_id=callback.message.chat.id,
+            message_id=callback.message.message_id,
+            parse_mode="html",
+            text=f'Выбран тест: {name_test}')
+        await bot.edit_message_reply_markup(
+            chat_id=callback.message.chat.id,
+            message_id=callback.message.message_id,
+            reply_markup=KB_Reply.set_IKB_one_but(f'Запустить {name_test}', '1'))
+        await FSMTest.test_progressed.set()
+        await callback.answer()
 
 
 # TODO Sql+Test 1. получать/сохранять из/и бд информацию о пользователе и тесте

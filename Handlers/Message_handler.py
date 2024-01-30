@@ -31,9 +31,6 @@ async def select_test(message: types.Message, state: FSMContext):
     await bot.send_message(chat_id=message.chat.id,
                            text='Выберите тест',
                            reply_markup=KB_Reply.set_IKB_select_survey())
-    # TODO Test. Убрать две строчки ниже
-    async with state.proxy() as data:
-        data['id_user'] = message.from_user.id
     await FSMTest.test_handler.set()
 
 
