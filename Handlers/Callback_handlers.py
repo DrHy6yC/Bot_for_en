@@ -36,6 +36,8 @@ async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None
 
 # TODO 1 получать из бд информацию о пользователе и тесте
 async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> None:
+    # TODO SQL Вывести через процедуру количество вопросов для условия, сделать что бы работали тесты с одним вопросом
+    MAX_QUESTION_SURVEY = 7
     id_chat = callback.message.chat.id
     data = await state.get_data()
     test_id = data['id_test']
@@ -51,7 +53,6 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
         chat_id=id_chat,
         message_id=callback.message.message_id,
         reply_markup=None)
-    # TODO Вывести через процедуру количество вопросов для условия, сделать что бы работали тесты с одним вопросом
     if question_num == 1:
         question = get_question(question_num, test_id)
         await state.update_data(question=question)
@@ -59,7 +60,7 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
             await bot.send_message(chat_id=id_chat,
                                    text=question,
                                    reply_markup=KB_Reply.set_IKB_Survey(answers))
-    elif 7 >= question_num > 1:
+    elif MAX_QUESTION_SURVEY >= question_num > 1:
         new_question = get_question(question_num, test_id)
         question = data.get('question')
         await state.update_data(question=new_question)
@@ -76,7 +77,7 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
                                    reply_markup=KB_Reply.set_IKB_Survey(answers))
         else:
             await FSMTest.test_revoked.set()
-    elif question_num == 8:
+    elif question_num == MAX_QUESTION_SURVEY + 1:
         question = data.get('question')
         answer_user_text = get_one_answer(question_num - 1, test_id, answer_user)
         text_q = question.replace('______', f'<u><em>{answer_user_text}</em></u>')

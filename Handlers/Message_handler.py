@@ -7,16 +7,14 @@ from Keyboards import KB_Reply
 from Utils.From_DB import get_const, find_user_bd, insert_user_in_db
 
 
-# TODO вставить имя в приветствие (проверить на новых пользователях, первое приветствие не должно убираться)
 async def send_welcome(message: types.Message):
     user_tg_id = int(message.from_user.id)
     user_full_name = f'{message.from_user.full_name}'
     username = message.from_user.username
-    print(user_tg_id, user_full_name, username)
-    print(message)
     await message.delete()
     reply_markup = KB_Reply.set_but_start()
-    TEXT_HI = get_const('TEXT_HI')
+    # TODO SQL вставить имя в приветствие в константе БД
+    TEXT_HI = get_const('TEXT_HI').replace('@FIO', user_full_name)
     IS_USER = find_user_bd(user_tg_id)
 
     if IS_USER:
