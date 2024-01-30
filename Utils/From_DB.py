@@ -89,11 +89,17 @@ def get_is_name_survey(name_test: str) -> bool:
     return bool(is_name)
 
 
+def get_count_question(id_test: int) -> int:
+    args_proc = [id_test, 0]
+    count_question = sql.call_procedure_return_one_from_db('get_count_question', args_proc)
+    return int(count_question)
+
+
 if __name__ == '__main__':
     try:
         # set_survey(2, 2, 'Who I am? ______', 'I', 'You', 'Vadim', 'Volan de Mort', 1)
-        VALUE = get_is_name_survey('Test1')
-        print(VALUE)
+        VALUE = get_count_question(17)
+        print(VALUE.__class__)
     except Exception as error_exception:
         print('Error main file')
         print(error_exception)
