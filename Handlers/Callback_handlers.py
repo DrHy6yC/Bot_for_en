@@ -6,8 +6,8 @@ from aiogram.dispatcher import FSMContext
 
 from Create_bot import bot
 from Keyboards import KB_Reply
-from Utils.From_DB import get_id_survey, get_answer, get_question
-from Utils.From_DB import get_one_answer, get_count_question, get_is_user_status_survey
+from Utils.From_DB import get_id_survey, get_answer, get_question, set_user_survey_get_id_user_survey
+from Utils.From_DB import get_one_answer, get_count_question, get_is_user_status_survey, get_user_survey
 
 
 async def delete_message(callback: types.CallbackQuery) -> None:
@@ -20,7 +20,7 @@ async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None
     # TODO Sql+Test 1. Получать/сохранять из/и бд информацию о пользователе и тесте
     name_test = callback.data.replace("Run test: ", "")
     # TODO SQL 1. get_is_user_status_survey(user_id: int, status: int) -> bool
-    user_id = callback.message.from_id
+    user_id = callback.from_user.id
     # TODO Test -> TODO SQL 1.1. Создание условии проверки: у одного пользователя может быть только один активный тест
     if get_is_user_status_survey(int(user_id), 1):
         await callback.answer('Уже есть запущенный тест', show_alert=True)
@@ -28,7 +28,9 @@ async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None
         # TODO SQL 1.2. set_user_survey_get_id_user_survey(user_id, test_id, status=1)
         # TODO Test 1 -> TODO SQL 1.2. Убрать state.update_data
         id_test = get_id_survey(name_test)
-        await state.update_data(name_test=name_test, id_test=id_test)
+        print(id_test, user_id, 1)
+        set_user_survey_get_id_user_survey(user_id, id_test, 1)
+        # await state.update_data(name_test=name_test, id_test=id_test)
         await bot.edit_message_text(
             chat_id=callback.message.chat.id,
             message_id=callback.message.message_id,
@@ -45,12 +47,15 @@ async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None
 # TODO Sql+Test 1. получать/сохранять из/и бд информацию о пользователе и тесте
 async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> None:
     id_chat = callback.message.chat.id
+    user_id = callback.from_user.id
     # TODO Sql 2. get_user_survey(user_id, status)
+    test_info = get_user_survey(user_id, 1)
     # TODO Test -> TODO Sql 2. Убрать data
     data = await state.get_data()
     test_id = data['id_test']
+    # test_id = test_info[2]
     MAX_QUESTION_SURVEY = get_count_question(int(test_id))
-    question_num = data.get('question_num', 0)
+    question_num = data.get('question_num', 0) #test_info[4]
     question_num += 1
     answer_user = str(callback.data)
     await state.update_data(question_num=question_num, answer_user=answer_user)
