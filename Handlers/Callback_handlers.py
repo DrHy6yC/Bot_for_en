@@ -17,10 +17,9 @@ async def delete_message(callback: types.CallbackQuery) -> None:
 
 async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None:
     # TODO Sql+Test 1. Получать/сохранять из/и бд информацию о пользователе и тесте
-    # TODO SQL 1.1. Создание процедуры на проверку запущен ли в USER_SURVEYS тест
-    # TODO Test -> TODO SQL 1.1. Создание условии проверки
-    print(await state.get_state() == 'FSMTest:test_handler')
     name_test = callback.data.replace("Run test: ", "")
+    # TODO SQL 1. get_is_user_status_survey(user_id: int, status: int) -> bool
+    # TODO Test -> TODO SQL 1.1. Создание условии проверки: у одного пользователя может быть только один активный тест
     id_test = get_id_survey(name_test)
     # TODO Test 1 -> TODO SQL 1. Убрать state.update_data
     await state.update_data(name_test=name_test, id_test=id_test)
@@ -33,7 +32,7 @@ async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
         reply_markup=KB_Reply.set_IKB_one_but(f'Запустить {name_test}', '1'))
-    # TODO SQL 1. Заполнить USER_SURVEYS
+    # TODO SQL 1.1. Заполнить USER_SURVEYS
     await FSMTest.test_progressed.set()
     await callback.answer()
 

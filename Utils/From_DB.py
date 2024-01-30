@@ -59,7 +59,7 @@ def get_name_survey() -> list:
 def set_survey_name_get_id_survey(name_survey: str,
                                   description_survey: str) -> int:
     args_proc = [name_survey, description_survey, 0]
-    id_survey = sql.call_procedure_return_one_from_db('set_survey_name_get_id_survey', args_proc)
+    id_survey = sql.call_procedure_return_changed_one('set_survey_name_get_id_survey', args_proc)
     return id_survey
 
 
@@ -95,11 +95,23 @@ def get_count_question(id_test: int) -> int:
     return int(count_question)
 
 
+def set_user_survey_get_id_user_survey(user_id: int, id_test: int, status_test: int) -> int:
+    args_proc = [user_id, id_test, status_test, 0]
+    id_user_survey = sql.call_procedure_return_changed_one('set_user_survey_get_id_user_survey', args_proc)
+    return int(id_user_survey)
+
+
+def get_is_user_status_survey(user_id: int, status: int) -> bool:
+    args_proc = [user_id, status, 0]
+    is_user_status_survey = int(sql.call_procedure_return_one_from_db('get_is_user_status_survey', args_proc))
+    return bool(is_user_status_survey)
+
+
 if __name__ == '__main__':
     try:
         # set_survey(2, 2, 'Who I am? ______', 'I', 'You', 'Vadim', 'Volan de Mort', 1)
-        VALUE = get_count_question(17)
-        print(VALUE.__class__)
+        VALUE = get_is_user_status_survey(1, 3)
+        print(VALUE)
     except Exception as error_exception:
         print('Error main file')
         print(error_exception)

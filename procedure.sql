@@ -164,3 +164,66 @@ BEGIN
 	SELECT count(QUESTION_ID) INTO count_question FROM BOT.SURVEYS_QUESTIONS
     WHERE SURVEY_ID = id_survey;
 END//
+
+
+-------------------------------------------
+DROP PROCEDURE IF EXISTS set_user_survey;
+DELIMITER //
+CREATE PROCEDURE set_user_survey(
+IN user_id INT,
+IN id_test INT,
+IN status_test INT)
+BEGIN
+    INSERT INTO USER_SURVEYS (ID_USER, ID_SURVEY, STATUS_SURVEY)
+    VALUES (user_id, id_test, status_test);
+END//
+
+
+-------------------------------------------
+DROP PROCEDURE IF EXISTS get_id_user_survey;
+DELIMITER //
+CREATE PROCEDURE get_id_user_survey(
+IN user_id INT,
+IN id_test INT,
+IN status_test INT,
+OUT id_user_test INT)
+BEGIN
+    SELECT ID_USER_SURVEY INTO id_user_test FROM USER_SURVEYS
+    WHERE ID_USER = user_id AND ID_SURVEY = id_test AND STATUS_SURVEY = status_test;
+END//
+
+
+-------------------------------------------
+DROP PROCEDURE IF EXISTS set_user_survey_get_id_user_survey;
+DELIMITER //
+CREATE PROCEDURE set_user_survey_get_id_user_survey(
+IN user_id INT,
+IN id_test INT,
+IN status_test INT,
+OUT id_user_test INT)
+BEGIN
+    CALL set_user_survey(user_id, id_test, status_test);
+    CALL get_id_user_survey(user_id, id_test, status_test, @res);
+     SET id_user_test = @res;
+END//
+
+
+-------------------------------------------
+DROP PROCEDURE IF EXISTS get_is_user_status_survey;
+DELIMITER //
+CREATE PROCEDURE get_is_user_status_survey(
+IN user_id INT,
+IN status INT,
+OUT is_user_selected_survey BIT)
+BEGIN
+	DECLARE count_selected_survey INT;
+	SELECT COUNT(ID_USER_SURVEY) INTO count_selected_survey FROM USER_SURVEYS
+    WHERE ID_USER = user_id AND STATUS_SURVEY = status;
+    IF count_selected_survey = 1
+		THEN SET is_user_selected_survey = 1;
+        ELSE SET is_user_selected_survey = 0;
+    END IF;
+END//
+
+
+-------------------------------------------
