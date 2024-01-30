@@ -107,10 +107,28 @@ def get_is_user_status_survey(user_id: int, status: int) -> bool:
     return bool(is_user_status_survey)
 
 
+def get_user_survey(user_id: int, status: int) -> list:
+    args_proc = [user_id, status]
+    user_survey_list = sql.call_procedure_return_table('get_user_survey', args_proc)
+    if user_survey_list:
+        return user_survey_list[0]
+    else:
+        return list()
+
+
+def get_user_survey_by_user_survey_id(user_survey_id: int) -> list:
+    args_proc = [user_survey_id]
+    user_survey_list = sql.call_procedure_return_table('get_user_survey_by_user_survey_id', args_proc)
+    if user_survey_list:
+        return user_survey_list[0]
+    else:
+        return list()
+
+
 if __name__ == '__main__':
     try:
         # set_survey(2, 2, 'Who I am? ______', 'I', 'You', 'Vadim', 'Volan de Mort', 1)
-        VALUE = get_is_user_status_survey(1, 3)
+        VALUE = get_user_survey_by_user_survey_id(87)
         print(VALUE)
     except Exception as error_exception:
         print('Error main file')

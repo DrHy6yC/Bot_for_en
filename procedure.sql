@@ -227,3 +227,26 @@ END//
 
 
 -------------------------------------------
+DROP PROCEDURE IF EXISTS get_user_survey;
+DELIMITER //
+CREATE PROCEDURE get_user_survey(
+IN user_id BIGINT,
+IN status INT)
+BEGIN
+	SELECT * FROM USER_SURVEYS
+    WHERE ID_USER = user_id AND STATUS_SURVEY = status;
+END//
+
+
+-------------------------------------------
+DROP PROCEDURE IF EXISTS get_user_survey_by_user_survey_id;
+DELIMITER //
+CREATE PROCEDURE get_user_survey_by_user_survey_id(
+IN user_survey_id INT)
+BEGIN
+	SELECT * FROM USER_SURVEYS
+    WHERE ID_USER_SURVEY = user_survey_id;
+END//
+
+
+-------------------------------------------

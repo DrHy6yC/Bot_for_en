@@ -45,8 +45,9 @@ class SQLAction:
     def call_procedure_return_table(self, name_proc: str, args_procedure: list) -> list:
         result = list()
         self.cursor.callproc(name_proc, args_procedure)
-        for tables in self.cursor.stored_results():
-            tuples = tables.fetchall()
+        tables = self.cursor.stored_results()
+        for table in tables:
+            tuples = table.fetchall()
             for tuple_select in tuples:
                 result.append(list(tuple_select))
         return result
