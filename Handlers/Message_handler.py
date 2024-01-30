@@ -13,7 +13,6 @@ async def send_welcome(message: types.Message):
     username = message.from_user.username
     await message.delete()
     reply_markup = KB_Reply.set_but_start()
-    # TODO SQL вставить имя в приветствие в константе БД
     TEXT_HI = get_const('TEXT_HI').replace('@FIO', user_full_name)
     IS_USER = find_user_bd(user_tg_id)
 
