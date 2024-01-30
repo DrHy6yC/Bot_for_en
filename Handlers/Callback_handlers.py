@@ -119,7 +119,6 @@ async def test_revoked(callback: types.CallbackQuery) -> None:
     await callback.answer()
 
 
-# TODO Bot+Sql+Test 2. Реализация расчета результата
 async def test_canceled(callback: types.CallbackQuery, state: FSMContext) -> None:
     await bot.edit_message_reply_markup(
         chat_id=callback.message.chat.id,
@@ -136,6 +135,7 @@ async def test_continue(callback: types.CallbackQuery, state: FSMContext) -> Non
     pass
 
 
+# TODO Bot+Sql+Test 2. Реализация расчета результата
 async def test_completed(callback: types.CallbackQuery, state: FSMContext) -> None:
     await bot.edit_message_reply_markup(
         chat_id=callback.message.chat.id,
