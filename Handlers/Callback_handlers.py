@@ -6,7 +6,7 @@ from aiogram.dispatcher import FSMContext
 
 from Create_bot import bot
 from Keyboards import KB_Reply
-from Utils.From_DB import get_id_survey, get_answer, get_question, get_one_answer
+from Utils.From_DB import get_id_survey, get_answer, get_question, get_one_answer, get_count_question
 
 
 async def delete_message(callback: types.CallbackQuery) -> None:
@@ -36,11 +36,10 @@ async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None
 
 # TODO 1 получать из бд информацию о пользователе и тесте
 async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> None:
-    # TODO SQL Вывести через процедуру количество вопросов для условия, сделать что бы работали тесты с одним вопросом
-    MAX_QUESTION_SURVEY = 7
     id_chat = callback.message.chat.id
     data = await state.get_data()
     test_id = data['id_test']
+    MAX_QUESTION_SURVEY = get_count_question(int(test_id))
     question_num = data.get('question_num', 0)
     question_num += 1
     answer_user = str(callback.data)
@@ -66,6 +65,7 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
         await state.update_data(question=new_question)
         answer_user_text = get_one_answer(question_num - 1, test_id, answer_user)
         text_q = question.replace('______', f'<u><em>{answer_user_text}</em></u>')
+        # TODO TEST !!! не работает без проверки если сообщение не было изменено.
         await bot.edit_message_text(
             chat_id=id_chat,
             message_id=callback.message.message_id,

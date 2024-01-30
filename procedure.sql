@@ -152,3 +152,15 @@ BEGIN
         ELSE SET is_survey = 0;
     END IF;
 END//
+
+
+-------------------------------------------
+DROP PROCEDURE IF EXISTS get_count_question;
+DELIMITER //
+CREATE PROCEDURE get_count_question(
+IN id_survey INT,
+OUT count_question INT)
+BEGIN
+	SELECT count(QUESTION_ID) INTO count_question FROM BOT.SURVEYS_QUESTIONS
+    WHERE SURVEY_ID = id_survey;
+END//
