@@ -17,6 +17,8 @@ async def delete_message(callback: types.CallbackQuery) -> None:
 
 async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None:
     # TODO Sql+Test 1. Получать/сохранять из/и бд информацию о пользователе и тесте
+    # TODO SQL 1.1. Создание процедуры на проверку запущен ли в USER_SURVEYS тест
+    # TODO Test -> TODO SQL 1.1. Создание условии проверки
     print(await state.get_state() == 'FSMTest:test_handler')
     name_test = callback.data.replace("Run test: ", "")
     id_test = get_id_survey(name_test)
