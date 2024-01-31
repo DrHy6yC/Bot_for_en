@@ -117,7 +117,6 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
 
 
 async def test_canceled(callback: types.CallbackQuery, state: FSMContext) -> None:
-    # TODO Sql+Test. Смена статуса теста в БД
     print(await state.get_state())
     await bot.edit_message_reply_markup(
         chat_id=callback.message.chat.id,
