@@ -59,7 +59,7 @@ async def test_progress(callback: types.CallbackQuery) -> None:
         reply_markup=None)
     if question_num == 1:
         if answer_user in ['1', '2', '3', '4']:
-            answer_id = get_answer_id(test_id, question_num, answer_user)
+            answer_id = get_answer_id(test_id, question_num, int(answer_user))
             set_user_answer(answer_id, user_test_id, question_num)
             question = get_question_by_id_question(test_info[5])
             await bot.send_message(chat_id=id_chat,
@@ -69,11 +69,11 @@ async def test_progress(callback: types.CallbackQuery) -> None:
             set_user_survey_status_test(user_test_id, 3)
     elif MAX_QUESTION_SURVEY >= question_num > 1:
         if answer_user in ['1', '2', '3', '4']:
-            answer_id = get_answer_id(test_id, question_num, answer_user)
+            answer_id = get_answer_id(test_id, question_num, int(answer_user))
             set_user_answer(answer_id, user_test_id, question_num)
             question = get_question_by_id_question(test_info[5])
             previous_question = get_question_by_id_question(test_info[6])
-            answer_user_text = get_one_answer(question_num - 1, test_id, answer_user)
+            answer_user_text = get_one_answer(question_num - 1, test_id, int(answer_user))
             text_q = previous_question.replace('______', f'<u><em>{answer_user_text}</em></u>')
             if previous_question != text_q:
                 await bot.edit_message_text(
@@ -88,7 +88,7 @@ async def test_progress(callback: types.CallbackQuery) -> None:
             set_user_survey_status_test(user_test_id, 3)
     elif question_num == MAX_QUESTION_SURVEY + 1:
         previous_question = get_question_by_id_question(test_info[6])
-        answer_user_text = get_one_answer(question_num - 1, test_id, answer_user)
+        answer_user_text = get_one_answer(question_num - 1, test_id, int(answer_user))
         text_q = previous_question.replace('______', f'<u><em>{answer_user_text}</em></u>')
         if previous_question != text_q:
             await bot.edit_message_text(
@@ -168,8 +168,6 @@ async def test_restart(callback: types.CallbackQuery, state: FSMContext) -> None
 
 def register_call_handlers_user(dp: Dispatcher) -> None:
     dp.register_callback_query_handler(test_handler, F.data.startswith('Run test: '), state=FSMTest.test_handler)
-    # dp.register_message_handler(test_progress, state=FSMTest.test_progressed)
-    # dp.register_callback_query_handler(test_progress, state=FSMTest.test_progressed)
     dp.register_callback_query_handler(test_revoked, text='-1', state=FSMTest.test_progressed)
     dp.register_callback_query_handler(test_progress, text=['1', '2', '3', '4'], state=FSMTest.test_progressed)
     dp.register_callback_query_handler(test_completed, state=FSMTest.test_completed)
