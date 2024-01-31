@@ -53,5 +53,5 @@ def set_IKB_select_survey() -> InlineKeyboardMarkup:
 
 
 def set_IKB_continue_finish() -> InlineKeyboardMarkup:
-    dict_but = {'Остановить тест': '-1', 'Продолжить тест': '0', 'Перезапустить тест': 'r'}
+    dict_but = {'Остановить тест': '-1', 'Продолжить тест': '0', 'Перезапустить тест': '1'}
     return set_IKB_many_but(dict_but)
