@@ -14,6 +14,7 @@ async def send_welcome(message: types.Message):
     await message.delete()
     reply_markup = KB_Reply.set_but_start()
     TEXT_HI = get_const('TEXT_HI').replace('@FIO', user_full_name)
+    # TODO Bot. нужно что бы были и инлайн кнопки и обычные
     # IS_USER = find_user_bd(user_tg_id)
     #
     # if IS_USER:
