@@ -70,7 +70,6 @@ BEGIN
     WHERE NUMBER_QUESTION = num_question and SURVEY_ID = id_survey;
 END//
 
-
 -------------------------------------------
 DROP PROCEDURE IF EXISTS get_one_answer;
 DELIMITER //
@@ -84,7 +83,6 @@ BEGIN
     WHERE NUMBER_QUESTION = num_question and SURVEY_ID = id_survey and NUMBER_ANSWER = num_answer;
 END//
 
-
 -------------------------------------------
 DROP PROCEDURE IF EXISTS get_name_survey;
 DELIMITER //
@@ -92,7 +90,6 @@ CREATE PROCEDURE get_name_survey()
 BEGIN
     SELECT SURVEY_NAME FROM SURVEYS;
 END//
-
 
 -------------------------------------------
 DROP PROCEDURE IF EXISTS set_survey_name_get_id_survey;
@@ -107,7 +104,6 @@ BEGIN
     SELECT SURVEY_ID INTO id_survey FROM SURVEYS
     WHERE SURVEY_NAME = name_survey;
 END//
-
 
 -------------------------------------------
 DROP PROCEDURE IF EXISTS set_survey;
@@ -136,7 +132,6 @@ BEGIN
      VALUES (4, id_survey, num_question, answer_4);
 END//
 
-
 -------------------------------------------
 DROP PROCEDURE IF EXISTS get_is_name_survey;
 DELIMITER //
@@ -153,7 +148,6 @@ BEGIN
     END IF;
 END//
 
-
 -------------------------------------------
 DROP PROCEDURE IF EXISTS get_count_question;
 DELIMITER //
@@ -164,7 +158,6 @@ BEGIN
 	SELECT count(QUESTION_ID) INTO count_question FROM BOT.SURVEYS_QUESTIONS
     WHERE SURVEY_ID = id_survey;
 END//
-
 
 -------------------------------------------
 DROP PROCEDURE IF EXISTS set_user_survey;
@@ -177,7 +170,6 @@ BEGIN
     INSERT INTO USER_SURVEYS (ID_USER, ID_SURVEY, STATUS_SURVEY)
     VALUES (user_id, id_test, status_test);
 END//
-
 
 -------------------------------------------
 DROP PROCEDURE IF EXISTS get_id_user_survey;
@@ -192,7 +184,6 @@ BEGIN
     WHERE ID_USER = user_id AND ID_SURVEY = id_test AND STATUS_SURVEY = status_test;
 END//
 
-
 -------------------------------------------
 DROP PROCEDURE IF EXISTS set_user_survey_get_id_user_survey;
 DELIMITER //
@@ -206,7 +197,6 @@ BEGIN
     CALL get_id_user_survey(user_id, id_test, status_test, @res);
      SET id_user_test = @res;
 END//
-
 
 -------------------------------------------
 DROP PROCEDURE IF EXISTS get_is_user_status_survey;
@@ -225,7 +215,6 @@ BEGIN
     END IF;
 END//
 
-
 -------------------------------------------
 DROP PROCEDURE IF EXISTS get_user_survey;
 DELIMITER //
@@ -237,7 +226,6 @@ BEGIN
     WHERE ID_USER = user_id AND STATUS_SURVEY = status;
 END//
 
-
 -------------------------------------------
 DROP PROCEDURE IF EXISTS get_user_survey_by_user_survey_id;
 DELIMITER //
@@ -248,5 +236,56 @@ BEGIN
     WHERE ID_USER_SURVEY = user_survey_id;
 END//
 
+-------------------------------------------
+DROP PROCEDURE IF EXISTS get_id_question_by_user_survey_id;
+DELIMITER //
+CREATE PROCEDURE get_id_question_by_user_survey_id(
+IN user_survey_id INT,
+OUT id_question INT)
+BEGIN
+	SELECT QUESTION_ID INTO id_question  FROM BOT.SURVEYS_QUESTIONS
+	WHERE NUMBER_QUESTION in (
+	    SELECT NUMBER_QUESTION FROM BOT.USER_SURVEYS
+	    WHERE ID_USER_SURVEY = user_survey_id)
+	and SURVEY_ID in (
+	    SELECT ID_SURVEY FROM BOT.USER_SURVEYS
+	    WHERE ID_USER_SURVEY = user_survey_id);
+END//
+
+-------------------------------------------
+DROP PROCEDURE IF EXISTS get_id_question_by_user_survey_id_num_question;
+DELIMITER //
+CREATE PROCEDURE get_id_question_by_user_survey_id_num_question(
+IN user_survey_id INT,
+IN num_question INT,
+OUT id_question INT)
+BEGIN
+	SELECT QUESTION_ID INTO id_question  FROM BOT.SURVEYS_QUESTIONS
+	WHERE NUMBER_QUESTION = num_question
+	and SURVEY_ID in (
+	    SELECT ID_SURVEY FROM BOT.USER_SURVEYS
+	    WHERE ID_USER_SURVEY = user_survey_id);
+END//
+
+-------------------------------------------
+DROP PROCEDURE IF EXISTS set_question_num;
+DELIMITER //
+CREATE PROCEDURE set_question_num(
+IN num_question INT,
+IN user_survey_id INT)
+BEGIN
+    DECLARE id_question INT;
+    DECLARE previous_id_question INT;
+	CALL get_id_question_by_user_survey_id_num_question(user_survey_id, num_question, id_question);
+    IF num_question > 1
+        THEN CALL get_id_question_by_user_survey_id_num_question(user_survey_id, num_question - 1, previous_id_question);
+        ELSE SET previous_id_question = NULL;
+    END IF;
+    UPDATE USER_SURVEYS
+	 SET NUMBER_QUESTION = num_question,
+	  QUESTION_ID = id_question,
+	   PREVIOUS_QUESTION_ID = previous_id_question
+	 WHERE (ID_USER_SURVEY = user_survey_id);
+END//
 
 -------------------------------------------

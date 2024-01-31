@@ -125,6 +125,11 @@ def get_user_survey_by_user_survey_id(user_survey_id: int) -> list:
         return list()
 
 
+def set_question_num(question_num: int, user_test_id: int) -> None:
+    args_proc = [question_num, user_test_id]
+    sql.call_procedure_changed_db('set_question_num', args_proc)
+
+
 if __name__ == '__main__':
     try:
         # set_survey(2, 2, 'Who I am? ______', 'I', 'You', 'Vadim', 'Volan de Mort', 1)
