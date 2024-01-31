@@ -14,13 +14,13 @@ async def send_welcome(message: types.Message):
     await message.delete()
     reply_markup = KB_Reply.set_but_start()
     TEXT_HI = get_const('TEXT_HI').replace('@FIO', user_full_name)
-    IS_USER = find_user_bd(user_tg_id)
-
-    if IS_USER:
-        # Возможность убирать последующие приветсятвие инлайн кнопкой
-        reply_markup = KB_Reply.set_IKB_one_but('Ok', 'delete_message')
-    else:
-        insert_user_in_db(user_tg_id, user_full_name, username)
+    # IS_USER = find_user_bd(user_tg_id)
+    #
+    # if IS_USER:
+    #     # Возможность убирать последующие приветсятвие инлайн кнопкой
+    #     reply_markup = KB_Reply.set_IKB_one_but('Ok', 'delete_message')
+    # else:
+    #     insert_user_in_db(user_tg_id, user_full_name, username)
 
     await bot.send_message(chat_id=message.chat.id,
                            text=TEXT_HI,

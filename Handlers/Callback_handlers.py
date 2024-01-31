@@ -6,8 +6,9 @@ from aiogram.dispatcher import FSMContext
 
 from Create_bot import bot
 from Keyboards import KB_Reply
-from Utils.From_DB import get_id_survey, get_answer, get_question, set_user_survey_get_id_user_survey, \
-    set_question_num, get_one_answer, get_count_question, get_is_user_status_survey, get_user_survey
+from Utils.From_DB import get_id_survey, get_answer, get_question_by_id_question, set_user_survey_get_id_user_survey, \
+    set_question_num, get_one_answer, get_count_question, get_is_user_status_survey, get_user_survey, \
+    set_user_survey_status_test, set_user_answer, get_answer_id
 
 
 async def delete_message(callback: types.CallbackQuery) -> None:
@@ -17,15 +18,15 @@ async def delete_message(callback: types.CallbackQuery) -> None:
 
 
 async def test_handler(callback: types.CallbackQuery) -> None:
-    # TODO Sql+Test 1. Получать/сохранять из/и бд информацию о пользователе и тесте
     name_test = callback.data.replace("Run test: ", "")
     user_id = callback.from_user.id
     if get_is_user_status_survey(int(user_id), 1):
         await callback.answer('Уже есть запущенный тест', show_alert=True)
     else:
         id_test = get_id_survey(name_test)
-        print(id_test, user_id, 1)
-        set_user_survey_get_id_user_survey(user_id, id_test, 1)
+        user_test_id = set_user_survey_get_id_user_survey(user_id, id_test, 1)
+        set_question_num(1, user_test_id)
+        await FSMTest.test_progressed.set()
         await bot.edit_message_text(
             chat_id=callback.message.chat.id,
             message_id=callback.message.message_id,
@@ -35,11 +36,9 @@ async def test_handler(callback: types.CallbackQuery) -> None:
             chat_id=callback.message.chat.id,
             message_id=callback.message.message_id,
             reply_markup=KB_Reply.set_IKB_one_but(f'Запустить {name_test}', '1'))
-        await FSMTest.test_progressed.set()
         await callback.answer()
 
 
-# TODO Sql+Test 1. получать/сохранять из/и бд информацию о пользователе и тесте
 async def test_progress(callback: types.CallbackQuery) -> None:
     id_chat = callback.message.chat.id
     user_id = callback.from_user.id
@@ -48,7 +47,6 @@ async def test_progress(callback: types.CallbackQuery) -> None:
     test_id = test_info[2]
     MAX_QUESTION_SURVEY = get_count_question(int(test_id))
     question_num = test_info[4]
-    question_num += 1
     set_question_num(question_num, user_test_id)
     answer_user = str(callback.data)
     answers_list = get_answer(question_num, test_id)
@@ -60,58 +58,67 @@ async def test_progress(callback: types.CallbackQuery) -> None:
         message_id=callback.message.message_id,
         reply_markup=None)
     if question_num == 1:
-        question = test_info[5]
         if answer_user in ['1', '2', '3', '4']:
+            answer_id = get_answer_id(test_id, question_num, answer_user)
+            set_user_answer(answer_id, user_test_id, question_num)
+            question = get_question_by_id_question(test_info[5])
             await bot.send_message(chat_id=id_chat,
                                    text=question,
                                    reply_markup=KB_Reply.set_IKB_Survey(answers))
+        else:
+            await FSMTest.test_revoked.set()
+            set_user_survey_status_test(user_test_id, 3)
     elif MAX_QUESTION_SURVEY >= question_num > 1:
-        new_question = test_info[5]
-        question = test_info[6]
+        if answer_user in ['1', '2', '3', '4']:
+            answer_id = get_answer_id(test_id, question_num, answer_user)
+            set_user_answer(answer_id, user_test_id, question_num)
+            question = get_question_by_id_question(test_info[5])
+            previous_question = get_question_by_id_question(test_info[6])
+            answer_user_text = get_one_answer(question_num - 1, test_id, answer_user)
+            text_q = previous_question.replace('______', f'<u><em>{answer_user_text}</em></u>')
+            if previous_question != text_q:
+                await bot.edit_message_text(
+                    chat_id=id_chat,
+                    message_id=callback.message.message_id,
+                    parse_mode="html",
+                    text=text_q)
+            await bot.send_message(chat_id=id_chat,
+                                   text=question,
+                                   reply_markup=KB_Reply.set_IKB_Survey(answers))
+        else:
+            await FSMTest.test_revoked.set()
+            set_user_survey_status_test(user_test_id, 3)
+    elif question_num == MAX_QUESTION_SURVEY + 1:
+        previous_question = get_question_by_id_question(test_info[6])
         answer_user_text = get_one_answer(question_num - 1, test_id, answer_user)
-        text_q = question.replace('______', f'<u><em>{answer_user_text}</em></u>')
-        # Ошибка если текст не изменялся
-        if answer_user_text == text_q:
+        text_q = previous_question.replace('______', f'<u><em>{answer_user_text}</em></u>')
+        if previous_question != text_q:
             await bot.edit_message_text(
                 chat_id=id_chat,
                 message_id=callback.message.message_id,
                 parse_mode="html",
                 text=text_q)
-        if answer_user in ['1', '2', '3', '4']:
-            await bot.send_message(chat_id=id_chat,
-                                   text=new_question,
-                                   reply_markup=KB_Reply.set_IKB_Survey(answers))
-        else:
-            await FSMTest.test_revoked.set()
-    elif question_num == MAX_QUESTION_SURVEY + 1:
-        question = test_info[6]
-        answer_user_text = get_one_answer(question_num - 1, test_id, answer_user)
-        text_q = question.replace('______', f'<u><em>{answer_user_text}</em></u>')
-        await bot.edit_message_text(
-            chat_id=id_chat,
-            message_id=callback.message.message_id,
-            parse_mode="html",
-            text=text_q)
         await FSMTest.test_completed.set()
+        set_user_survey_status_test(user_test_id, 5)
         await bot.edit_message_reply_markup(
             chat_id=id_chat,
             message_id=callback.message.message_id,
             reply_markup=KB_Reply.set_IKB_one_but('Посмотреть результаты', 'view_result'))
     else:
         print('ERROR')
+    question_num += 1
+    set_question_num(question_num, user_test_id)
     await callback.answer()
 
 
 async def test_revoked(callback: types.CallbackQuery) -> None:
-    # TODO Sql+Test. Смена статуса теста в БД
-    await FSMTest.test_revoked.set()
     await bot.edit_message_reply_markup(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
         reply_markup=None
     )
     await bot.send_message(chat_id=callback.message.chat.id,
-                           text='Тест прерван',
+                           text='Тест остановлен',
                            reply_markup=KB_Reply.set_IKB_continue_finish())
     await callback.answer()
 
@@ -124,7 +131,7 @@ async def test_canceled(callback: types.CallbackQuery, state: FSMContext) -> Non
         reply_markup=None)
     await state.finish()
     await bot.send_message(chat_id=callback.message.chat.id,
-                           text='Тест Прерван\nРезультат - хз')
+                           text='Тест отменен\nРезультат - хз')
     await callback.answer()
 
 
@@ -154,8 +161,9 @@ async def test_restart(callback: types.CallbackQuery, state: FSMContext) -> None
 
 def register_call_handlers_user(dp: Dispatcher) -> None:
     dp.register_callback_query_handler(test_handler, F.data.startswith('Run test: '), state=FSMTest.test_handler)
-    dp.register_message_handler(test_progress, state=FSMTest.test_progressed)
-    dp.register_callback_query_handler(test_revoked, text='-1', state=FSMTest.test_progressed)
+    # dp.register_message_handler(test_progress, state=FSMTest.test_progressed)
+    dp.register_callback_query_handler(test_progress, state=FSMTest.test_progressed)
+    dp.register_callback_query_handler(test_revoked, text='-1', state=FSMTest.test_revoked)
     dp.register_callback_query_handler(test_progress, text=['1', '2', '3', '4'], state=FSMTest.test_progressed)
     dp.register_callback_query_handler(test_completed, state=FSMTest.test_completed)
     dp.register_callback_query_handler(test_continue, state=FSMTest.test_revoked, text='0')

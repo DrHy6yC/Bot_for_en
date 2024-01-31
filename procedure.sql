@@ -71,6 +71,17 @@ BEGIN
 END//
 
 -------------------------------------------
+DROP PROCEDURE IF EXISTS get_question_by_id_question;
+DELIMITER //
+CREATE PROCEDURE get_question_by_id_question(
+IN id_question INT,
+OUT question_txt VARCHAR(200))
+BEGIN
+    SELECT SURVEY_QUESTION INTO question_txt FROM SURVEYS_QUESTIONS
+    WHERE QUESTION_ID = id_question;
+END//
+
+-------------------------------------------
 DROP PROCEDURE IF EXISTS get_one_answer;
 DELIMITER //
 CREATE PROCEDURE get_one_answer(
@@ -286,6 +297,40 @@ BEGIN
 	  QUESTION_ID = id_question,
 	   PREVIOUS_QUESTION_ID = previous_id_question
 	 WHERE (ID_USER_SURVEY = user_survey_id);
+END//
+
+-------------------------------------------
+DROP PROCEDURE IF EXISTS set_user_survey_status_test;
+DELIMITER //
+CREATE PROCEDURE set_user_survey_status_test(
+IN user_survey_id INT,
+IN status_test INT)
+BEGIN
+	UPDATE USER_SURVEYS SET STATUS_SURVEY = status_test WHERE ID_USER_SURVEY = user_survey_id;
+END//
+
+-------------------------------------------
+DROP PROCEDURE IF EXISTS set_user_answer;
+DELIMITER //
+CREATE PROCEDURE set_user_answer(
+IN id_answer INT,
+IN user_survey_id INT,
+IN num_question INT)
+BEGIN
+	INSERT INTO ANSWERS_USERS (ANSWER_ID, ID_USER_SURVEY, NUMBER_QUESTION) VALUES (id_answer, user_survey_id, num_question);
+END//
+
+-------------------------------------------
+DROP PROCEDURE IF EXISTS get_answer_id;
+DELIMITER //
+CREATE PROCEDURE get_answer_id(
+IN id_test INT,
+IN num_question INT,
+IN num_answer INT,
+OUT id_answer INT)
+BEGIN
+	SELECT ANSWER_ID INTO id_answer FROM SURVEYS_ANSWERS
+    WHERE SURVEY_ID = id_test and NUMBER_QUESTION = num_question and NUMBER_ANSWER = num_answer;
 END//
 
 -------------------------------------------

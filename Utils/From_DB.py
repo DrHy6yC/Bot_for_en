@@ -42,6 +42,12 @@ def get_question(num_question: int,
     return question_txt
 
 
+def get_question_by_id_question(id_question: int) -> str:
+    args_proc = [id_question, 0]
+    question_txt = sql.call_procedure_return_one_from_db('get_question_by_id_question', args_proc)
+    return question_txt
+
+
 def get_one_answer(num_question: int,
                    id_survey: int,
                    num_answer: int) -> str:
@@ -130,11 +136,27 @@ def set_question_num(question_num: int, user_test_id: int) -> None:
     sql.call_procedure_changed_db('set_question_num', args_proc)
 
 
+def set_user_survey_status_test(user_test_id: int, status: int) -> None:
+    args_proc = [user_test_id, status]
+    sql.call_procedure_changed_db('set_user_survey_status_test', args_proc)
+
+
+def set_user_answer(id_answer: int, user_survey_id: int, num_question: int) -> None:
+    args_proc = [id_answer, user_survey_id, num_question]
+    sql.call_procedure_changed_db('set_user_answer', args_proc)
+
+
+def get_answer_id(id_test: int, num_question: int, num_answer: int) -> int:
+    args_proc = [id_test, num_question, num_answer, 0]
+    answer_id = sql.call_procedure_return_one_from_db('get_answer_id', args_proc)
+    return int(answer_id)
+
+
 if __name__ == '__main__':
     try:
-        # set_survey(2, 2, 'Who I am? ______', 'I', 'You', 'Vadim', 'Volan de Mort', 1)
-        VALUE = get_user_survey_by_user_survey_id(87)
-        print(VALUE)
+        set_user_answer(4, 322222, 1)
+        # VALUE = set_user_survey_status_test()
+        # print(VALUE)
     except Exception as error_exception:
         print('Error main file')
         print(error_exception)
