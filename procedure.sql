@@ -334,3 +334,28 @@ BEGIN
 END//
 
 -------------------------------------------
+DROP PROCEDURE IF EXISTS get_answer_user_by_id_user_test;
+DELIMITER //
+CREATE PROCEDURE get_answer_user_by_id_user_test(
+IN id_user_test INT)
+BEGIN
+	SELECT
+	    AU.NUMBER_QUESTION,
+	    (SELECT NUMBER_ANSWER FROM BOT.SURVEYS_ANSWERS
+         WHERE ANSWER_ID = AU.ANSWER_ID) NUMBER_ANSWER
+    FROM BOT.ANSWERS_USERS AU
+     WHERE AU.ID_USER_SURVEY = id_user_test;
+END//
+
+-------------------------------------------
+DROP PROCEDURE IF EXISTS get_answer_true_by_id_user_test;
+DELIMITER //
+CREATE PROCEDURE get_answer_true_by_id_user_test(
+IN id_user_test INT)
+BEGIN
+	SELECT NUMBER_QUESTION, NUMBER_TRUE_ANSWER
+	FROM BOT.SURVEYS_TRUE_ANSWERS
+	 WHERE SURVEY_ID in (SELECT ID_SURVEY FROM BOT.USER_SURVEYS WHERE ID_USER_SURVEY = id_user_test);
+END//
+
+-------------------------------------------

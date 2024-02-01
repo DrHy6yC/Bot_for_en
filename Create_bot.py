@@ -1,9 +1,11 @@
+from icecream import ic
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 
 from Utils.From_DB import get_const
 
+ic.enable()
 storage = MemoryStorage()
 
 # TODO Bot. Реализовать запуск теста только в личку, если запускался в группе результат отправлялся еще и в группу

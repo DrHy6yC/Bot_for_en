@@ -1,3 +1,4 @@
+from icecream import ic
 from Utils.SQL_actions import sql
 # OUT Параметры процедцры в листе аргумента должен быть 0
 
@@ -152,13 +153,31 @@ def get_answer_id(id_test: int, num_question: int, num_answer: int) -> int:
     return int(answer_id)
 
 
+def comparison_answer(id_user_test: int) -> int:
+    balls = 0
+    args_proc = [id_user_test]
+    answer_user = dict(sql.call_procedure_return_table('get_answer_user_by_id_user_test', args_proc))
+    answer_true = dict(sql.call_procedure_return_table('get_answer_true_by_id_user_test', args_proc))
+    ic(answer_user, answer_true)
+    for num, answer in answer_true.items():
+        ic(num, answer, answer_user.get(num, 0))
+        if answer_true[num] == answer_user.get(num, 0):
+            balls += 1
+    return balls
+
+
+def set_balls(id_user_test: int, balls: int) -> None:
+    args_proc = [id_user_test, balls]
+    sql.call_procedure_changed_db('set_balls', args_proc)
+
+
 if __name__ == '__main__':
     try:
-        set_user_answer(4, 322222, 1)
-        # VALUE = set_user_survey_status_test()
-        # print(VALUE)
+        set_balls(95, 1)
+        # VALUE = comparison_answer(94)
+        # ic(VALUE)
     except Exception as error_exception:
-        print('Error main file')
-        print(error_exception)
+        ic('Error main file')
+        ic(error_exception)
     finally:
         sql.end_con()
