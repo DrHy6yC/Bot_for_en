@@ -154,6 +154,7 @@ def get_answer_id(id_test: int, num_question: int, num_answer: int) -> int:
 
 
 def comparison_answer(id_user_test: int) -> int:
+    ic.disable()
     balls = 0
     args_proc = [id_user_test]
     answer_user = dict(sql.call_procedure_return_table('get_answer_user_by_id_user_test', args_proc))
@@ -163,6 +164,7 @@ def comparison_answer(id_user_test: int) -> int:
         ic(num, answer, answer_user.get(num, 0))
         if answer_true[num] == answer_user.get(num, 0):
             balls += 1
+    ic.enable()
     return balls
 
 
