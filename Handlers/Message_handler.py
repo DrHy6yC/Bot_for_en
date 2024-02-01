@@ -29,8 +29,9 @@ async def send_welcome(message: types.Message) -> None:
         insert_user_in_db(user_tg_id, user_full_name, username, message_id.message_id)
 
 
+# TODO Bot. Отправляет тест в личку но не может его запустить.
 async def select_test(message: types.Message) -> None:
-    await bot.send_message(chat_id=message.chat.id,
+    await bot.send_message(chat_id=message.from_user.id,
                            text='Выберите тест',
                            reply_markup=KB_Reply.set_IKB_select_survey())
     await FSMTest.test_handler.set()
@@ -38,7 +39,7 @@ async def select_test(message: types.Message) -> None:
 
 async def help_command(message: types.Message) -> None:
     await message.delete()
-    await bot.send_message(chat_id=message.chat.id,
+    await bot.send_message(chat_id=message.from_user.id,
                            text=get_const('TEXT_HELP'),
                            reply_markup=KB_Reply.set_IKB_one_but('Ok', 'delete_message'))
 
