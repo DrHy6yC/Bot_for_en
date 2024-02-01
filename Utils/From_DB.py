@@ -18,8 +18,9 @@ def find_user_bd(user_tg_id: str) -> bool:
 
 def insert_user_in_db(user_id: int,
                       user_name: str,
-                      user_login_tg: str) -> None:
-    args_proc = [user_id, user_name, user_login_tg]
+                      user_login_tg: str,
+                      message_id: int) -> None:
+    args_proc = [user_id, user_name, user_login_tg, message_id]
     sql.call_procedure_changed_db('set_user_in_bd', args_proc)
 
 

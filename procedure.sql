@@ -18,10 +18,11 @@ DROP PROCEDURE IF EXISTS set_user_in_bd;
 DELIMITER //
 CREATE PROCEDURE set_user_in_bd(
 IN user_id BIGINT, IN user_name VARCHAR(50),
-IN user_login_tg VARCHAR(30))
+IN user_login_tg VARCHAR(30),
+IN id_message INT)
 BEGIN
-    INSERT INTO USERS (USER_TG_ID, USER_FULL_NAME, USER_LOGIN)
-    VALUES (user_id, user_name, user_login_tg);
+    INSERT INTO USERS (USER_TG_ID, USER_FULL_NAME, USER_LOGIN, MESSAGE_START_ID)
+    VALUES (user_id, user_name, user_login_tg, id_message);
 END//
 
 -------------------------------------------
