@@ -18,11 +18,18 @@ async def delete_message(callback: types.CallbackQuery) -> None:
     return await callback.answer()
 
 
-async def test_handler(callback: types.CallbackQuery) -> None:
+async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None:
     name_test = callback.data.replace("Run test: ", "")
     user_id = callback.from_user.id
     if get_is_user_status_survey(int(user_id), 1):
-        await callback.answer('Уже есть запущенный тест', show_alert=True)
+        test_info = get_user_survey(user_id, 1)[0]
+        user_test_id = test_info[0]
+        await callback.answer('Уже есть запущенный тест, теперь он остановлен', show_alert=True)
+        set_user_survey_status_test(user_test_id, 3)
+        ic('Change state = 3')
+        ic(await state.get_state())
+        ic(str(callback.data))
+
     else:
         id_test = get_id_survey(name_test)
         user_test_id = set_user_survey_get_id_user_survey(user_id, id_test, 1)
@@ -48,14 +55,14 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
     user_test_id = test_info[0]
     if answer_user == '-1':
         set_user_survey_status_test(user_test_id, 3)
+        ic('Change state = 3')
+        ic(await state.get_state())
+        ic(str(callback.data))
         await FSMTest.test_revoked.set()
         await delete_message(callback)
         await bot.send_message(chat_id=id_chat,
                                text='Тест приостановлен',
                                reply_markup=KB_Reply.set_IKB_continue_finish())
-        ic('Change state = 3')
-        ic(await state.get_state())
-        ic(str(callback.data))
     else:
         test_id = test_info[2]
         MAX_QUESTION_SURVEY = get_count_question(int(test_id))
