@@ -1,5 +1,7 @@
-from aiogram.dispatcher.filters import ChatTypeFilter
 from icecream import ic
+
+from aiogram.types import ContentType
+from aiogram.dispatcher.filters import ChatTypeFilter
 from aiogram import types, Dispatcher, filters
 from FSMStates.FSMTests import FSMTest
 
@@ -44,11 +46,36 @@ async def help_command(message: types.Message) -> None:
                            reply_markup=KB_Reply.set_IKB_one_but('Ok', 'delete_message'))
 
 
+async def test_filter_handler(message: types.Message) -> None:
+    ic(message)
+    id_user = message.from_user.id
+    id_chat = message.chat.id
+    id_message = message.message_id
+
+    await bot.delete_message(chat_id=id_chat,
+                             message_id=id_message)
+    await bot.send_message(chat_id=id_user,
+                           text='Не шли стикеры иначе засру личку')
+    await bot.send_sticker(chat_id=id_user,
+                           sticker='CAACAgIAAx0CbjGesQACAaNlu9Nn_55FcbPgKHv2fy6bTyEk6QACRRUAAm7NwEql3a6mlLHZ6DQE')
+
+
 def register_handlers_user(dp: Dispatcher) -> None:
-    dp.register_message_handler(send_welcome, commands=['start'], state="*")
-    dp.register_message_handler(send_welcome, filters.Text(equals="START", ignore_case=True), state="*")
+    dp.register_message_handler(send_welcome,
+                                commands=['start'],
+                                state="*")
+    dp.register_message_handler(send_welcome,
+                                filters.Text(equals="START", ignore_case=True),
+                                state="*")
     dp.register_message_handler(select_test,
                                 filters.Text(equals="Пройти тест"),
                                 ChatTypeFilter(chat_type=types.ChatType.PRIVATE))
-    dp.register_message_handler(help_command, commands=['help'], state="*")
-    dp.register_message_handler(help_command, filters.Text(equals="Помощь"), state="*")
+    dp.register_message_handler(help_command,
+                                commands=['help'],
+                                state="*")
+    dp.register_message_handler(help_command,
+                                filters.Text(equals="Помощь"),
+                                state="*")
+    dp.register_message_handler(test_filter_handler,
+                                ChatTypeFilter(chat_type=types.ChatType.SUPERGROUP),
+                                content_types=ContentType.STICKER)
