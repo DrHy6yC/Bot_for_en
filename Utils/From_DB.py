@@ -118,7 +118,7 @@ def get_user_survey(user_id: int, status: int) -> list:
     args_proc = [user_id, status]
     user_survey_list = sql.call_procedure_return_table('get_user_survey', args_proc)
     if user_survey_list:
-        return user_survey_list[0]
+        return user_survey_list
     else:
         return list()
 
@@ -169,6 +169,12 @@ def comparison_answer(id_user_test: int) -> int:
 def set_balls(id_user_test: int, balls: int) -> None:
     args_proc = [id_user_test, balls]
     sql.call_procedure_changed_db('set_balls', args_proc)
+
+
+def get_balls(id_user_test: int) -> int:
+    args_proc = [id_user_test, 0]
+    ball = sql.call_procedure_return_one_from_db('get_balls', args_proc)
+    return ball
 
 
 if __name__ == '__main__':

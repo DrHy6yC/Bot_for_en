@@ -234,7 +234,8 @@ IN user_id BIGINT,
 IN status INT)
 BEGIN
 	SELECT * FROM USER_SURVEYS
-    WHERE ID_USER = user_id AND STATUS_SURVEY = status;
+    WHERE ID_USER = user_id AND STATUS_SURVEY = status
+    ORDER by ID_USER_SURVEY DESC;
 END//
 
 -------------------------------------------
@@ -359,3 +360,11 @@ BEGIN
 END//
 
 -------------------------------------------
+DROP PROCEDURE IF EXISTS get_balls;
+DELIMITER //
+CREATE PROCEDURE get_balls(
+IN id_user_test INT,
+OUT ball INT)
+BEGIN
+	SELECT BALLS INTO ball FROM USER_SURVEYS WHERE ID_USER_SURVEY = id_user_test;
+END//

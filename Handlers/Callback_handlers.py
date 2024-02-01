@@ -9,7 +9,7 @@ from Create_bot import bot
 from Keyboards import KB_Reply
 from Utils.From_DB import get_id_survey, get_answer, get_question_by_id_question, set_user_survey_get_id_user_survey, \
     set_question_num, get_one_answer, get_count_question, get_is_user_status_survey, get_user_survey, \
-    set_user_survey_status_test, set_user_answer, get_answer_id, comparison_answer, set_balls
+    set_user_survey_status_test, set_user_answer, get_answer_id, comparison_answer, set_balls, get_balls
 
 
 async def delete_message(callback: types.CallbackQuery) -> None:
@@ -44,7 +44,7 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
     answer_user = str(callback.data)
     id_chat = callback.message.chat.id
     user_id = callback.from_user.id
-    test_info = get_user_survey(user_id, 1)
+    test_info = get_user_survey(user_id, 1)[0]
     user_test_id = test_info[0]
     if answer_user == '-1':
         set_user_survey_status_test(user_test_id, 3)
@@ -132,12 +132,20 @@ async def test_canceled(callback: types.CallbackQuery, state: FSMContext) -> Non
         reply_markup=None)
     await state.finish()
     user_id = callback.from_user.id
-    test_info = get_user_survey(user_id, 3)
+    test_info = get_user_survey(user_id, 3)[0]
     user_test_id = test_info[0]
+    ball = get_balls(user_test_id)
+    test_id = test_info[2]
+    MAX_QUESTION_SURVEY = get_count_question(int(test_id))
+    percent = float(ball) / float(MAX_QUESTION_SURVEY) * 100
+    percent = round(percent, 2)
     set_user_survey_status_test(user_test_id, 4)
     ic(await state.get_state())
     await bot.send_message(chat_id=callback.message.chat.id,
-                           text='Тест отменен\nРезультат - хз')
+                           text=f'Тест отменен\n'
+                                f'Результат: {percent}%\n'
+                                f'{ball} правильных ответов\n'
+                                f'из {MAX_QUESTION_SURVEY} всех вопросов')
     await callback.answer()
 
 
@@ -145,7 +153,7 @@ async def test_canceled(callback: types.CallbackQuery, state: FSMContext) -> Non
 async def test_continue(callback: types.CallbackQuery, state: FSMContext) -> None:
     # TODO Sql+Test. Выбор из ранее запущенных (остановленных и прерванных)
     # user_id = callback.from_user.id
-    # test_info = get_user_survey(user_id, 1)
+    # test_info = get_user_survey(user_id, 1)[0]
     # user_test_id = test_info[0]
     # set_user_survey_status_test(user_test_id, 4)
     # FSMTest.test_continue.set()
@@ -153,15 +161,25 @@ async def test_continue(callback: types.CallbackQuery, state: FSMContext) -> Non
     await callback.answer('Сейчас можно только остановить тест', show_alert=True)
 
 
-# TODO Bot+Sql+Test 2. Реализация расчета результата
 async def test_completed(callback: types.CallbackQuery, state: FSMContext) -> None:
+    user_id = callback.from_user.id
+    test_info = get_user_survey(user_id, 5)[0]
+    user_test_id = test_info[0]
+    ball = get_balls(user_test_id)
+    test_id = test_info[2]
+    MAX_QUESTION_SURVEY = get_count_question(int(test_id))
+    percent = float(ball)/float(MAX_QUESTION_SURVEY) * 100
+    percent = round(percent, 2)
     await bot.edit_message_reply_markup(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
         reply_markup=None)
     await state.finish()
     await bot.send_message(chat_id=callback.message.chat.id,
-                           text='Тест закончен\nРезультат - хз')
+                           text=f'Тест закончен\n'
+                                f'Результат: {percent}%\n'
+                                f'{ball} правильных ответов\n'
+                                f'из {MAX_QUESTION_SURVEY} всех вопросов')
     await callback.answer()
 
 
