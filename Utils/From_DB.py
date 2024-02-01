@@ -9,7 +9,7 @@ def get_const(name_const: str) -> str:
     return value_const
 
 
-def find_user_bd(user_tg_id: str) -> bool:
+def find_user_bd(user_tg_id: int) -> bool:
     args_proc = [user_tg_id, 0]
     USER = sql.call_procedure_return_one_from_db('get_is_user_in_bd', args_proc)
     is_user_found = bool(int(USER))
@@ -182,9 +182,9 @@ def get_balls(id_user_test: int) -> int:
 
 if __name__ == '__main__':
     try:
-        set_balls(95, 1)
-        # VALUE = comparison_answer(94)
-        # ic(VALUE)
+        # set_balls(95, 1)
+        VALUE = find_user_bd(5436880841)
+        ic(VALUE)
     except Exception as error_exception:
         ic('Error main file')
         ic(error_exception)

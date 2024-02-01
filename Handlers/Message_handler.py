@@ -1,3 +1,4 @@
+from aiogram.dispatcher.filters import ChatTypeFilter
 from icecream import ic
 from aiogram import types, Dispatcher, filters
 from FSMStates.FSMTests import FSMTest
@@ -12,10 +13,10 @@ async def send_welcome(message: types.Message) -> None:
     user_tg_id = message.from_user.id
     user_full_name = f'{message.from_user.full_name}'
     username = message.from_user.username
-    # TODO Bot. Запихать вызов обычных кнопок через меню
     reply_markup_start = KB_Reply.set_but_start()
     reply_markup_delete = KB_Reply.set_IKB_one_but('Ok', 'delete_message')
     TEXT_HI = get_const('TEXT_HI').replace('@FIO', user_full_name)
+    ic(user_tg_id)
     IS_USER = find_user_bd(user_tg_id)
     ic(IS_USER)
     if IS_USER:
@@ -29,7 +30,6 @@ async def send_welcome(message: types.Message) -> None:
         insert_user_in_db(user_tg_id, user_full_name, username, message_id.message_id)
 
 
-# TODO Bot. Отправляет тест в личку но не может его запустить.
 async def select_test(message: types.Message) -> None:
     await bot.send_message(chat_id=message.from_user.id,
                            text='Выберите тест',
@@ -47,6 +47,8 @@ async def help_command(message: types.Message) -> None:
 def register_handlers_user(dp: Dispatcher) -> None:
     dp.register_message_handler(send_welcome, commands=['start'], state="*")
     dp.register_message_handler(send_welcome, filters.Text(equals="START", ignore_case=True), state="*")
-    dp.register_message_handler(select_test, filters.Text(equals="Пройти тест"))
+    dp.register_message_handler(select_test,
+                                filters.Text(equals="Пройти тест"),
+                                ChatTypeFilter(chat_type=types.ChatType.PRIVATE))
     dp.register_message_handler(help_command, commands=['help'], state="*")
     dp.register_message_handler(help_command, filters.Text(equals="Помощь"), state="*")

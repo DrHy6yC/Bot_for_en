@@ -4,7 +4,7 @@ CREATE PROCEDURE get_is_user_in_bd(
 IN user_tg BIGINT,
 OUT is_user_in_bd BIT)
 BEGIN
-	DECLARE id_user INT;
+	DECLARE id_user BIGINT;
 	SELECT USER_TG_ID INTO id_user FROM USERS
 	WHERE USER_TG_ID = user_tg;
     IF id_user IS NOT NULL
