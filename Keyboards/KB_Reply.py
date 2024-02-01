@@ -3,7 +3,6 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMar
 from Utils.From_DB import get_name_survey
 
 
-# TODO Bot. Отправлять эту клавиатуру только в личку
 def set_but_start() -> ReplyKeyboardMarkup:
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
     b1 = KeyboardButton(text="Помощь")

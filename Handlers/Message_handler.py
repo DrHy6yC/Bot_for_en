@@ -1,3 +1,4 @@
+from icecream import ic
 from aiogram import types, Dispatcher, filters
 from aiogram.dispatcher import FSMContext
 from FSMStates.FSMTests import FSMTest
@@ -8,24 +9,28 @@ from Utils.From_DB import get_const, find_user_bd, insert_user_in_db
 
 
 async def send_welcome(message: types.Message):
-    user_tg_id = int(message.from_user.id)
+    await message.delete()
+    user_tg_id = message.from_user.id
     user_full_name = f'{message.from_user.full_name}'
     username = message.from_user.username
-    await message.delete()
-    reply_markup = KB_Reply.set_but_start()
+    reply_markup_start = KB_Reply.set_but_start()
+    reply_markup_delete = KB_Reply.set_IKB_one_but('Ok', 'delete_message')
     TEXT_HI = get_const('TEXT_HI').replace('@FIO', user_full_name)
-    # TODO Bot. нужно что бы были и инлайн кнопки и обычные
-    # IS_USER = find_user_bd(user_tg_id)
-    #
-    # if IS_USER:
-    #     # Возможность убирать последующие приветсятвие инлайн кнопкой
-    #     reply_markup = KB_Reply.set_IKB_one_but('Ok', 'delete_message')
-    # else:
+    IS_USER = find_user_bd(user_tg_id)
+    # if not IS_USER:
     #     insert_user_in_db(user_tg_id, user_full_name, username)
-
-    await bot.send_message(chat_id=message.chat.id,
+    #     await bot.send_message(chat_id=user_tg_id,
+    #                            text=TEXT_HI,
+    #                            reply_markup=reply_markup_start)
+    # else:
+    #     await bot.send_message(chat_id=user_tg_id,
+    #                            text=TEXT_HI,
+    #                            reply_markup=reply_markup_delete)
+    await bot.send_message(chat_id=user_tg_id,
                            text=TEXT_HI,
-                           reply_markup=reply_markup)
+                           reply_markup=reply_markup_start)
+    ic(await bot.get_chat(user_tg_id),
+       await bot.get_new_session())
 
 
 async def select_test(message: types.Message, state: FSMContext):
