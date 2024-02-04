@@ -1,17 +1,19 @@
 from icecream import ic
 
-from aiogram.types import ContentType
+from aiogram.types import ContentType, BotCommand
 from aiogram.dispatcher.filters import ChatTypeFilter
-from aiogram import types, Dispatcher, filters
+from aiogram import types, Dispatcher, filters, Bot
 from FSMStates.FSMTests import FSMTest
 
 from Create_bot import bot
 from Keyboards import KB_Reply
-from Utils.From_DB import get_const, find_user_bd, insert_user_in_db
+from Survey.Survey import getLevelUser
+from Utils.From_DB import get_const, find_user_bd, insert_user_in_db, get_end_result_test
 
 
 async def send_welcome(message: types.Message) -> None:
     await message.delete()
+    await set_my_keyboard()
     user_tg_id = message.from_user.id
     user_full_name = f'{message.from_user.full_name}'
     username = message.from_user.username
@@ -60,12 +62,45 @@ async def test_filter_handler(message: types.Message) -> None:
                            sticker='CAACAgIAAx0CbjGesQACAaNlu9Nn_55FcbPgKHv2fy6bTyEk6QACRRUAAm7NwEql3a6mlLHZ6DQE')
 
 
+async def set_my_keyboard() -> None:
+    my_command = [BotCommand(command='get_keyboard',
+                             description='Кнопка для получения индивидуальной клавиатуры')]
+    await bot.set_my_commands(commands=my_command)
+
+
+async def my_keyboard(message: types.Message) -> None:
+    await bot.delete_message(chat_id=message.from_user.id,
+                             message_id=message.message_id)
+    await bot.send_message(chat_id=message.from_user.id,
+                           text='Вот персональная клавиатура',
+                           reply_markup=KB_Reply.set_but_start())
+
+
+async def get_level_English(message: types.Message) -> None:
+    user_id = message.from_user.id
+    await bot.delete_message(chat_id=user_id,
+                             message_id=message.message_id)
+    ball_test = get_end_result_test(user_id)
+    reply_markup = None
+    if not ball_test == 0:
+        percent_ball = round(ball_test * 100 / 80, 2)
+        text_level = getLevelUser(percent_ball)
+        text = f'Твой уровень: {text_level}'
+    else:
+        text = f'Твой уровень еще не определен, пройди для начала тест: English Level test. Grammar'
+        await FSMTest.test_handler.set()
+        reply_markup = KB_Reply.set_IKB_grammar_test()
+    await bot.send_message(chat_id=user_id,
+                           text=text,
+                           reply_markup=reply_markup)
+
+
 def register_handlers_user(dp: Dispatcher) -> None:
     dp.register_message_handler(send_welcome,
                                 commands=['start'],
                                 state="*")
-    dp.register_message_handler(send_welcome,
-                                filters.Text(equals="START", ignore_case=True),
+    dp.register_message_handler(get_level_English,
+                                filters.Text(equals="Узнать уровень"),
                                 state="*")
     dp.register_message_handler(select_test,
                                 filters.Text(equals="Пройти тест"),
@@ -79,3 +114,4 @@ def register_handlers_user(dp: Dispatcher) -> None:
     dp.register_message_handler(test_filter_handler,
                                 ChatTypeFilter(chat_type=types.ChatType.SUPERGROUP),
                                 content_types=ContentType.STICKER)
+    dp.register_message_handler(my_keyboard, commands=['get_keyboard'])

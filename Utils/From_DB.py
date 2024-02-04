@@ -1,5 +1,7 @@
 from icecream import ic
 from Utils.SQL_actions import sql
+
+
 # OUT Параметры процедцры в листе аргумента должен быть 0
 
 
@@ -177,13 +179,19 @@ def set_balls(id_user_test: int, balls: int) -> None:
 def get_balls(id_user_test: int) -> int:
     args_proc = [id_user_test, 0]
     ball = sql.call_procedure_return_one_from_db('get_balls', args_proc)
-    return ball
+    return int(ball)
+
+
+def get_end_result_test(id_user: int) -> int:
+    args_proc = [id_user, 0]
+    ball = sql.call_procedure_return_one_from_db('get_end_result_test', args_proc)
+    return int(ball)
 
 
 if __name__ == '__main__':
     try:
         # set_balls(95, 1)
-        VALUE = find_user_bd(5436880841)
+        VALUE = get_end_result_test(809916411)
         ic(VALUE)
     except Exception as error_exception:
         ic('Error main file')

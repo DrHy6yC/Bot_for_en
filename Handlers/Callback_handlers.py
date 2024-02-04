@@ -10,10 +10,12 @@ from Keyboards import KB_Reply
 from Utils.From_DB import get_id_survey, get_answer, get_question_by_id_question, set_user_survey_get_id_user_survey, \
     set_question_num, get_one_answer, get_count_question, get_is_user_status_survey, get_user_survey, \
     set_user_survey_status_test, set_user_answer, get_answer_id, comparison_answer, set_balls, get_balls
+from Survey.Survey import getLevelUser
 
 
-async def delete_message(callback: types.CallbackQuery) -> None:
+async def delete_message(callback: types.CallbackQuery, state: FSMContext) -> None:
     ic('Message delete')
+    await state.finish()
     await bot.delete_message(callback.message.chat.id, callback.message.message_id)
     return await callback.answer()
 
@@ -59,7 +61,7 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
         ic(await state.get_state())
         ic(str(callback.data))
         await FSMTest.test_revoked.set()
-        await delete_message(callback)
+        await delete_message(callback, state)
         await bot.send_message(chat_id=id_chat,
                                text='Тест приостановлен',
                                reply_markup=KB_Reply.set_IKB_continue_finish())
@@ -152,7 +154,8 @@ async def test_canceled(callback: types.CallbackQuery, state: FSMContext) -> Non
                            text=f'Тест отменен\n'
                                 f'Результат: {percent}%\n'
                                 f'{ball} правильных ответов\n'
-                                f'из {MAX_QUESTION_SURVEY} всех вопросов')
+                                f'из {MAX_QUESTION_SURVEY} всех вопросов\n'
+                                f'"Это уровень: {getLevelUser(percent)}')
     await callback.answer()
 
 
@@ -186,7 +189,8 @@ async def test_completed(callback: types.CallbackQuery, state: FSMContext) -> No
                            text=f'Тест закончен\n'
                                 f'Результат: {percent}%\n'
                                 f'{ball} правильных ответов\n'
-                                f'из {MAX_QUESTION_SURVEY} всех вопросов')
+                                f'из {MAX_QUESTION_SURVEY} всех вопросов\n'
+                                f'"Это уровень: {getLevelUser(percent)}')
     await callback.answer()
 
 
