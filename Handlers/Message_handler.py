@@ -85,7 +85,10 @@ async def get_level_English(message: types.Message) -> None:
     if not ball_test == 0:
         percent_ball = round(ball_test * 100 / 80, 2)
         text_level = getLevelUser(percent_ball)
-        text = f'Твой уровень: {text_level}'
+        text = f'Твой уровень: {text_level}\n' \
+               f'Если хочешь повысить уровень,\n' \
+               f' пройди еще раз:\n' \
+               f'English Level test. Grammar.'
     else:
         text = f'Твой уровень еще не определен, пройди для начала тест: English Level test. Grammar'
         await FSMTest.test_handler.set()
