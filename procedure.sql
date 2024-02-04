@@ -369,3 +369,24 @@ OUT ball INT)
 BEGIN
 	SELECT BALLS INTO ball FROM USER_SURVEYS WHERE ID_USER_SURVEY = id_user_test;
 END//
+
+-------------------------------------------
+DROP PROCEDURE IF EXISTS get_end_result_test;
+DELIMITER //
+CREATE PROCEDURE get_end_result_test(
+IN user_tg BIGINT,
+OUT end_balls INT)
+BEGIN
+	SELECT BALLS INTO end_balls
+    FROM BOT.USER_SURVEYS
+	 WHERE ID_USER = user_tg
+	  and STATUS_SURVEY = 5
+	  and ID_SURVEY = 17
+	 ORDER by ID_USER_SURVEY DESC
+	 limit 1;
+         IF end_balls > 0
+		THEN SET end_balls = end_balls;
+        ELSE SET end_balls = 0;
+    END IF;
+
+END//

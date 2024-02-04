@@ -5,9 +5,9 @@ from Utils.From_DB import get_name_survey
 
 def set_but_start() -> ReplyKeyboardMarkup:
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
-    b1 = KeyboardButton(text="Помощь")
-    b2 = KeyboardButton(text="Пройти тест")
-    b3 = KeyboardButton(text="START")
+    b1 = KeyboardButton(text='Помощь')
+    b2 = KeyboardButton(text='Пройти тест')
+    b3 = KeyboardButton(text='Узнать уровень')
     kb.add(b3, b1, b2)
     return kb
 
@@ -46,7 +46,16 @@ def set_IKB_select_survey() -> InlineKeyboardMarkup:
     for name_test_list in list_surveys:
         name_test = name_test_list[0]
         dictionary[name_test] = f'Run test: {name_test}'
+    dictionary['Отмена'] = f'delete_message'
+    ikb = set_IKB_many_but(dictionary)
+    return ikb
 
+
+def set_IKB_grammar_test() -> InlineKeyboardMarkup:
+    dictionary = dict()
+    name_test = 'English Level test. Grammar'
+    dictionary[name_test] = f'Run test: {name_test}'
+    dictionary['Отмена'] = f'delete_message'
     ikb = set_IKB_many_but(dictionary)
     return ikb
 
