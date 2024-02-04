@@ -15,9 +15,11 @@ from Survey.Survey import getLevelUser
 
 async def delete_message(callback: types.CallbackQuery, state: FSMContext) -> None:
     ic('Message delete')
-    await state.finish()
+    ic(await state.get_state())
+    if await state.get_state() != 'FSMTest:test_revoked':
+        await state.finish()
     await bot.delete_message(callback.message.chat.id, callback.message.message_id)
-    return await callback.answer()
+    # await callback.answer()
 
 
 async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None:
@@ -61,10 +63,12 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
         ic(await state.get_state())
         ic(str(callback.data))
         await FSMTest.test_revoked.set()
+        ic(await state.get_state())
         await delete_message(callback, state)
         await bot.send_message(chat_id=id_chat,
                                text='Тест приостановлен',
                                reply_markup=KB_Reply.set_IKB_continue_finish())
+        # await callback.answer()
     else:
         test_id = test_info[2]
         MAX_QUESTION_SURVEY = get_count_question(int(test_id))
