@@ -8,7 +8,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 
-from Utils.From_DB import get_const
+# from Utils.From_DB import get_const
 
 ic.enable()
 storage = MemoryStorage()
