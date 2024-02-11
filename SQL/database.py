@@ -1,5 +1,6 @@
 from os import getenv
 from dotenv import load_dotenv
+from icecream import ic
 
 load_dotenv()
 
@@ -91,7 +92,7 @@ class DBMYSQL:
         Переводит строку из .env в python bool
         :return: Возвращает True когда DB_IS_CREATED=True, в остальных случаях -> False
         """
-
+        ic(self.DB_IS_CREATED)
         if self.DB_IS_CREATED == 'True':
             return True
         else:

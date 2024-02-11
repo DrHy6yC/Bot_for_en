@@ -1,6 +1,6 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 
-from Utils.From_DB import get_name_survey
+from SQL.orm import get_name_survey
 
 
 def set_but_start() -> ReplyKeyboardMarkup:
@@ -41,12 +41,7 @@ def set_IKB_Survey(answers: list) -> InlineKeyboardMarkup:
 
 
 def set_IKB_select_survey() -> InlineKeyboardMarkup:
-    dictionary = dict()
-    list_surveys = get_name_survey()
-    for name_test_list in list_surveys:
-        name_test = name_test_list[0]
-        dictionary[name_test] = f'Run test: {name_test}'
-    dictionary['Отмена'] = f'delete_message'
+    dictionary = get_name_survey()
     ikb = set_IKB_many_but(dictionary)
     return ikb
 

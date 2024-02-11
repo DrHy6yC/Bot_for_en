@@ -1,14 +1,16 @@
 import datetime
 from typing import Annotated
 
-from sqlalchemy import BigInteger, String, func, ForeignKey
+from sqlalchemy import BigInteger, String, Text, func, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
 
 int_pk = Annotated[int, mapped_column(primary_key=True)]
-big_int = Annotated[int, mapped_column(BigInteger)]
+big_int = Annotated[int, mapped_column(BigInteger, unique=True)]
 int_serv_def_0 = Annotated[int, mapped_column(server_default='0')]
 
 date_now = Annotated[datetime.datetime, mapped_column(server_default=func.now())]
+
+txt = Annotated[str, mapped_column(Text)]
 
 str_512 = Annotated[str, mapped_column(String(512))]
 str_256 = Annotated[str, mapped_column(String(256))]
@@ -27,6 +29,7 @@ class Base(DeclarativeBase):
         str_50: String(50),
         str_256: String(256),
         str_512: String(512)
+
     }
 
 
@@ -53,9 +56,9 @@ class UsersORM(Base):
         Уровень который определяется после прохождения теста English Level test. Grammar
     USER_ACCESS:
         Уровень доступа (Админ, Учитель, Пользователь)
-    USER_CREATE_TIME:
+    CREATE_TIME:
         Дата внесения пользователя в БД
-    USER_UPDATE_TIME:
+    UPDATE_TIME:
         Дата изменения данных пользователя
     """
     __tablename__ = 'USERS'
@@ -65,8 +68,8 @@ class UsersORM(Base):
     USER_FULL_NAME: Mapped[str_256]
     USER_LEVEL: Mapped[int_serv_def_0]
     USER_ACCESS: Mapped[int_serv_def_0]
-    USER_CREATE_TIME: Mapped[date_now]
-    USER_UPDATE_TIME: Mapped[date_now]
+    CREATE_TIME: Mapped[date_now]
+    UPDATE_TIME: Mapped[date_now]
 
 
 # TODO тригер меняющий QUIZE_UPDATE_TIME при изменении таблиц (QUIZE_QUESTIONS, QUIZE_ANSWERS, QUIZE_TRUE_ANSWERS)
@@ -84,18 +87,18 @@ class QuizzesORM(Base):
         Имя теста
     QUIZE_DESCRIPTION:
         Описание теста
-    QUIZE_CREATE_TIME:
+    CREATE_TIME:
         Дата и время создания опросника
-    QUIZE_UPDATE_TIME:
+    UPDATE_TIME:
         Дата и время изменения опросника
     """
 
     __tablename__ = 'QUIZZES'
     ID: Mapped[int_pk]
-    QUIZE_NAME: Mapped[str_50]
+    QUIZE_NAME: Mapped[str_50] = mapped_column(unique=True)
     QUIZE_DESCRIPTION: Mapped[str_256]
-    QUIZE_CREATE_TIME: Mapped[date_now]
-    QUIZE_UPDATE_TIME: Mapped[date_now]
+    CREATE_TIME: Mapped[date_now]
+    UPDATE_TIME: Mapped[date_now]
 
 
 class QuizeQuestionsORM(Base):
@@ -113,9 +116,9 @@ class QuizeQuestionsORM(Base):
         Номер вопроса
     QUESTION_TEXT:
         Текст вопроса
-    QUESTION_CREATE_TIME:
+    CREATE_TIME:
         Дата и время создания вопроса
-    QUESTION_UPDATE_TIME:
+    UPDATE_TIME:
         Дата и время изменения вопроса
     """
 
@@ -124,8 +127,8 @@ class QuizeQuestionsORM(Base):
     ID_QUIZE: Mapped[int] = mapped_column(ForeignKey('QUIZZES.ID', ondelete='CASCADE', onupdate='CASCADE'))
     QUESTION_NUMBER: Mapped[int]
     QUESTION_TEXT: Mapped[str_512]
-    QUESTION_CREATE_TIME: Mapped[date_now]
-    QUESTION_UPDATE_TIME: Mapped[date_now]
+    CREATE_TIME: Mapped[date_now]
+    UPDATE_TIME: Mapped[date_now]
 
 
 class QuizeAnswersORM(Base):
@@ -139,8 +142,8 @@ class QuizeAnswersORM(Base):
     QUESTION_NUMBER: Mapped[int]
     ANSWER_NUMBER: Mapped[int]
     ANSWER_TEXT: Mapped[str_512]
-    ANSWER_CREATE_TIME: Mapped[date_now]
-    ANSWER_UPDATE_TIME: Mapped[date_now]
+    CREATE_TIME: Mapped[date_now]
+    UPDATE_TIME: Mapped[date_now]
 
 
 class QuizeTrueAnswersORM(Base):
@@ -153,8 +156,8 @@ class QuizeTrueAnswersORM(Base):
     ID_QUIZE: Mapped[int] = mapped_column(ForeignKey('QUIZZES.ID', ondelete='CASCADE', onupdate='CASCADE'))
     ID_ANSWER: Mapped[int] = mapped_column(ForeignKey('QUIZE_ANSWERS.ID', ondelete='CASCADE', onupdate='CASCADE'))
     QUESTION_NUMBER: Mapped[int]
-    ANSWER_CREATE_TIME: Mapped[date_now]
-    ANSWER_UPDATE_TIME: Mapped[date_now]
+    CREATE_TIME: Mapped[date_now]
+    UPDATE_TIME: Mapped[date_now]
 
 
 class QuizeStatusesORM(Base):
@@ -165,6 +168,8 @@ class QuizeStatusesORM(Base):
     __tablename__ = 'QUIZE_STATUSES'
     ID: Mapped[int_pk]
     STATUS_TEXT: Mapped[str_50]
+    CREATE_TIME: Mapped[date_now]
+    UPDATE_TIME: Mapped[date_now]
 
 
 class UserQuizzesORM(Base):
@@ -190,9 +195,9 @@ class UserQuizzesORM(Base):
     QUIZE_SCORE:
         Кол-во очков которое получил пользователь за правильные ответы
     CREATE_TIME:
-    Дата и время создания теста
+        Дата и время создания теста
     UPDATE_TIME:
-    Дата и время изменения теста
+        Дата и время изменения теста
     """
 
     __tablename__ = 'USER_QUIZZES'
@@ -205,3 +210,13 @@ class UserQuizzesORM(Base):
     QUIZE_SCORE: Mapped[int]
     CREATE_TIME: Mapped[date_now]
     UPDATE_TIME: Mapped[date_now]
+
+
+class ConstantsORM(Base):
+    __tablename__ = "CONSTANTS"
+    ID: Mapped[int_pk]
+    CONSTANT_NAME: Mapped[str_50]
+    CONSTANT_VALUE: Mapped[str_512]
+    CREATE_TIME: Mapped[date_now]
+    UPDATE_TIME: Mapped[date_now]
+

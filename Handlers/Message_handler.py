@@ -1,27 +1,31 @@
+from aiogram import types, Dispatcher, filters
+from aiogram.dispatcher.filters import ChatTypeFilter
+from aiogram.types import ContentType, BotCommand
 from icecream import ic
 
-from aiogram.types import ContentType, BotCommand
-from aiogram.dispatcher.filters import ChatTypeFilter
-from aiogram import types, Dispatcher, filters, Bot
-from FSMStates.FSMTests import FSMTest
-
 from Create_bot import bot
+from FSMStates.FSMTests import FSMTest
 from Keyboards import KB_Reply
+from SQL.models import UsersORM
+from SQL.orm import async_get_const, async_is_user_in_bd, async_insert_data_list_to_bd
 from Survey.Survey import getLevelUser
-from Utils.From_DB import get_const, find_user_bd, insert_user_in_db, get_end_result_test
+
+# from Utils.From_DB import get_const, find_user_bd, insert_user_in_db, get_end_result_test
 
 
 async def send_welcome(message: types.Message) -> None:
     await message.delete()
     await set_my_keyboard()
     user_tg_id = message.from_user.id
+    ic(user_tg_id)
     user_full_name = f'{message.from_user.full_name}'
     username = message.from_user.username
     reply_markup_start = KB_Reply.set_but_start()
     reply_markup_delete = KB_Reply.set_IKB_one_but('Ok', 'delete_message')
-    TEXT_HI = get_const('TEXT_HI').replace('@FIO', user_full_name)
+    TEXT_HI_template = await async_get_const('TEXT_HI')
+    TEXT_HI = TEXT_HI_template.CONSTANT_VALUE.replace('@FIO', user_full_name)
     ic(user_tg_id)
-    IS_USER = find_user_bd(user_tg_id)
+    IS_USER = await async_is_user_in_bd(user_tg_id)
     ic(IS_USER)
     if IS_USER:
         await bot.send_message(chat_id=user_tg_id,
@@ -31,7 +35,12 @@ async def send_welcome(message: types.Message) -> None:
         message_id = await bot.send_message(chat_id=user_tg_id,
                                             text=TEXT_HI,
                                             reply_markup=reply_markup_start)
-        insert_user_in_db(user_tg_id, user_full_name, username, message_id.message_id)
+        new_user = UsersORM(
+            USER_TG_ID=user_tg_id,
+            USER_LOGIN=user_full_name,
+            USER_FULL_NAME=username
+        )
+        await async_insert_data_list_to_bd([new_user])
 
 
 async def select_test(message: types.Message) -> None:
@@ -43,8 +52,10 @@ async def select_test(message: types.Message) -> None:
 
 async def help_command(message: types.Message) -> None:
     await message.delete()
+    help_txt_temp = await async_get_const('TEXT_HELP')
+    TEXT_HELP = help_txt_temp.CONSTANT_VALUE
     await bot.send_message(chat_id=message.from_user.id,
-                           text=get_const('TEXT_HELP'),
+                           text=TEXT_HELP,
                            reply_markup=KB_Reply.set_IKB_one_but('Ok', 'delete_message'))
 
 

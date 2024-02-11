@@ -3,7 +3,7 @@ from sqlalchemy.engine.base import Engine
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncEngine
 from sqlalchemy.orm import sessionmaker
 
-from database import DBMYSQL
+from SQL.database import DBMYSQL
 
 
 def get_engine(dsn_db: str) -> Engine:
