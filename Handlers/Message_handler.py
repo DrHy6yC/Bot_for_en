@@ -5,9 +5,9 @@ from icecream import ic
 
 from Create_bot import bot
 from FSMStates.FSMTests import FSMTest
-from Keyboards import KB_Reply
+from Keyboards.KB_Reply import set_but_start, set_IKB_one_but, set_IKB_select_survey, set_IKB_grammar_test
 from SQL.models import UsersORM
-from SQL.orm import async_get_const, async_is_user_in_bd, async_insert_data_list_to_bd
+from SQL.orm import async_get_const, async_is_user_in_bd, async_insert_data_list_to_bd, async_get_name_survey_for_ikb
 from Survey.Survey import getLevelUser
 
 # from Utils.From_DB import get_const, find_user_bd, insert_user_in_db, get_end_result_test
@@ -20,8 +20,8 @@ async def send_welcome(message: types.Message) -> None:
     ic(user_tg_id)
     user_full_name = f'{message.from_user.full_name}'
     username = message.from_user.username
-    reply_markup_start = KB_Reply.set_but_start()
-    reply_markup_delete = KB_Reply.set_IKB_one_but('Ok', 'delete_message')
+    reply_markup_start = set_but_start()
+    reply_markup_delete = set_IKB_one_but('Ok', 'delete_message')
     TEXT_HI_template = await async_get_const('TEXT_HI')
     TEXT_HI = TEXT_HI_template.CONSTANT_VALUE.replace('@FIO', user_full_name)
     ic(user_tg_id)
@@ -44,9 +44,10 @@ async def send_welcome(message: types.Message) -> None:
 
 
 async def select_test(message: types.Message) -> None:
+    dict_name_tests = await async_get_name_survey_for_ikb()
     await bot.send_message(chat_id=message.from_user.id,
                            text='Выберите тест',
-                           reply_markup=KB_Reply.set_IKB_select_survey())
+                           reply_markup=set_IKB_select_survey(dict_name_tests))
     await FSMTest.test_handler.set()
 
 
@@ -56,7 +57,7 @@ async def help_command(message: types.Message) -> None:
     TEXT_HELP = help_txt_temp.CONSTANT_VALUE
     await bot.send_message(chat_id=message.from_user.id,
                            text=TEXT_HELP,
-                           reply_markup=KB_Reply.set_IKB_one_but('Ok', 'delete_message'))
+                           reply_markup=set_IKB_one_but('Ok', 'delete_message'))
 
 
 async def test_filter_handler(message: types.Message) -> None:
@@ -84,7 +85,7 @@ async def my_keyboard(message: types.Message) -> None:
                              message_id=message.message_id)
     await bot.send_message(chat_id=message.from_user.id,
                            text='Вот персональная клавиатура',
-                           reply_markup=KB_Reply.set_but_start())
+                           reply_markup=set_but_start())
 
 
 async def get_level_English(message: types.Message) -> None:
@@ -103,7 +104,7 @@ async def get_level_English(message: types.Message) -> None:
     else:
         text = f'Твой уровень еще не определен, пройди для начала тест: English Level test. Grammar'
         await FSMTest.test_handler.set()
-        reply_markup = KB_Reply.set_IKB_grammar_test()
+        reply_markup = set_IKB_grammar_test()
     await bot.send_message(chat_id=user_id,
                            text=text,
                            reply_markup=reply_markup)

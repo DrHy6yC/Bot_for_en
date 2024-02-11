@@ -7,9 +7,9 @@ from aiogram.dispatcher import FSMContext
 
 from Create_bot import bot
 from Keyboards import KB_Reply
-from Utils.From_DB import get_id_survey, get_answer, get_question_by_id_question, set_user_survey_get_id_user_survey, \
-    set_question_num, get_one_answer, get_count_question, get_is_user_status_survey, get_user_survey, \
-    set_user_survey_status_test, set_user_answer, get_answer_id, comparison_answer, set_balls, get_balls
+# from Utils.From_DB import get_id_survey, get_answer, get_question_by_id_question, set_user_survey_get_id_user_survey, \
+#     set_question_num, get_one_answer, get_count_question, get_is_user_status_survey, get_user_survey, \
+#     set_user_survey_status_test, set_user_answer, get_answer_id, comparison_answer, set_balls, get_balls
 from Survey.Survey import getLevelUser
 
 

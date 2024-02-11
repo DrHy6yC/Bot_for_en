@@ -1,6 +1,6 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 
-from SQL.orm import get_name_survey
+from SQL.orm import async_get_name_survey_for_ikb
 
 
 def set_but_start() -> ReplyKeyboardMarkup:
@@ -40,8 +40,7 @@ def set_IKB_Survey(answers: list) -> InlineKeyboardMarkup:
     return ikb
 
 
-def set_IKB_select_survey() -> InlineKeyboardMarkup:
-    dictionary = get_name_survey()
+def set_IKB_select_survey(dictionary) -> InlineKeyboardMarkup:
     ikb = set_IKB_many_but(dictionary)
     return ikb
 

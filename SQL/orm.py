@@ -10,16 +10,6 @@ from SQL.models import Base, UsersORM, QuizzesORM, ConstantsORM
 ModelsORM = UsersORM, QuizzesORM, ConstantsORM
 
 
-def get_name_survey() -> dict[str, str]:
-    dictionary = dict
-    list_surveys = async_select_from_db(QuizzesORM)
-    for test in list_surveys:
-        name_test = test.QUIZE_NAME
-        dictionary[name_test] = f'Run test: {name_test}'
-    dictionary['Отмена'] = f'delete_message'
-    return dictionary
-
-
 # Example:
 # ================================async===================================
 async def async_create_all_table(async_engine: AsyncEngine) -> None:
@@ -82,6 +72,15 @@ async def async_is_user_in_bd(user_tg_id: int) -> bool:
         else:
             return False
 
+
+async def async_get_name_survey_for_ikb() -> dict[str, str]:
+    dictionary = dict()
+    list_tests = await async_select_from_db(QuizzesORM)
+    for test in list_tests:
+        name_test = test.QUIZE_NAME
+        dictionary[name_test] = f'Run test: {name_test}'
+    dictionary['Отмена'] = f'delete_message'
+    return dictionary
 
 
 # =====================sync===================

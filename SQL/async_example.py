@@ -5,7 +5,7 @@ from config import sql_async_engine
 
 from models import UsersORM, QuizzesORM, ConstantsORM
 from orm import async_create_all_table, async_insert_data_list_to_bd, async_select_from_db, \
-    async_get_const, async_select_user_by_id, async_is_user_in_bd
+    async_get_const, async_select_user_by_id, async_is_user_in_bd, async_get_name_survey_for_ikb
 
 
 async def tasks():
@@ -64,8 +64,7 @@ async def tasks1():
 
 
 async def tasks2():
-    res = await async_is_user_in_bd(2342254345)
-    ic(res)
+    await async_get_name_survey_for_ikb()
 
 if __name__ == "__main__":
     # asyncio.run(tasks())
