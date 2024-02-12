@@ -1,9 +1,10 @@
 from icecream import ic
 import asyncio
 
+from SQL.create_min_in_DB import filling_min_db
 from config import sql_async_engine
 
-from models import UsersORM, QuizzesORM, ConstantsORM
+from models import UsersORM, QuizzesORM, ConstantsORM, QuizeStatusesORM
 from orm import async_create_all_table, async_insert_data_list_to_bd, async_select_from_db, \
     async_get_const, async_select_user_by_id, async_is_user_in_bd, async_get_name_survey_for_ikb, \
     async_get_is_user_status_test
@@ -47,9 +48,38 @@ async def rewrite_DB():
         CONSTANT_NAME='TEXT_HELP',
         CONSTANT_VALUE=help_txt
     )
-    await async_create_all_table(sql_async_engine)
-    await async_insert_data_list_to_bd([user_di, user_admin, mini_test, grammar_level_test, TEXT_HI, TEXT_HELP])
 
+    status_quize_Selected = QuizeStatusesORM(
+        ID=1,
+        STATUS_TEXT='Selected'
+    )
+
+    status_quize_Launched = QuizeStatusesORM(
+        ID=2,
+        STATUS_TEXT='Launched'
+    )
+    status_quize_Stopped = QuizeStatusesORM(
+        ID=3,
+        STATUS_TEXT='Stopped'
+    )
+    status_quize_Revoked = QuizeStatusesORM(
+        ID=4,
+        STATUS_TEXT='Revoked'
+    )
+    status_quize_Completed = QuizeStatusesORM(
+        ID=5,
+        STATUS_TEXT='Completed'
+    )
+
+    status_quize_Deleted = QuizeStatusesORM(
+        ID=6,
+        STATUS_TEXT='Deleted'
+    )
+
+    await async_create_all_table(sql_async_engine)
+    await async_insert_data_list_to_bd([user_di, user_admin, mini_test, grammar_level_test, TEXT_HI, TEXT_HELP,
+                                        status_quize_Selected, status_quize_Launched,status_quize_Stopped,
+                                        status_quize_Revoked, status_quize_Completed, status_quize_Deleted])
 
 
 async def check_db():
@@ -65,9 +95,10 @@ async def check_db():
 
 
 async def tasks():
-    await async_get_is_user_status_test(3242342, 1)
+    await filling_min_db()
+    # await async_get_is_user_status_test(3242342, 1)
 
 if __name__ == "__main__":
-    asyncio.run(rewrite_DB())
+    # asyncio.run(rewrite_DB())
     # asyncio.run(check_db())
-    # asyncio.run(tasks())
+    asyncio.run(tasks())
