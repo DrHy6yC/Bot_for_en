@@ -1,6 +1,8 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.utils.callback_data import CallbackData
 
 from SQL.orm import async_get_name_survey_for_ikb
+from callback_datas import call_data_test
 
 
 def set_but_start() -> ReplyKeyboardMarkup:
@@ -12,7 +14,7 @@ def set_but_start() -> ReplyKeyboardMarkup:
     return kb
 
 
-def set_IKB_one_but(text, call_data) -> InlineKeyboardMarkup:
+def set_IKB_one_but(text: str, call_data: CallbackData) -> InlineKeyboardMarkup:
     ikb = InlineKeyboardMarkup(row_width=1)
     ib = InlineKeyboardButton(text=text,
                               callback_data=call_data)
@@ -20,7 +22,7 @@ def set_IKB_one_but(text, call_data) -> InlineKeyboardMarkup:
     return ikb
 
 
-def set_IKB_many_but(dictionary: dict) -> InlineKeyboardMarkup:
+def set_IKB_many_but(dictionary: dict[str, CallbackData]) -> InlineKeyboardMarkup:
     ikb = InlineKeyboardMarkup(row_width=1)
     for text, call in dictionary.items():
         ikb.add(InlineKeyboardButton(text=text,
@@ -40,8 +42,17 @@ def set_IKB_Survey(answers: list) -> InlineKeyboardMarkup:
     return ikb
 
 
-def set_IKB_select_survey(dictionary) -> InlineKeyboardMarkup:
-    ikb = set_IKB_many_but(dictionary)
+# def set_IKB_select_survey(dictionary) -> InlineKeyboardMarkup:
+#     ikb = set_IKB_many_but(dictionary)
+#     return ikb
+
+
+def set_IKB_select_survey(names_tests: list) -> InlineKeyboardMarkup:
+    ikb = InlineKeyboardMarkup(row_width=1)
+    for name_test in names_tests:
+        call_data = call_data_test.new(name_test)
+        ikb.add(InlineKeyboardButton(text=f'{name_test}',
+                                     callback_data=call_data))
     return ikb
 
 

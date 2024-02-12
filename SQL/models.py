@@ -5,7 +5,8 @@ from sqlalchemy import BigInteger, String, Text, func, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
 
 int_pk = Annotated[int, mapped_column(primary_key=True)]
-big_int = Annotated[int, mapped_column(BigInteger, unique=True)]
+big_int = Annotated[int, mapped_column(BigInteger)]
+big_int_uniq = Annotated[int, mapped_column(BigInteger, unique=True)]
 int_serv_def_0 = Annotated[int, mapped_column(server_default='0')]
 
 date_now = Annotated[datetime.datetime, mapped_column(server_default=func.now())]
@@ -63,7 +64,7 @@ class UsersORM(Base):
     """
     __tablename__ = 'USERS'
     ID: Mapped[int_pk]
-    USER_TG_ID: Mapped[big_int]
+    USER_TG_ID: Mapped[big_int_uniq]
     USER_LOGIN: Mapped[str_256]
     USER_FULL_NAME: Mapped[str_256]
     USER_LEVEL: Mapped[int_serv_def_0]
@@ -202,12 +203,12 @@ class UserQuizzesORM(Base):
 
     __tablename__ = 'USER_QUIZZES'
     ID: Mapped[int_pk]
-    ID_USER: Mapped[int] = mapped_column(ForeignKey('USERS.ID', ondelete='CASCADE', onupdate='CASCADE'))
+    ID_USER_TG: Mapped[big_int] = mapped_column(ForeignKey('USERS.USER_TG_ID', ondelete='CASCADE', onupdate='CASCADE'))
     ID_QUIZE: Mapped[int] = mapped_column(ForeignKey('QUIZZES.ID', ondelete='CASCADE', onupdate='CASCADE'))
     QUIZE_STATUS: Mapped[int] = mapped_column(ForeignKey('QUIZE_STATUSES.ID', ondelete='CASCADE', onupdate='CASCADE'))
-    QUESTION_NUMBER: Mapped[int]
-    ID_ANSWER_LAST: Mapped[int]
-    QUIZE_SCORE: Mapped[int]
+    QUESTION_NUMBER: Mapped[int_serv_def_0]
+    ID_ANSWER_LAST: Mapped[int_serv_def_0]
+    QUIZE_SCORE: Mapped[int_serv_def_0]
     CREATE_TIME: Mapped[date_now]
     UPDATE_TIME: Mapped[date_now]
 
@@ -219,4 +220,3 @@ class ConstantsORM(Base):
     CONSTANT_VALUE: Mapped[str_512]
     CREATE_TIME: Mapped[date_now]
     UPDATE_TIME: Mapped[date_now]
-

@@ -9,6 +9,8 @@ from Keyboards.KB_Reply import set_but_start, set_IKB_one_but, set_IKB_select_su
 from SQL.models import UsersORM
 from SQL.orm import async_get_const, async_is_user_in_bd, async_insert_data_list_to_bd, async_get_name_survey_for_ikb
 from Survey.Survey import getLevelUser
+from callback_datas.our_call_datas import call_data_cancel
+
 
 # from Utils.From_DB import get_const, find_user_bd, insert_user_in_db, get_end_result_test
 
@@ -21,7 +23,8 @@ async def send_welcome(message: types.Message) -> None:
     user_full_name = f'{message.from_user.full_name}'
     username = message.from_user.username
     reply_markup_start = set_but_start()
-    reply_markup_delete = set_IKB_one_but('Ok', 'delete_message')
+    call_data = call_data_cancel.new()
+    reply_markup_delete = set_IKB_one_but('Ok', call_data)
     TEXT_HI_template = await async_get_const('TEXT_HI')
     TEXT_HI = TEXT_HI_template.CONSTANT_VALUE.replace('@FIO', user_full_name)
     ic(user_tg_id)
@@ -35,6 +38,7 @@ async def send_welcome(message: types.Message) -> None:
         message_id = await bot.send_message(chat_id=user_tg_id,
                                             text=TEXT_HI,
                                             reply_markup=reply_markup_start)
+        ic(message_id)
         new_user = UsersORM(
             USER_TG_ID=user_tg_id,
             USER_LOGIN=user_full_name,
@@ -55,9 +59,10 @@ async def help_command(message: types.Message) -> None:
     await message.delete()
     help_txt_temp = await async_get_const('TEXT_HELP')
     TEXT_HELP = help_txt_temp.CONSTANT_VALUE
+    call_data = call_data_cancel.new()
     await bot.send_message(chat_id=message.from_user.id,
                            text=TEXT_HELP,
-                           reply_markup=set_IKB_one_but('Ok', 'delete_message'))
+                           reply_markup=set_IKB_one_but('Ok', call_data))
 
 
 async def test_filter_handler(message: types.Message) -> None:

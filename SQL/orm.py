@@ -1,11 +1,11 @@
 from typing import Type, Union
 
 from icecream import ic
-from sqlalchemy import Engine, select
+from sqlalchemy import Engine, select, func, and_, desc
 from sqlalchemy.ext.asyncio import AsyncEngine
 
 from SQL.config import session_sql_connect, async_session_sql_connect
-from SQL.models import Base, UsersORM, QuizzesORM, ConstantsORM
+from SQL.models import Base, UsersORM, QuizzesORM, ConstantsORM, UserQuizzesORM
 
 ModelsORM = UsersORM, QuizzesORM, ConstantsORM
 
@@ -74,6 +74,7 @@ async def async_is_user_in_bd(user_tg_id: int) -> bool:
 
 
 async def async_get_name_survey_for_ikb() -> dict[str, str]:
+    ic('ЗАМЕНИТЬ!! должно выводить dict[str, CallbackData]')
     dictionary = dict()
     list_tests = await async_select_from_db(QuizzesORM)
     for test in list_tests:
@@ -81,6 +82,47 @@ async def async_get_name_survey_for_ikb() -> dict[str, str]:
         dictionary[name_test] = f'Run test: {name_test}'
     dictionary['Отмена'] = f'delete_message'
     return dictionary
+
+
+async def async_get_is_user_status_test(user_id, status) -> bool:
+    async with async_session_sql_connect() as session_sql:
+        query = select(func.count(UserQuizzesORM.ID)).\
+            select_from(UserQuizzesORM).\
+            where(and_(UserQuizzesORM.ID_USER_TG == user_id, UserQuizzesORM.QUIZE_STATUS == status))
+        user_exec = await session_sql.execute(query)
+        user = user_exec.scalars().one_or_none()
+    is_user_status_test: bool = user != 0
+    ic(user)
+    ic(is_user_status_test)
+    return is_user_status_test
+
+
+async def async_get_user_survey(user_id, status) -> UserQuizzesORM:
+    async with async_session_sql_connect() as session_sql:
+        query = select(UserQuizzesORM).\
+            select_from(UserQuizzesORM).\
+            where(and_(UserQuizzesORM.ID_USER == user_id, UserQuizzesORM.QUIZE_STATUS == status)).\
+            order_by(desc(UserQuizzesORM.CREATE_TIME))
+        users_exec = await session_sql.execute(query)
+        user = users_exec.scalars().first()
+        return user
+
+
+async def async_get_id_test(name_test: str) -> int:
+    async with async_session_sql_connect() as session_sql:
+        query = select(QuizzesORM.ID).\
+            select_from(QuizzesORM).\
+            where(QuizzesORM.QUIZE_NAME == name_test)
+        tests_exec = await session_sql.execute(query)
+        test = tests_exec.scalars().first()
+        return test
+
+
+async def async_set_user_test_status(user_test_id: int, status: int) -> None:
+    async with async_session_sql_connect() as session_sql:
+        user_test = session_sql.get(UserQuizzesORM, user_test_id)
+        user_test.QUIZE_STATUS = status
+        await session_sql.commit()
 
 
 # =====================sync===================

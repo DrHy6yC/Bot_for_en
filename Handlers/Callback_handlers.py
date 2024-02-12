@@ -6,6 +6,10 @@ from FSMStates.FSMTests import FSMTest
 from aiogram.dispatcher import FSMContext
 
 from Create_bot import bot
+from SQL.models import UserQuizzesORM
+from SQL.orm import async_get_is_user_status_test, async_get_user_survey, async_get_id_test, \
+    async_insert_data_list_to_bd, async_set_user_test_status
+from callback_datas.our_call_datas import call_data_test, call_data_cancel
 from Keyboards import KB_Reply
 # from Utils.From_DB import get_id_survey, get_answer, get_question_by_id_question, set_user_survey_get_id_user_survey, \
 #     set_question_num, get_one_answer, get_count_question, get_is_user_status_survey, get_user_survey, \
@@ -22,22 +26,42 @@ async def delete_message(callback: types.CallbackQuery, state: FSMContext) -> No
     # await callback.answer()
 
 
-async def test_handler(callback: types.CallbackQuery, state: FSMContext) -> None:
-    name_test = callback.data.replace("Run test: ", "")
+async def test_handler(callback: types.CallbackQuery, callback_data: dict, state: FSMContext) -> None:
+    """
+    Notes:
+        Убедиться что пользователь нажимал старт и зарегистрирован в БД бота!
+
+    Parameters
+    ----------
+    callback
+    callback_data
+    state
+
+    Returns
+    -------
+
+    """
+    name_test = callback_data.get('name_test')
     user_id = callback.from_user.id
-    if get_is_user_status_survey(int(user_id), 1):
-        test_info = get_user_survey(user_id, 1)[0]
-        user_test_id = test_info[0]
+    if await async_get_is_user_status_test(int(user_id), 1):
+        test_info = await async_get_user_survey(user_id, 1)
+        user_test_id = test_info.ID
         await callback.answer('Уже есть запущенный тест, теперь он остановлен', show_alert=True)
-        set_user_survey_status_test(user_test_id, 3)
+        await async_set_user_test_status(user_test_id, 3)
         ic('Change state = 3')
         ic(await state.get_state())
         ic(str(callback.data))
 
     else:
-        id_test = get_id_survey(name_test)
-        user_test_id = set_user_survey_get_id_user_survey(user_id, id_test, 1)
-        set_question_num(1, user_test_id)
+        id_test = await async_get_id_test(name_test)
+        ic(user_id, id_test, name_test)
+        user_test = UserQuizzesORM(
+            ID_USER_TG=user_id,
+            ID_QUIZE=id_test,
+            QUIZE_STATUS=1,
+            QUESTION_NUMBER=1
+        )
+        await async_insert_data_list_to_bd([user_test])
         await FSMTest.test_progressed.set()
         await bot.edit_message_text(
             chat_id=callback.message.chat.id,
@@ -205,10 +229,13 @@ async def test_restart(callback: types.CallbackQuery, state: FSMContext) -> None
 
 
 def register_call_handlers_user(dp: Dispatcher) -> None:
-    dp.register_callback_query_handler(test_handler, F.data.startswith('Run test: '), state=FSMTest.test_handler)
+    dp.register_callback_query_handler(delete_message, call_data_test.filter(name_test='Отмена'), state="*")
+    dp.register_callback_query_handler(delete_message, call_data_cancel.filter(), state="*")
+    # dp.register_callback_query_handler(delete_message, state="*", text='delete_message')
+    dp.register_callback_query_handler(test_handler, call_data_test.filter(), state=FSMTest.test_handler)
     dp.register_callback_query_handler(test_progress, text=['-1', '1', '2', '3', '4'], state=FSMTest.test_progressed)
     dp.register_callback_query_handler(test_completed, state=FSMTest.test_completed)
     dp.register_callback_query_handler(test_continue, state=FSMTest.test_revoked, text='0')
     dp.register_callback_query_handler(test_canceled, state=FSMTest.test_revoked, text='-1')
-    dp.register_callback_query_handler(delete_message, state="*", text='delete_message')
     dp.register_callback_query_handler(test_restart, state=FSMTest.test_revoked, text='1')
+
