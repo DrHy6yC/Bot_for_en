@@ -1,8 +1,8 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.callback_data import CallbackData
 
-from SQL.orm import async_get_name_survey_for_ikb
-from callback_datas import call_data_test
+from SQL.models import QuizeAnswersORM
+from Callback_datas import call_data_test
 
 
 def set_but_start() -> ReplyKeyboardMarkup:
@@ -30,7 +30,8 @@ def set_IKB_many_but(dictionary: dict[str, CallbackData]) -> InlineKeyboardMarku
     return ikb
 
 
-def set_IKB_Survey(answers: list) -> InlineKeyboardMarkup:
+def set_IKB_Survey(answers: list[QuizeAnswersORM]) -> InlineKeyboardMarkup:
+    # TODO Переделать с использованием своей CallbackData
     dictionary = dict()
     list_answers = answers
     i = 1
@@ -59,8 +60,10 @@ def set_IKB_select_survey(names_tests: list) -> InlineKeyboardMarkup:
 def set_IKB_grammar_test() -> InlineKeyboardMarkup:
     dictionary = dict()
     name_test = 'English Level test. Grammar'
-    dictionary[name_test] = f'Run test: {name_test}'
-    dictionary['Отмена'] = f'delete_message'
+    call_data_1 = call_data_test.new(name_test)
+    call_data_2 = call_data_test.new('Отмена')
+    dictionary[name_test] = call_data_1
+    dictionary['Отмена'] = call_data_2
     ikb = set_IKB_many_but(dictionary)
     return ikb
 

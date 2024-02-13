@@ -1,20 +1,14 @@
 from icecream import ic
 from aiogram import types, Dispatcher
 
-from magic_filter import F
 from FSMStates.FSMTests import FSMTest
 from aiogram.dispatcher import FSMContext
 
 from Create_bot import bot
 from SQL.models import UserQuizzesORM
-from SQL.orm import async_get_is_user_status_test, async_get_user_survey, async_get_id_test, \
-    async_insert_data_list_to_bd, async_set_user_test_status
-from callback_datas.our_call_datas import call_data_test, call_data_cancel
+from SQL import orm
+from Callback_datas.our_call_datas import call_data_test, call_data_cancel
 from Keyboards import KB_Reply
-# from Utils.From_DB import get_id_survey, get_answer, get_question_by_id_question, set_user_survey_get_id_user_survey, \
-#     set_question_num, get_one_answer, get_count_question, get_is_user_status_survey, get_user_survey, \
-#     set_user_survey_status_test, set_user_answer, get_answer_id, comparison_answer, set_balls, get_balls
-from Survey.Survey import getLevelUser
 
 
 async def delete_message(callback: types.CallbackQuery, state: FSMContext) -> None:
@@ -41,27 +35,29 @@ async def test_handler(callback: types.CallbackQuery, callback_data: dict, state
     -------
 
     """
+
+    # await delete_message(callback, state)
     name_test = callback_data.get('name_test')
-    user_id = callback.from_user.id
-    if await async_get_is_user_status_test(int(user_id), 1):
-        test_info = await async_get_user_survey(user_id, 1)
+    user_tg_id = callback.from_user.id
+    if await orm.async_get_is_user_status_test(int(user_tg_id), 1):
+        test_info = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 1)
         user_test_id = test_info.ID
         await callback.answer('Уже есть запущенный тест, теперь он остановлен', show_alert=True)
-        await async_set_user_test_status(user_test_id, 3)
+        await orm.async_set_user_test_status(user_test_id, 3)
         ic('Change state = 3')
         ic(await state.get_state())
         ic(str(callback.data))
 
     else:
-        id_test = await async_get_id_test(name_test)
-        ic(user_id, id_test, name_test)
+        id_test = await orm.async_get_id_test(name_test)
+        ic(user_tg_id, id_test, name_test)
         user_test = UserQuizzesORM(
-            ID_USER_TG=user_id,
+            ID_USER_TG=user_tg_id,
             ID_QUIZE=id_test,
             QUIZE_STATUS=1,
             QUESTION_NUMBER=1
         )
-        await async_insert_data_list_to_bd([user_test])
+        await orm.async_insert_data_list_to_bd([user_test])
         await FSMTest.test_progressed.set()
         await bot.edit_message_text(
             chat_id=callback.message.chat.id,
@@ -78,11 +74,12 @@ async def test_handler(callback: types.CallbackQuery, callback_data: dict, state
 async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> None:
     answer_user = str(callback.data)
     id_chat = callback.message.chat.id
-    user_id = callback.from_user.id
-    test_info = get_user_survey(user_id, 1)[0]
-    user_test_id = test_info[0]
+    user_tg_id = callback.from_user.id
+    test_info = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 1)
+    user_test_id = test_info.ID
     if answer_user == '-1':
-        set_user_survey_status_test(user_test_id, 3)
+        # TODO переделать Callback_data
+        await orm.async_set_user_test_status(user_test_id, 3)
         ic('Change state = 3')
         ic(await state.get_state())
         ic(str(callback.data))
@@ -94,21 +91,22 @@ async def test_progress(callback: types.CallbackQuery, state: FSMContext) -> Non
                                reply_markup=KB_Reply.set_IKB_continue_finish())
         # await callback.answer()
     else:
-        test_id = test_info[2]
-        MAX_QUESTION_SURVEY = get_count_question(int(test_id))
-        question_num = test_info[4]
-        set_question_num(question_num, user_test_id)
-        answers_list = get_answer(question_num, test_id)
-        answers = list()
-        for i in answers_list:
-            answers.append(i[0])
+        test_id = test_info.ID_QUIZE
+        MAX_QUESTION_SURVEY = await orm.async_get_count_question_test(test_id)
+        question_num = test_info.QUESTION_NUMBER
+        # set_question_num(question_num, user_test_id)
+        answers = await orm.async_get_answers_by_id_test_and_num_question(question_num, test_id)
+        # for i in answers:
+        #     answers.append(i[0])
         await bot.edit_message_reply_markup(
             chat_id=id_chat,
             message_id=callback.message.message_id,
             reply_markup=None)
         if question_num == 1:
             ic()
-            question = get_question_by_id_question(test_info[5])
+            question = await orm.async_get_question_by_id_test_num_question(
+                test_info.ID_QUIZE, test_info.QUESTION_NUMBER
+            )
             await bot.send_message(chat_id=id_chat,
                                    text=question,
                                    reply_markup=KB_Reply.set_IKB_Survey(answers))

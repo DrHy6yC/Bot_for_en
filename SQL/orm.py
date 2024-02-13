@@ -1,13 +1,19 @@
 from typing import Type, Union
 
+from aiogram.utils.callback_data import CallbackData
 from icecream import ic
 from sqlalchemy import Engine, select, func, and_, desc
+from sqlalchemy.orm import join
 from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy.sql.functions import count
 
+import Callback_datas
 from SQL.config import session_sql_connect, async_session_sql_connect
-from SQL.models import Base, UsersORM, QuizzesORM, ConstantsORM, UserQuizzesORM
+from SQL.models import Base, UsersORM, QuizzesORM, ConstantsORM, UserQuizzesORM, UserLevelsORM, QuizeAnswersORM, \
+    QuizeQuestionsORM
+from Callback_datas import call_data_test
 
-ModelsORM = UsersORM, QuizzesORM, ConstantsORM
+ModelsORM = UsersORM, QuizzesORM, ConstantsORM, UserQuizzesORM, UserLevelsORM
 
 
 # Example:
@@ -23,7 +29,7 @@ async def async_create_all_table(async_engine: AsyncEngine) -> None:
         await conn.run_sync(Base.metadata.create_all)
 
 
-async def async_insert_data_list_to_bd(list_data: list) -> None:
+async def async_insert_data_list_to_bd(list_data: list[Union[ModelsORM]]) -> None:
     async with async_session_sql_connect() as session_sql:
         session_sql.add_all(list_data)
         await session_sql.commit()
@@ -34,6 +40,13 @@ async def async_select_from_db(class_orm: Union[ModelsORM]) -> list[Union[Models
         query = select(class_orm)
         result_execute = await session_sql.execute(query)
         result = result_execute.scalars().all()
+        ic(result)
+        return result
+
+
+async def async_get_orm_by_pk(class_orm: Union[ModelsORM], id_orm: int) -> Union[ModelsORM]:
+    async with async_session_sql_connect() as session_sql:
+        result = await session_sql.get(class_orm.__class__, id_orm)
         ic(result)
         return result
 
@@ -73,22 +86,24 @@ async def async_is_user_in_bd(user_tg_id: int) -> bool:
             return False
 
 
-async def async_get_name_survey_for_ikb() -> dict[str, str]:
-    ic('ЗАМЕНИТЬ!! должно выводить dict[str, CallbackData]')
+async def async_get_name_test_for_ikb() -> dict[str, CallbackData]:
+    ic('Заменил, нужно проверить должно выводить dict[str, CallbackData]')
     dictionary = dict()
     list_tests = await async_select_from_db(QuizzesORM)
     for test in list_tests:
         name_test = test.QUIZE_NAME
-        dictionary[name_test] = f'Run test: {name_test}'
-    dictionary['Отмена'] = f'delete_message'
+        call_data = call_data_test.new('name_test')
+        dictionary[name_test] = call_data
+    call_data = call_data_test.new('Отмена')
+    dictionary['Отмена'] = call_data
     return dictionary
 
 
-async def async_get_is_user_status_test(user_id, status) -> bool:
+async def async_get_is_user_status_test(user_tg_id: int, status: int) -> bool:
     async with async_session_sql_connect() as session_sql:
         query = select(func.count(UserQuizzesORM.ID)).\
             select_from(UserQuizzesORM).\
-            where(and_(UserQuizzesORM.ID_USER_TG == user_id, UserQuizzesORM.QUIZE_STATUS == status))
+            where(and_(UserQuizzesORM.ID_USER_TG == user_tg_id, UserQuizzesORM.QUIZE_STATUS == status))
         user_exec = await session_sql.execute(query)
         user = user_exec.scalars().one_or_none()
     is_user_status_test: bool = user != 0
@@ -97,11 +112,11 @@ async def async_get_is_user_status_test(user_id, status) -> bool:
     return is_user_status_test
 
 
-async def async_get_user_survey(user_id, status) -> UserQuizzesORM:
+async def async_get_user_test_by_user_tg_id_and_status(user_tg_id: int, status: int) -> UserQuizzesORM:
     async with async_session_sql_connect() as session_sql:
         query = select(UserQuizzesORM).\
             select_from(UserQuizzesORM).\
-            where(and_(UserQuizzesORM.ID_USER == user_id, UserQuizzesORM.QUIZE_STATUS == status)).\
+            where(and_(UserQuizzesORM.ID_USER_TG == user_tg_id, UserQuizzesORM.QUIZE_STATUS == status)).\
             order_by(desc(UserQuizzesORM.CREATE_TIME))
         users_exec = await session_sql.execute(query)
         user = users_exec.scalars().first()
@@ -118,12 +133,76 @@ async def async_get_id_test(name_test: str) -> int:
         return test
 
 
-async def async_set_user_test_status(user_test_id: int, status: int) -> None:
+async def async_set_user_test_status(id_test: int, status: int) -> None:
     async with async_session_sql_connect() as session_sql:
-        user_test = session_sql.get(UserQuizzesORM, user_test_id)
-        user_test.QUIZE_STATUS = status
+        test = await session_sql.get(UserQuizzesORM, id_test)
+        ic(type(test))
+        if test:
+            test.QUIZE_STATUS = status
+        else:
+            ic(f"Теста id = {id_test} со статусом = {status} нет.")
+        ic(id_test, status)
         await session_sql.commit()
 
+
+async def async_get_level_user_text(user_tg_id: int) -> str:
+    async with async_session_sql_connect() as session_sql:
+        query = select(UserLevelsORM.LEVEL_TEXT). \
+            select_from(join(UserLevelsORM, UsersORM)). \
+            where(UsersORM.USER_TG_ID == user_tg_id)
+        text_exec = await session_sql.execute(query)
+        text = text_exec.scalars().first()
+        return text
+
+
+async def async_is_test_in_bd(name_test: int) -> bool:
+    async with async_session_sql_connect() as session_sql:
+        query = select(QuizzesORM).where(QuizzesORM.QUIZE_NAME == name_test)
+        result_execute = await session_sql.execute(query)
+        result = result_execute.scalars().one_or_none()
+        if result:
+            return True
+        else:
+            return False
+
+
+async def async_get_test_by_name(name_test: str) -> QuizzesORM:
+    async with async_session_sql_connect() as session_sql:
+        query = select(QuizzesORM).where(QuizzesORM.QUIZE_NAME == name_test)
+        test_execute = await session_sql.execute(query)
+        test = test_execute.scalars().first()
+        ic(test, type(test))
+        return test
+
+
+async def async_get_answers_by_id_test_and_num_question(id_test: int, num_question: int) -> list[QuizeAnswersORM]:
+    async with async_session_sql_connect() as session_sql:
+        query = select(QuizeAnswersORM).where(
+            and_(QuizeAnswersORM.ID_QUIZE == id_test, QuizeAnswersORM.QUESTION_NUMBER == num_question)
+        )
+        result_execute = await session_sql.execute(query)
+        result = result_execute.scalars().all()
+        ic(result)
+        return result
+
+
+async def async_get_count_question_test(id_test: int) -> int:
+    async with async_session_sql_connect() as session_sql:
+        query = select(count(QuizeQuestionsORM.ID)).where(QuizeQuestionsORM.ID_QUIZE == id_test)
+        result_execute = await session_sql.execute(query)
+        result = result_execute.scalars().first()
+        ic(result)
+        return result
+
+
+async def async_get_question_by_id_test_num_question(id_test: int, num_question: int) -> str:
+    async with async_session_sql_connect() as session_sql:
+        query = select(QuizeQuestionsORM.QUESTION_TEXT).where(
+            and_(QuizeQuestionsORM.ID_QUIZE == id_test, QuizeQuestionsORM.QUESTION_NUMBER == num_question))
+        result_execute = await session_sql.execute(query)
+        result = result_execute.scalars().first()
+        ic(result)
+        return result
 
 # =====================sync===================
 def create_all_table(engine: Engine) -> None:

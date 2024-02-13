@@ -1,3 +1,4 @@
+from icecream import ic
 from sqlalchemy import create_engine
 from sqlalchemy.engine.base import Engine
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncEngine
@@ -33,6 +34,10 @@ def get_async_engine(async_dsn_db: str) -> AsyncEngine:
 
 
 db_mysql = DBMYSQL()
+is_created_db = db_mysql.get_db_is_created()
+ic(is_created_db)
+# if is_created_db:
+#     await filling_min_db()
 # sync
 dsn = db_mysql.get_dsn()
 sql_engine = get_engine(dsn)

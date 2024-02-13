@@ -1,6 +1,9 @@
+import datetime
+
 from SQL.config import sql_async_engine
-from SQL.models import QuizzesORM, ConstantsORM, QuizeStatusesORM
+from SQL.models import QuizzesORM, ConstantsORM, QuizeStatusesORM, UserLevelsORM
 from SQL.orm import async_create_all_table, async_insert_data_list_to_bd
+from Utils.Import_csv_to_bd import async_import_survey_csv
 
 
 async def filling_min_db() -> None:
@@ -37,6 +40,11 @@ async def filling_min_db() -> None:
         CONSTANT_VALUE=help_txt
     )
 
+    CREATE_TIME_BD = ConstantsORM(
+        CONSTANT_NAME='CREATE_TIME_BD',
+        CONSTANT_VALUE=str(datetime.datetime.now())
+    )
+
     status_quize_Selected = QuizeStatusesORM(
         ID=1,
         STATUS_TEXT='Selected'
@@ -64,9 +72,44 @@ async def filling_min_db() -> None:
         STATUS_TEXT='Deleted'
     )
 
+    level_A0 = UserLevelsORM(
+        LEVEL_TEXT='No level',
+        MIN_LEVEL_SCORE=0,
+        MAX_LEVEL_SCORE=5
+    )
+
+    level_A1 = UserLevelsORM(
+        LEVEL_TEXT='Beginner (A1)',
+        MIN_LEVEL_SCORE=6,
+        MAX_LEVEL_SCORE=30
+    )
+
+    level_A2 = UserLevelsORM(
+        LEVEL_TEXT='Elementary (A2)',
+        MIN_LEVEL_SCORE=31,
+        MAX_LEVEL_SCORE=60
+    )
+
+    level_B1 = UserLevelsORM(
+        LEVEL_TEXT='Pre-Intermediate (B1)',
+        MIN_LEVEL_SCORE=61,
+        MAX_LEVEL_SCORE=90
+    )
+
+    level_B2 = UserLevelsORM(
+        LEVEL_TEXT='Intermediate (B2)',
+        MIN_LEVEL_SCORE=91,
+        MAX_LEVEL_SCORE=100
+    )
+
     await async_create_all_table(sql_async_engine)
     await async_insert_data_list_to_bd([
         grammar_level_test,
-        TEXT_HI, TEXT_HELP,
+        TEXT_HI, TEXT_HELP, CREATE_TIME_BD,
         status_quize_Selected, status_quize_Launched, status_quize_Stopped,
-        status_quize_Revoked, status_quize_Completed, status_quize_Deleted])
+        status_quize_Revoked, status_quize_Completed, status_quize_Deleted,
+        level_A0, level_A1, level_A2, level_B1, level_B2
+    ])
+
+    await async_import_survey_csv("English Level test. Grammar.csv",
+                                  "Основной тест для проверки уровня английского (грамматика")

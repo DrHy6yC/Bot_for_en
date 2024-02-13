@@ -8,6 +8,7 @@ int_pk = Annotated[int, mapped_column(primary_key=True)]
 big_int = Annotated[int, mapped_column(BigInteger)]
 big_int_uniq = Annotated[int, mapped_column(BigInteger, unique=True)]
 int_serv_def_0 = Annotated[int, mapped_column(server_default='0')]
+int_serv_def_1 = Annotated[int, mapped_column(server_default='1')]
 
 date_now = Annotated[datetime.datetime, mapped_column(server_default=func.now())]
 
@@ -18,6 +19,7 @@ str_256 = Annotated[str, mapped_column(String(256))]
 str_50 = Annotated[str, mapped_column(String(50))]
 
 
+# TODO тригер меняющий UPDATE_TIME при изменении таблиц
 class Base(DeclarativeBase):
     """Базовый класс
     Наследуемые от этого класса ОРМ создаются в orm.create_all_table
@@ -67,18 +69,25 @@ class UsersORM(Base):
     USER_TG_ID: Mapped[big_int_uniq]
     USER_LOGIN: Mapped[str_256]
     USER_FULL_NAME: Mapped[str_256]
-    USER_LEVEL: Mapped[int_serv_def_0]
+    USER_LEVEL: Mapped[int_serv_def_1] = mapped_column(
+        ForeignKey('USER_LEVELS.ID', ondelete='CASCADE', onupdate='CASCADE')
+    )
+    USER_POINTS: Mapped[int_serv_def_0]
     USER_ACCESS: Mapped[int_serv_def_0]
     CREATE_TIME: Mapped[date_now]
     UPDATE_TIME: Mapped[date_now]
 
 
-# TODO тригер меняющий QUIZE_UPDATE_TIME при изменении таблиц (QUIZE_QUESTIONS, QUIZE_ANSWERS, QUIZE_TRUE_ANSWERS)
 class QuizzesORM(Base):
     """ Класс Опросника где находятся название теста и их описание
 
     Note:
+        Не создавать тесты с именем 'Отмена',
+        потому что первым регистрируется каллбэк хэндлером для функции delete_message
+        с фильтром call_data_test.filter(name_test='Отмена')
+
         При создании в классе ForeignKey обратить внимание что имена колонок регистрозависимые!
+
 
     Attributes
     ----------
@@ -125,7 +134,9 @@ class QuizeQuestionsORM(Base):
 
     __tablename__ = 'QUIZE_QUESTIONS'
     ID: Mapped[int_pk]
-    ID_QUIZE: Mapped[int] = mapped_column(ForeignKey('QUIZZES.ID', ondelete='CASCADE', onupdate='CASCADE'))
+    ID_QUIZE: Mapped[int] = mapped_column(
+        ForeignKey('QUIZZES.ID', ondelete='CASCADE', onupdate='CASCADE')
+    )
     QUESTION_NUMBER: Mapped[int]
     QUESTION_TEXT: Mapped[str_512]
     CREATE_TIME: Mapped[date_now]
@@ -139,7 +150,9 @@ class QuizeAnswersORM(Base):
 
     __tablename__ = 'QUIZE_ANSWERS'
     ID: Mapped[int_pk]
-    ID_QUIZE: Mapped[int] = mapped_column(ForeignKey('QUIZZES.ID', ondelete='CASCADE', onupdate='CASCADE'))
+    ID_QUIZE: Mapped[int] = mapped_column(
+        ForeignKey('QUIZZES.ID', ondelete='CASCADE', onupdate='CASCADE')
+    )
     QUESTION_NUMBER: Mapped[int]
     ANSWER_NUMBER: Mapped[int]
     ANSWER_TEXT: Mapped[str_512]
@@ -154,8 +167,12 @@ class QuizeTrueAnswersORM(Base):
 
     __tablename__ = 'QUIZE_TRUE_ANSWERS'
     ID: Mapped[int_pk]
-    ID_QUIZE: Mapped[int] = mapped_column(ForeignKey('QUIZZES.ID', ondelete='CASCADE', onupdate='CASCADE'))
-    ID_ANSWER: Mapped[int] = mapped_column(ForeignKey('QUIZE_ANSWERS.ID', ondelete='CASCADE', onupdate='CASCADE'))
+    ID_QUIZE: Mapped[int] = mapped_column(
+        ForeignKey('QUIZZES.ID', ondelete='CASCADE', onupdate='CASCADE')
+    )
+    ID_ANSWER: Mapped[int] = mapped_column(
+        ForeignKey('QUIZE_ANSWERS.ID', ondelete='CASCADE', onupdate='CASCADE')
+    )
     QUESTION_NUMBER: Mapped[int]
     CREATE_TIME: Mapped[date_now]
     UPDATE_TIME: Mapped[date_now]
@@ -183,7 +200,7 @@ class UserQuizzesORM(Base):
     ----------
     ID:
         ИД в БД
-    ID_USER:
+    ID_USER_TG:
         ИД пользователя запустившего тест
     ID_QUIZE:
         ИД теста который запустил пользователь
@@ -203,9 +220,15 @@ class UserQuizzesORM(Base):
 
     __tablename__ = 'USER_QUIZZES'
     ID: Mapped[int_pk]
-    ID_USER_TG: Mapped[big_int] = mapped_column(ForeignKey('USERS.USER_TG_ID', ondelete='CASCADE', onupdate='CASCADE'))
-    ID_QUIZE: Mapped[int] = mapped_column(ForeignKey('QUIZZES.ID', ondelete='CASCADE', onupdate='CASCADE'))
-    QUIZE_STATUS: Mapped[int] = mapped_column(ForeignKey('QUIZE_STATUSES.ID', ondelete='CASCADE', onupdate='CASCADE'))
+    ID_USER_TG: Mapped[big_int] = mapped_column(
+        ForeignKey('USERS.USER_TG_ID', ondelete='CASCADE', onupdate='CASCADE')
+    )
+    ID_QUIZE: Mapped[int] = mapped_column(
+        ForeignKey('QUIZZES.ID', ondelete='CASCADE', onupdate='CASCADE')
+    )
+    QUIZE_STATUS: Mapped[int] = mapped_column(
+        ForeignKey('QUIZE_STATUSES.ID', ondelete='CASCADE', onupdate='CASCADE')
+    )
     QUESTION_NUMBER: Mapped[int_serv_def_0]
     ID_ANSWER_LAST: Mapped[int_serv_def_0]
     QUIZE_SCORE: Mapped[int_serv_def_0]
@@ -218,5 +241,19 @@ class ConstantsORM(Base):
     ID: Mapped[int_pk]
     CONSTANT_NAME: Mapped[str_50]
     CONSTANT_VALUE: Mapped[str_512]
+    CREATE_TIME: Mapped[date_now]
+    UPDATE_TIME: Mapped[date_now]
+
+
+class UserLevelsORM(Base):
+    """
+    При создании в классе ForeignKey обратить внимание что имена колонок регистрозависимые!
+    """
+
+    __tablename__ = 'USER_LEVELS'
+    ID: Mapped[int_pk]
+    LEVEL_TEXT: Mapped[str_50]
+    MIN_LEVEL_SCORE: Mapped[int]
+    MAX_LEVEL_SCORE: Mapped[int]
     CREATE_TIME: Mapped[date_now]
     UPDATE_TIME: Mapped[date_now]

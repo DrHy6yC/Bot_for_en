@@ -7,19 +7,15 @@ from Create_bot import bot
 from FSMStates.FSMTests import FSMTest
 from Keyboards.KB_Reply import set_but_start, set_IKB_one_but, set_IKB_select_survey, set_IKB_grammar_test
 from SQL.models import UsersORM
-from SQL.orm import async_get_const, async_is_user_in_bd, async_insert_data_list_to_bd, async_get_name_survey_for_ikb
-from Survey.Survey import getLevelUser
-from callback_datas.our_call_datas import call_data_cancel
-
-
-# from Utils.From_DB import get_const, find_user_bd, insert_user_in_db, get_end_result_test
+from SQL.orm import async_get_const, async_is_user_in_bd, async_insert_data_list_to_bd, async_get_name_test_for_ikb, \
+    async_select_user_by_id, async_get_level_user_text
+from Callback_datas.our_call_datas import call_data_cancel
 
 
 async def send_welcome(message: types.Message) -> None:
     await message.delete()
     await set_my_keyboard()
     user_tg_id = message.from_user.id
-    ic(user_tg_id)
     user_full_name = f'{message.from_user.full_name}'
     username = message.from_user.username
     reply_markup_start = set_but_start()
@@ -27,7 +23,6 @@ async def send_welcome(message: types.Message) -> None:
     reply_markup_delete = set_IKB_one_but('Ok', call_data)
     TEXT_HI_template = await async_get_const('TEXT_HI')
     TEXT_HI = TEXT_HI_template.CONSTANT_VALUE.replace('@FIO', user_full_name)
-    ic(user_tg_id)
     IS_USER = await async_is_user_in_bd(user_tg_id)
     ic(IS_USER)
     if IS_USER:
@@ -48,7 +43,7 @@ async def send_welcome(message: types.Message) -> None:
 
 
 async def select_test(message: types.Message) -> None:
-    dict_name_tests = await async_get_name_survey_for_ikb()
+    dict_name_tests = await async_get_name_test_for_ikb()
     await bot.send_message(chat_id=message.from_user.id,
                            text='Выберите тест',
                            reply_markup=set_IKB_select_survey(dict_name_tests))
@@ -80,8 +75,14 @@ async def test_filter_handler(message: types.Message) -> None:
 
 
 async def set_my_keyboard() -> None:
-    my_command = [BotCommand(command='get_keyboard',
-                             description='Кнопка для получения индивидуальной клавиатуры')]
+    my_command = [
+        BotCommand(command='start',
+                   description='Кнопка для внесения пользователя в БД'),
+        BotCommand(command='stop',
+                   description='Кнопка для остановки бота'),
+        BotCommand(command='get_keyboard',
+                   description='Кнопка для получения индивидуальной клавиатуры')
+    ]
     await bot.set_my_commands(commands=my_command)
 
 
@@ -94,15 +95,13 @@ async def my_keyboard(message: types.Message) -> None:
 
 
 async def get_level_English(message: types.Message) -> None:
-    user_id = message.from_user.id
-    await bot.delete_message(chat_id=user_id,
+    user_tg_id = message.from_user.id
+    await bot.delete_message(chat_id=user_tg_id,
                              message_id=message.message_id)
-    ball_test = get_end_result_test(user_id)
+    user_level = await async_get_level_user_text(user_tg_id)
     reply_markup = None
-    if not ball_test == 0:
-        percent_ball = round(ball_test * 100 / 80, 2)
-        text_level = getLevelUser(percent_ball)
-        text = f'Твой уровень: {text_level}\n' \
+    if user_level != "No level":
+        text = f'Твой уровень: {user_level}\n' \
                f'Если хочешь повысить уровень,\n' \
                f' пройди еще раз:\n' \
                f'English Level test. Grammar.'
@@ -110,7 +109,7 @@ async def get_level_English(message: types.Message) -> None:
         text = f'Твой уровень еще не определен, пройди для начала тест: English Level test. Grammar'
         await FSMTest.test_handler.set()
         reply_markup = set_IKB_grammar_test()
-    await bot.send_message(chat_id=user_id,
+    await bot.send_message(chat_id=user_tg_id,
                            text=text,
                            reply_markup=reply_markup)
 
