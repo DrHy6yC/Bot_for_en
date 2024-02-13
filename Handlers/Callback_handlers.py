@@ -7,7 +7,7 @@ from aiogram.dispatcher import FSMContext
 from Create_bot import bot
 from SQL.models import UserQuizzesORM
 from SQL import orm
-from Callback_datas.our_call_datas import call_data_test, call_data_cancel
+from Callback_datas.our_call_datas import call_data_select_test, call_data_cancel
 from Keyboards import KB_Reply
 
 
@@ -227,10 +227,10 @@ async def test_restart(callback: types.CallbackQuery, state: FSMContext) -> None
 
 
 def register_call_handlers_user(dp: Dispatcher) -> None:
-    dp.register_callback_query_handler(delete_message, call_data_test.filter(name_test='Отмена'), state="*")
+    dp.register_callback_query_handler(delete_message, call_data_select_test.filter(name_test='Отмена'), state="*")
     dp.register_callback_query_handler(delete_message, call_data_cancel.filter(), state="*")
     # dp.register_callback_query_handler(delete_message, state="*", text='delete_message')
-    dp.register_callback_query_handler(test_handler, call_data_test.filter(), state=FSMTest.test_handler)
+    dp.register_callback_query_handler(test_handler, call_data_select_test.filter(), state=FSMTest.test_handler)
     dp.register_callback_query_handler(test_progress, text=['-1', '1', '2', '3', '4'], state=FSMTest.test_progressed)
     dp.register_callback_query_handler(test_completed, state=FSMTest.test_completed)
     dp.register_callback_query_handler(test_continue, state=FSMTest.test_revoked, text='0')

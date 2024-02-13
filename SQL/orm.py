@@ -11,7 +11,7 @@ import Callback_datas
 from SQL.config import session_sql_connect, async_session_sql_connect
 from SQL.models import Base, UsersORM, QuizzesORM, ConstantsORM, UserQuizzesORM, UserLevelsORM, QuizeAnswersORM, \
     QuizeQuestionsORM
-from Callback_datas import call_data_test
+from Callback_datas import call_data_select_test
 
 ModelsORM = UsersORM, QuizzesORM, ConstantsORM, UserQuizzesORM, UserLevelsORM
 
@@ -92,9 +92,9 @@ async def async_get_name_test_for_ikb() -> dict[str, CallbackData]:
     list_tests = await async_select_from_db(QuizzesORM)
     for test in list_tests:
         name_test = test.QUIZE_NAME
-        call_data = call_data_test.new('name_test')
+        call_data = call_data_select_test.new('name_test')
         dictionary[name_test] = call_data
-    call_data = call_data_test.new('Отмена')
+    call_data = call_data_select_test.new('Отмена')
     dictionary['Отмена'] = call_data
     return dictionary
 
