@@ -7,7 +7,6 @@ from sqlalchemy.orm import join
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.sql.functions import count
 
-import Callback_datas
 from SQL.config import session_sql_connect, async_session_sql_connect
 from SQL.models import Base, UsersORM, QuizzesORM, ConstantsORM, UserQuizzesORM, UserLevelsORM, QuizeAnswersORM, \
     QuizeQuestionsORM
@@ -86,17 +85,12 @@ async def async_is_user_in_bd(user_tg_id: int) -> bool:
             return False
 
 
-async def async_get_name_test_for_ikb() -> dict[str, CallbackData]:
-    ic('Заменил, нужно проверить должно выводить dict[str, CallbackData]')
-    dictionary = dict()
-    list_tests = await async_select_from_db(QuizzesORM)
-    for test in list_tests:
-        name_test = test.QUIZE_NAME
-        call_data = call_data_select_test.new('name_test')
-        dictionary[name_test] = call_data
-    call_data = call_data_select_test.new('Отмена')
-    dictionary['Отмена'] = call_data
-    return dictionary
+async def async_get_name_test() -> list[str]:
+    async with async_session_sql_connect() as session_sql:
+        query = select(QuizzesORM.QUIZE_NAME).select_from(QuizzesORM)
+        result_execute = await session_sql.execute(query)
+        result = result_execute.scalars().all()
+    return result
 
 
 async def async_get_is_user_status_test(user_tg_id: int, status: int) -> bool:
@@ -133,15 +127,15 @@ async def async_get_id_test(name_test: str) -> int:
         return test
 
 
-async def async_set_user_test_status(id_test: int, status: int) -> None:
+async def async_set_user_test_status(user_test_id: int, status: int) -> None:
     async with async_session_sql_connect() as session_sql:
-        test = await session_sql.get(UserQuizzesORM, id_test)
+        test = await session_sql.get(UserQuizzesORM, user_test_id)
         ic(type(test))
         if test:
             test.QUIZE_STATUS = status
         else:
-            ic(f"Теста id = {id_test} со статусом = {status} нет.")
-        ic(id_test, status)
+            ic(f"Теста id = {user_test_id} со статусом = {status} нет.")
+        ic(user_test_id, status)
         await session_sql.commit()
 
 
@@ -199,6 +193,16 @@ async def async_get_question_by_id_test_num_question(id_test: int, num_question:
     async with async_session_sql_connect() as session_sql:
         query = select(QuizeQuestionsORM.QUESTION_TEXT).where(
             and_(QuizeQuestionsORM.ID_QUIZE == id_test, QuizeQuestionsORM.QUESTION_NUMBER == num_question))
+        result_execute = await session_sql.execute(query)
+        result = result_execute.scalars().first()
+        ic(result)
+        return result
+
+
+async def async_get_text_level(points: int) -> str:
+    async with async_session_sql_connect() as session_sql:
+        query = select(UserLevelsORM.LEVEL_TEXT).where(
+            and_(UserLevelsORM.MIN_LEVEL_SCORE <= points, UserLevelsORM.MAX_LEVEL_SCORE >= points))
         result_execute = await session_sql.execute(query)
         result = result_execute.scalars().first()
         ic(result)

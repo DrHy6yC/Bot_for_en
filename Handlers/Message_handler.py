@@ -7,8 +7,7 @@ from Create_bot import bot
 from FSMStates.FSMTests import FSMTest
 from Keyboards.KB_Reply import set_but_start, set_IKB_one_but, set_IKB_select_survey, set_IKB_grammar_test
 from SQL.models import UsersORM
-from SQL.orm import async_get_const, async_is_user_in_bd, async_insert_data_list_to_bd, async_get_name_test_for_ikb, \
-    async_select_user_by_id, async_get_level_user_text
+from SQL import orm
 from Callback_datas.our_call_datas import call_data_cancel
 
 
@@ -19,11 +18,11 @@ async def send_welcome(message: types.Message) -> None:
     user_full_name = f'{message.from_user.full_name}'
     username = message.from_user.username
     reply_markup_start = set_but_start()
-    call_data = call_data_cancel.new()
+    call_data = call_data_cancel.new('Удалить сообщение')
     reply_markup_delete = set_IKB_one_but('Ok', call_data)
-    TEXT_HI_template = await async_get_const('TEXT_HI')
+    TEXT_HI_template = await orm.async_get_const('TEXT_HI')
     TEXT_HI = TEXT_HI_template.CONSTANT_VALUE.replace('@FIO', user_full_name)
-    IS_USER = await async_is_user_in_bd(user_tg_id)
+    IS_USER = await orm.async_is_user_in_bd(user_tg_id)
     ic(IS_USER)
     if IS_USER:
         await bot.send_message(chat_id=user_tg_id,
@@ -39,22 +38,22 @@ async def send_welcome(message: types.Message) -> None:
             USER_LOGIN=user_full_name,
             USER_FULL_NAME=username
         )
-        await async_insert_data_list_to_bd([new_user])
+        await orm.async_insert_data_list_to_bd([new_user])
 
 
 async def select_test(message: types.Message) -> None:
-    dict_name_tests = await async_get_name_test_for_ikb()
+    name_tests = await orm.async_get_name_test()
     await bot.send_message(chat_id=message.from_user.id,
                            text='Выберите тест',
-                           reply_markup=set_IKB_select_survey(dict_name_tests))
+                           reply_markup=set_IKB_select_survey(name_tests))
     await FSMTest.test_handler.set()
 
 
 async def help_command(message: types.Message) -> None:
     await message.delete()
-    help_txt_temp = await async_get_const('TEXT_HELP')
+    help_txt_temp = await orm.async_get_const('TEXT_HELP')
     TEXT_HELP = help_txt_temp.CONSTANT_VALUE
-    call_data = call_data_cancel.new()
+    call_data = call_data_cancel.new('Удалить сообщение')
     await bot.send_message(chat_id=message.from_user.id,
                            text=TEXT_HELP,
                            reply_markup=set_IKB_one_but('Ok', call_data))
@@ -98,7 +97,7 @@ async def get_level_English(message: types.Message) -> None:
     user_tg_id = message.from_user.id
     await bot.delete_message(chat_id=user_tg_id,
                              message_id=message.message_id)
-    user_level = await async_get_level_user_text(user_tg_id)
+    user_level = await orm.async_get_level_user_text(user_tg_id)
     reply_markup = None
     if user_level != "No level":
         text = f'Твой уровень: {user_level}\n' \
