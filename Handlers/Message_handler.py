@@ -13,6 +13,11 @@ from SQL import orm
 from Callback_datas.our_call_datas import cancel
 
 
+async def delete_message(message: types.Message) -> None:
+    ic('Message delete')
+    await bot.delete_message(message.chat.id, message.message_id)
+
+
 async def send_welcome(message: types.Message) -> None:
     await message.delete()
     await set_my_keyboard()
@@ -51,6 +56,7 @@ async def stop_bot(message: types.Message):
 
 
 async def select_test(message: types.Message) -> None:
+    await delete_message(message)
     name_tests = await orm.async_get_name_test()
     await bot.send_message(chat_id=message.from_user.id,
                            text='Выберите тест',

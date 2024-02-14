@@ -11,7 +11,6 @@ from Keyboards import KB_Reply
 async def delete_message(callback: types.CallbackQuery) -> None:
     ic('Message delete')
     await bot.delete_message(callback.message.chat.id, callback.message.message_id)
-    # await callback.answer()
 
 
 async def test_handler(callback: types.CallbackQuery, callback_data: dict) -> None:
@@ -21,11 +20,10 @@ async def test_handler(callback: types.CallbackQuery, callback_data: dict) -> No
 
     """
 
-    # await delete_message(callback, state)
     name_test = callback_data.get('name_test')
     user_tg_id = callback.from_user.id
-    if await orm.async_get_is_user_status_test(int(user_tg_id), 1):
-        run_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 1)
+    if await orm.async_get_is_user_status_test(int(user_tg_id), 2):
+        run_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 2)
         user_test_id = run_test.ID
         await callback.answer('Уже есть запущенный тест, теперь он остановлен', show_alert=True)
         await orm.async_set_user_test_status(user_test_id, 3)
@@ -40,7 +38,6 @@ async def test_handler(callback: types.CallbackQuery, callback_data: dict) -> No
             QUIZE_STATUS=1,
             QUESTION_NUMBER=0
         )
-        # TODO переделать так, что бы тест сохранялся в бд в test_progress
         await orm.async_insert_data_list_to_bd([user_test])
         await bot.edit_message_text(
             chat_id=callback.message.chat.id,
@@ -48,7 +45,9 @@ async def test_handler(callback: types.CallbackQuery, callback_data: dict) -> No
             parse_mode="html",
             text=f'Выбран тест: {name_test}')
         dict_str_cal = dict()
-        dict_str_cal[f'Запустить {name_test}'] = our_call_datas.run_test.new(0)
+        dict_str_cal[f'Запустить {name_test}'] = our_call_datas.run_test.new(
+            name_test
+        )
         dict_str_cal['Отмена'] = our_call_datas.cancel.new('Отмена')
 
         await bot.edit_message_reply_markup(
@@ -59,16 +58,42 @@ async def test_handler(callback: types.CallbackQuery, callback_data: dict) -> No
         await callback.answer()
 
 
+async def test_run(callback: types.CallbackQuery, callback_data: dict) -> None:
+    name_test = callback_data.get('name_test')
+    message_id = callback.message.message_id
+    user_tg_id = callback.from_user.id
+    run_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 1)
+    id_answer = 0
+    call_data = our_call_datas.start_test.new(id_answer)
+    await bot.edit_message_text(
+        chat_id=user_tg_id,
+        message_id=message_id,
+        text=f'Запущен {name_test}'
+    )
+    await bot.edit_message_reply_markup(
+        chat_id=user_tg_id,
+        message_id=message_id,
+        reply_markup=KB_Reply.set_IKB_one_but('Ok', call_data)
+    )
+    await orm.async_set_user_test_status(run_test.ID, 2)
+
+
 async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> None:
     id_user_answer = int(callback_data.get('id_answer'))
+    message_id = callback.message.message_id
     user_tg_id = callback.from_user.id
-    running_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 1)
+    running_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 2)
     running_test_id = running_test.ID
     quize_id = running_test.ID_QUIZE
     question_num = running_test.QUESTION_NUMBER
     MAX_QUESTION_SURVEY = await orm.async_get_count_question_test(quize_id)
     ic(question_num, id_user_answer)
     if question_num == 0:
+        await bot.edit_message_reply_markup(
+            chat_id=user_tg_id,
+            message_id=message_id,
+            reply_markup=None
+        )
         question_num += 1
         running_test.QUESTION_NUMBER = question_num
         answers = await orm.async_get_answers_by_id_test_and_num_question(quize_id, question_num)
@@ -190,7 +215,8 @@ def register_call_handlers_user(dp: Dispatcher) -> None:
     # TODO Собрать в переменные части каллбэков
     dp.register_callback_query_handler(delete_message, our_call_datas.cancel.filter(type_cancel='Удалить сообщение'))
     dp.register_callback_query_handler(test_handler, our_call_datas.select_test.filter())
-    dp.register_callback_query_handler(test_progress, our_call_datas.run_test.filter())
+    dp.register_callback_query_handler(test_run, our_call_datas.run_test.filter())
+    dp.register_callback_query_handler(test_progress, our_call_datas.start_test.filter())
     dp.register_callback_query_handler(test_completed, our_call_datas.view_result.filter())
     dp.register_callback_query_handler(test_continue, our_call_datas.cancel.filter(type_cancel='1'))
     dp.register_callback_query_handler(test_canceled, our_call_datas.cancel.filter(type_cancel='Отмена'))

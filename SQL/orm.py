@@ -97,6 +97,14 @@ async def async_get_name_test() -> list[str]:
     return result
 
 
+async def async_get_name_test_by_id(id_test) -> list[str]:
+    async with async_session_sql_connect() as session_sql:
+        query = select(QuizzesORM.QUIZE_NAME).select_from(QuizzesORM).where(QuizzesORM.ID == id_test)
+        result_execute = await session_sql.execute(query)
+        result = result_execute.scalars().one_or_none()
+    return result
+
+
 async def async_get_is_user_status_test(user_tg_id: int, status: int) -> bool:
     async with async_session_sql_connect() as session_sql:
         query = select(func.count(UserQuizzesORM.ID)).\
