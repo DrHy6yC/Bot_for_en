@@ -7,6 +7,14 @@ from Utils.Import_csv_to_bd import async_import_survey_csv
 
 
 async def filling_min_db() -> None:
+    """
+        Функция для перезаписи БД и заполнение необходимых параметров для начала работы бота:
+
+        * Константы
+        * Тесты
+        * Уровни
+
+    """
     help_txt = """  
     Этот бот умеет:
     
@@ -24,11 +32,6 @@ async def filling_min_db() -> None:
      
     Или переходи сразу к тесту и удивись своему уровню!
     """
-
-    grammar_level_test = QuizzesORM(
-        QUIZE_NAME='English Level test. Grammar',
-        QUIZE_DESCRIPTION='Тест для проверки уровня грамматики по английскому'
-    )
 
     TEXT_HI = ConstantsORM(
         CONSTANT_NAME='TEXT_HI',
@@ -104,7 +107,6 @@ async def filling_min_db() -> None:
 
     await async_create_all_table(sql_async_engine)
     await async_insert_data_list_to_bd([
-        grammar_level_test,
         TEXT_HI, TEXT_HELP, CREATE_TIME_BD,
         status_quize_Selected, status_quize_Launched, status_quize_Stopped,
         status_quize_Revoked, status_quize_Completed, status_quize_Deleted,
@@ -112,4 +114,4 @@ async def filling_min_db() -> None:
     ])
 
     await async_import_survey_csv("English Level test. Grammar.csv",
-                                  "Основной тест для проверки уровня английского (грамматика")
+                                  "Основной тест для проверки уровня английского (грамматика)")

@@ -42,28 +42,29 @@ class UsersORM(Base):
     Хранит информацию о пользователе полученную из тг
 
     Note:
-        USER_TG_ID не всегда помещается в int, приходиться использовать bigint
-        !При создании в классе ForeignKey обратить внимание что имена колонок регистрозависимые!
+    USER_TG_ID не всегда помещается в int, приходиться использовать bigint
 
-    Attributes
+    !При создании в классе ForeignKey обратить внимание что имена колонок регистрозависимые!
+
+    Attributes:
     ----------
-    ID:
-        ИД в БД
-    USER_TG_ID:
-        Ид в тг
-    USER_LOGIN
-        Логин в тг
-    USER_FULL_NAME
-        Полное имя фамилия из тг
-    USER_LEVEL:
-        Уровень который определяется после прохождения теста English Level test. Grammar
-    USER_ACCESS:
-        Уровень доступа (Админ, Учитель, Пользователь)
-    CREATE_TIME:
-        Дата внесения пользователя в БД
-    UPDATE_TIME:
-        Дата изменения данных пользователя
+    ID -  ИД в БД
+
+    USER_TG_ID - Ид в тг
+
+    USER_LOGIN - Логин в тг
+
+    USER_FULL_NAME - Полное имя фамилия из тг
+
+    USER_LEVEL: - Уровень который определяется после прохождения теста English Level test. Grammar
+
+    USER_ACCESS: - Уровень доступа (Админ, Учитель, Пользователь)
+
+    CREATE_TIME: - Дата внесения пользователя в БД
+
+    UPDATE_TIME: - Дата изменения данных пользователя
     """
+
     __tablename__ = 'USERS'
     ID: Mapped[int_pk]
     USER_TG_ID: Mapped[big_int_uniq]

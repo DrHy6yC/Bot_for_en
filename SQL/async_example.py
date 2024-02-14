@@ -1,13 +1,14 @@
 from icecream import ic
 import asyncio
 
+from SQL.create_min_in_DB import filling_min_db
 # from SQL.create_min_in_DB import filling_min_db
 from models import UsersORM, QuizzesORM, ConstantsORM, QuizeStatusesORM
 import orm
 
 
 async def rewrite_DB():
-    # await filling_min_db()
+    await filling_min_db()
     pass
 
 
@@ -30,5 +31,5 @@ async def tasks():
 
 if __name__ == "__main__":
     # asyncio.run(rewrite_DB())
-    # asyncio.run(check_db())
-    asyncio.run(tasks())
+    asyncio.run(check_db())
+    # asyncio.run(tasks())

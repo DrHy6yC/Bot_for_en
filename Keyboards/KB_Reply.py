@@ -7,6 +7,7 @@ from Callback_datas import call_data_select_test
 
 
 def set_but_start() -> ReplyKeyboardMarkup:
+    # TODO задать фильтры, что бы разный набор кнопак был у разных пользователей
     kb = ReplyKeyboardMarkup(resize_keyboard=True)
     b1 = KeyboardButton(text='Помощь')
     b2 = KeyboardButton(text='Пройти тест')
@@ -16,6 +17,21 @@ def set_but_start() -> ReplyKeyboardMarkup:
 
 
 def set_IKB_one_but(text: str, call_data: CallbackData) -> InlineKeyboardMarkup:
+    """
+    Генерирует inline клавиатуру с одной кнопкой на которой будет текст полученный из параметров(text),
+    при нажатии на которую будет отправлен пользовательский CallbackData (call_data) для дальнейшего отлавливания
+
+    Parameters:
+    ----------
+    text - Строка которая будет отображатся на кнопке
+
+    call_data - CallbackData которую нужно будет ловить call_data.filter()
+
+    Returns:
+    -------
+    InlineKeyboardMarkup - inline клавиатура состоящая из одной кнопки
+
+    """
     ikb = InlineKeyboardMarkup(row_width=1)
     ib = InlineKeyboardButton(text=text,
                               callback_data=call_data)
@@ -24,6 +40,21 @@ def set_IKB_one_but(text: str, call_data: CallbackData) -> InlineKeyboardMarkup:
 
 
 def set_IKB_many_but(dictionary: dict[str, CallbackData]) -> InlineKeyboardMarkup:
+    """
+        Генерирует inline клавиатуру с одной кнопкой на которой будет текст полученный из параметров(text),
+        при нажатии на которую будет отправлен пользовательский CallbackData (call_data) для дальнейшего отлавливания
+
+        Parameters:
+        ----------
+        text - Строка которая будет отображатся на кнопке
+
+        call_data - CallbackData которую нужно будет ловить call_data.filter()
+
+        Returns:
+        -------
+        InlineKeyboardMarkup - inline клавиатура состоящая из одной кнопки
+
+        """
     ikb = InlineKeyboardMarkup(row_width=1)
     for text, call in dictionary.items():
         ikb.add(InlineKeyboardButton(text=text,

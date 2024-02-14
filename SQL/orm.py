@@ -1,6 +1,5 @@
 from typing import Type, Union
 
-from aiogram.utils.callback_data import CallbackData
 from icecream import ic
 from sqlalchemy import Engine, select, func, and_, desc
 from sqlalchemy.orm import join
@@ -9,7 +8,7 @@ from sqlalchemy.sql.functions import count
 
 from SQL.config import session_sql_connect, async_session_sql_connect
 from SQL.models import Base, UsersORM, QuizzesORM, ConstantsORM, UserQuizzesORM, UserLevelsORM, QuizeAnswersORM, \
-    QuizeQuestionsORM
+    QuizeQuestionsORM, UserAnswersORM
 from Callback_datas import call_data_select_test
 
 ModelsORM = UsersORM, QuizzesORM, ConstantsORM, UserQuizzesORM, UserLevelsORM
@@ -208,35 +207,52 @@ async def async_get_text_level(points: int) -> str:
         ic(result)
         return result
 
+
+async def async_get_points(id_test: int) -> int:
+    async with async_session_sql_connect() as session_sql:
+        query = select(UserAnswersORM.ID_ANSWER).where(
+            and_(UserLevelsORM.MIN_LEVEL_SCORE <= points, UserLevelsORM.MAX_LEVEL_SCORE >= points))
+        result_execute = await session_sql.execute(query)
+        result = result_execute.scalars().first()
+        ic(result)
+        return result
+
+
 # =====================sync===================
-def create_all_table(engine: Engine) -> None:
-    """
-    Пересоздает(Если есть) все таблицы наследуемые от Base
-    :param engine: Принимает sql_engine/подключение
-    :return: Ничего не возвращает
-    """
-    ic(Base.registry.metadata.tables)
-    Base.metadata.drop_all(engine)
-    Base.metadata.create_all(engine)
-
-
-def insert_data_list_to_bd(list_data: list) -> None:
-    with session_sql_connect() as session_sql:
-        session_sql.add_all(list_data)
-        session_sql.commit()
-
-
-def select_from_db(class_orm: Type[UsersORM] | Type[QuizzesORM]) -> list:
-    with session_sql_connect() as session_sql:
-        query = select(class_orm)
-        result_execute = session_sql.execute(query)
-        result_select = result_execute.scalars().all()
-        ic(result_select)
-        return result_select
-
-
-def update_object(object_orm, new_user_param: str) -> None:
-    with session_sql_connect() as session_sql:
-        object_orm = session_sql.get(object_orm.__class__, object_orm.ID)
-        object_orm.USER_LOGIN = new_user_param
-        session_sql.commit()
+# def create_all_table(engine: Engine) -> None:
+#     """
+#     Пересоздает(Если есть) все таблицы наследуемые от Base
+#     :param engine: Принимает sql_engine/подключение
+#     :return: Ничего не возвращает
+#     """
+#     ic(Base.registry.metadata.tables)
+#     Base.metadata.drop_all(engine)
+#     Base.metadata.create_all(engine)
+#
+#
+# def insert_data_list_to_bd(list_data: list) -> None:
+#     with session_sql_connect() as session_sql:
+#         session_sql.add_all(list_data)
+#         session_sql.commit()
+#
+#
+# def insert_data_list_to_bd(list_data: list) -> None:
+#     with session_sql_connect() as session_sql:
+#         session_sql.add_all(list_data)
+#         session_sql.commit()
+#
+#
+# def select_from_db(class_orm: Type[UsersORM] | Type[QuizzesORM]) -> list:
+#     with session_sql_connect() as session_sql:
+#         query = select(class_orm)
+#         result_execute = session_sql.execute(query)
+#         result_select = result_execute.scalars().all()
+#         ic(result_select)
+#         return result_select
+#
+#
+# def update_object(object_orm, new_user_param: str) -> None:
+#     with session_sql_connect() as session_sql:
+#         object_orm = session_sql.get(object_orm.__class__, object_orm.ID)
+#         object_orm.USER_LOGIN = new_user_param
+#         session_sql.commit()

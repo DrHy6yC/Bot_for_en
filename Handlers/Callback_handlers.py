@@ -5,7 +5,7 @@ from FSMStates.FSMTests import FSMTest
 from aiogram.dispatcher import FSMContext
 
 from Create_bot import bot
-from SQL.models import UserQuizzesORM
+from SQL.models import UserQuizzesORM, UserAnswersORM
 from SQL import orm
 from Callback_datas.our_call_datas import call_data_select_test, call_data_cancel, call_data_run_test
 from Keyboards import KB_Reply
@@ -68,28 +68,21 @@ async def test_handler(callback: types.CallbackQuery, callback_data: dict, state
 
 
 async def test_progress(callback: types.CallbackQuery, callback_data: dict, state: FSMContext) -> None:
-    id_answer = callback_data.get('id_answer')
+    id_answer = int(callback_data.get('id_answer'))
+    ic(id_answer, type(id_answer))
     user_tg_id = callback.from_user.id
     run_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 1)
     user_test_id = run_test.ID
-    # if answer_user == '-1':
-    #     # TODO переделать Callback_data
-    #     await orm.async_set_user_test_status(user_test_id, 3)
-    #     ic('Change state = 3')
-    #     ic(await state.get_state())
-    #     ic(str(callback.data))
-    #     await FSMTest.test_revoked.set()
-    #     ic(await state.get_state())
-    #     await delete_message(callback, state)
-    #     await bot.send_message(chat_id=id_chat,
-    #                            text='Тест приостановлен',
-    #                            reply_markup=KB_Reply.set_IKB_continue_finish())
-    #     # await callback.answer()
-    # else:
+    if id_answer != 0:
+        answer_user = UserAnswersORM(
+            ID_USER_TG=user_tg_id,
+            ID_USER_QUIZE=user_test_id,
+            ID_ANSWER=id_answer
+        )
+        await orm.async_insert_data_list_to_bd([answer_user])
     test_id = run_test.ID_QUIZE
     MAX_QUESTION_SURVEY = await orm.async_get_count_question_test(test_id)
     question_num = run_test.QUESTION_NUMBER
-    # set_question_num(question_num, user_test_id)
     answers = await orm.async_get_answers_by_id_test_and_num_question(test_id, question_num)
     ic(answers)
     await bot.edit_message_reply_markup(
@@ -147,10 +140,10 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict, stat
         ic('ERROR')
     question_num += 1
     run_test.QUESTION_NUMBER = question_num
-    # TODO создать модель ответов пользователя и функцию сравнения
-    balls_now = comparison_answer(user_test_id)
-    run_test.QUIZE_SCORE = balls_now
-    ic(balls_now)
+    # TODO создать функцию сравнения
+    # balls_now = comparison_answer(user_test_id)
+    # run_test.QUIZE_SCORE = balls_now
+    # ic(balls_now)
     await orm.async_insert_data_list_to_bd([run_test])
     await callback.answer()
 
