@@ -115,3 +115,6 @@ async def filling_min_db() -> None:
 
     await async_import_survey_csv("English Level test. Grammar.csv",
                                   "Основной тест для проверки уровня английского (грамматика)")
+
+    await async_import_survey_csv("Who test.csv",
+                                  "Микро тест для проверки работоспособности теста")

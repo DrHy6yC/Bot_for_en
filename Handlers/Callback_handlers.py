@@ -109,10 +109,7 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
 
         elif MAX_QUESTION_SURVEY >= question_num > 1:
             ic()
-            # answer_id = get_answer_id(test_id, question_num, int(answer_user))
-            # set_user_answer(answer_id, user_test_id, question_num - 1)
             question_text = await orm.async_get_question_by_id_test_num_question(test_id, question_num)
-            # previous_question = get_question_by_id_question(run_test[6])
             ic(answer_user_text, type(answer_user_text))
             ic(question_text, type(question_text))
             text_q = question_text.replace('______', f'<u><em>{answer_user_text}</em></u>')
@@ -125,13 +122,8 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
             await bot.send_message(chat_id=user_tg_id,
                                    text=question_text,
                                    reply_markup=KB_Reply.set_IKB_Survey(answers))
-        elif question_num == MAX_QUESTION_SURVEY + 1:
+        elif question_num == MAX_QUESTION_SURVEY:
             ic()
-            # answer_id = get_answer_id(test_id, question_num-1, int(answer_user))
-            # ic(answer_id)
-            # set_user_answer(answer_id, user_test_id, question_num - 1)
-            # previous_question = get_question_by_id_question(run_test[6])
-            # answer_user_text = get_one_answer(question_num - 1, test_id, int(answer_user))
             question_text = await orm.async_get_question_by_id_test_num_question(test_id, question_num)
             text_q = question_text.replace('______', f'<u><em>{answer_user_text}</em></u>')
             if question_text != text_q:
@@ -140,7 +132,6 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
                     message_id=callback.message.message_id,
                     parse_mode="html",
                     text=text_q)
-            # await FSMTest.test_completed.set()
             await orm.async_set_user_test_status(user_test_id, 5)
             ic('Change state = 5')
             await bot.edit_message_reply_markup(
@@ -166,7 +157,6 @@ async def test_canceled(callback: types.CallbackQuery) -> None:
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
         reply_markup=None)
-    # await state.finish()
     user_tg_id = callback.from_user.id
     run_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 3)
     user_test_id = run_test.ID
@@ -211,7 +201,6 @@ async def test_completed(callback: types.CallbackQuery) -> None:
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
         reply_markup=None)
-    # await state.finish()
     await bot.send_message(chat_id=callback.message.chat.id,
                            text=f'Тест закончен\n'
                                 f'Результат: {percent}%\n'

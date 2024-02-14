@@ -30,6 +30,6 @@ async def tasks():
     ic(result.ID)
 
 if __name__ == "__main__":
-    # asyncio.run(rewrite_DB())
-    asyncio.run(check_db())
+    asyncio.run(rewrite_DB())
+    # asyncio.run(check_db())
     # asyncio.run(tasks())
