@@ -84,7 +84,7 @@ def set_IKB_select_survey(names_tests: list) -> InlineKeyboardMarkup:
         call_data = call_data_select_test.new(name_test)
         ikb.add(InlineKeyboardButton(text=f'{name_test}',
                                      callback_data=call_data))
-    call_data = call_data_cancel.new('Отмена')
+    call_data = call_data_cancel.new('Удалить сообщение')
     ikb.add(InlineKeyboardButton(text=f'Отмена',
                                  callback_data=call_data))
     return ikb
@@ -92,6 +92,7 @@ def set_IKB_select_survey(names_tests: list) -> InlineKeyboardMarkup:
 
 def set_IKB_grammar_test() -> InlineKeyboardMarkup:
     dictionary = dict()
+    # TODO сделать выбор теста по умолчанию
     name_test = 'English Level test. Grammar'
     call_data_1 = call_data_select_test.new(name_test)
     call_data_2 = call_data_cancel.new('Удалить сообщение')

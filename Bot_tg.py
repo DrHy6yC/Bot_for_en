@@ -23,13 +23,6 @@ if __name__ == '__main__':
     ih.register_inline_handler(dp)
 
 
-    @dp.message_handler(IDFilter(chat_id='809916411'), commands=['stop'])
-    def stop(message: types.Message):
-        dp.stop_polling()
-        ic(f'{message.from_user.id} остановил бота')
-        sys.exit(0)
-
-
     @dp.message_handler()
     async def echo(message: types.Message):
         ic(message.from_user.id)

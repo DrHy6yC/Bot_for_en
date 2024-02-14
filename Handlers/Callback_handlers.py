@@ -1,9 +1,6 @@
 from icecream import ic
 from aiogram import types, Dispatcher
 
-from FSMStates.FSMTests import FSMTest
-from aiogram.dispatcher import FSMContext
-
 from Create_bot import bot
 from SQL.models import UserQuizzesORM, UserAnswersORM
 from SQL import orm
@@ -11,16 +8,13 @@ from Callback_datas.our_call_datas import call_data_select_test, call_data_cance
 from Keyboards import KB_Reply
 
 
-async def delete_message(callback: types.CallbackQuery, state: FSMContext) -> None:
+async def delete_message(callback: types.CallbackQuery) -> None:
     ic('Message delete')
-    ic(await state.get_state())
-    if await state.get_state() != 'FSMTest:test_revoked':
-        await state.finish()
     await bot.delete_message(callback.message.chat.id, callback.message.message_id)
     # await callback.answer()
 
 
-async def test_handler(callback: types.CallbackQuery, callback_data: dict, state: FSMContext) -> None:
+async def test_handler(callback: types.CallbackQuery, callback_data: dict) -> None:
     """
     Notes:
         Убедиться что пользователь нажимал старт и зарегистрирован в БД бота!
@@ -36,7 +30,6 @@ async def test_handler(callback: types.CallbackQuery, callback_data: dict, state
         await callback.answer('Уже есть запущенный тест, теперь он остановлен', show_alert=True)
         await orm.async_set_user_test_status(user_test_id, 3)
         ic('Change state = 3')
-        ic(await state.get_state())
         ic(str(callback.data))
     else:
         id_test = await orm.async_get_id_test(name_test)
@@ -49,7 +42,6 @@ async def test_handler(callback: types.CallbackQuery, callback_data: dict, state
         )
         # TODO переделать так, что бы тест запускался в test_progress
         await orm.async_insert_data_list_to_bd([user_test])
-        await FSMTest.test_progressed.set()
         await bot.edit_message_text(
             chat_id=callback.message.chat.id,
             message_id=callback.message.message_id,
@@ -67,7 +59,7 @@ async def test_handler(callback: types.CallbackQuery, callback_data: dict, state
         await callback.answer()
 
 
-async def test_progress(callback: types.CallbackQuery, callback_data: dict, state: FSMContext) -> None:
+async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> None:
     id_answer = int(callback_data.get('id_answer'))
     ic(id_answer, type(id_answer))
     user_tg_id = callback.from_user.id
@@ -148,13 +140,12 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict, stat
     await callback.answer()
 
 
-async def test_canceled(callback: types.CallbackQuery, state: FSMContext) -> None:
-    ic(await state.get_state())
+async def test_canceled(callback: types.CallbackQuery) -> None:
     await bot.edit_message_reply_markup(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
         reply_markup=None)
-    await state.finish()
+    # await state.finish()
     user_tg_id = callback.from_user.id
     run_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 3)
     user_test_id = run_test.ID
@@ -164,7 +155,6 @@ async def test_canceled(callback: types.CallbackQuery, state: FSMContext) -> Non
     percent = float(points) / float(MAX_QUESTION_SURVEY) * 100
     percent = round(percent, 2)
     await orm.async_set_user_test_status(user_test_id, 4)
-    ic(await state.get_state())
     level_user_text = await orm.async_get_text_level(points)
     await bot.send_message(chat_id=callback.message.chat.id,
                            text=f'Тест отменен\n'
@@ -176,7 +166,7 @@ async def test_canceled(callback: types.CallbackQuery, state: FSMContext) -> Non
 
 
 # TODO Sql+Test -> TODO Sql+Test 1. Реализовать продолжение теста
-async def test_continue(callback: types.CallbackQuery, state: FSMContext) -> None:
+async def test_continue(callback: types.CallbackQuery) -> None:
     # TODO Sql+Test. Выбор из ранее запущенных (остановленных и прерванных)
     # user_id = callback.from_user.id
     # test_info = get_user_survey(user_id, 1)[0]
@@ -187,7 +177,7 @@ async def test_continue(callback: types.CallbackQuery, state: FSMContext) -> Non
     await callback.answer('Сейчас можно только остановить тест', show_alert=True)
 
 
-async def test_completed(callback: types.CallbackQuery, state: FSMContext) -> None:
+async def test_completed(callback: types.CallbackQuery) -> None:
     user_id = callback.from_user.id
     test_info = get_user_survey(user_id, 5)[0]
     user_test_id = test_info[0]
@@ -200,7 +190,7 @@ async def test_completed(callback: types.CallbackQuery, state: FSMContext) -> No
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
         reply_markup=None)
-    await state.finish()
+    # await state.finish()
     await bot.send_message(chat_id=callback.message.chat.id,
                            text=f'Тест закончен\n'
                                 f'Результат: {percent}%\n'
@@ -211,40 +201,18 @@ async def test_completed(callback: types.CallbackQuery, state: FSMContext) -> No
 
 
 # TODO Sql+Test -> TODO Sql+Test 1. Реализовать перезапуск теста
-async def test_restart(callback: types.CallbackQuery, state: FSMContext) -> None:
+async def test_restart(callback: types.CallbackQuery) -> None:
     # TODO Sql+Test. Выбор из ранее запущенных (остановленных и прерванных)
     await callback.answer('Сейчас можно только остановить тест', show_alert=True)
 
 
 def register_call_handlers_user(dp: Dispatcher) -> None:
     # TODO Собрать в переменные части каллбэков
-    # TODO Убрать машину состояний так как проще ловить фильтрами калбэка
-    dp.register_callback_query_handler(
-        delete_message,
-        call_data_cancel.filter(type_cancel='Удалить сообщение'),
-        state="*")
-    dp.register_callback_query_handler(
-        test_handler,
-        call_data_select_test.filter(),
-        state=FSMTest.test_handler)
-    dp.register_callback_query_handler(
-        test_progress,
-        call_data_run_test.filter(),
-        state=FSMTest.test_progressed
-    )
-    dp.register_callback_query_handler(
-        test_completed,
-        state=FSMTest.test_completed
-    )
-    dp.register_callback_query_handler(
-        test_continue,
-        state=FSMTest.test_revoked
-    )
-    dp.register_callback_query_handler(
-        test_canceled,
-        call_data_cancel.filter(type_cancel='Отмена'),
-        state=FSMTest.test_revoked)
-    dp.register_callback_query_handler(
-        test_restart,
-        state=FSMTest.test_revoked)
+    dp.register_callback_query_handler(delete_message, call_data_cancel.filter(type_cancel='Удалить сообщение'))
+    dp.register_callback_query_handler(test_handler, call_data_select_test.filter())
+    dp.register_callback_query_handler(test_progress, call_data_run_test.filter())
+    dp.register_callback_query_handler(test_completed, call_data_cancel.filter(type_cancel='0'))
+    dp.register_callback_query_handler(test_continue, call_data_cancel.filter(type_cancel='1'))
+    dp.register_callback_query_handler(test_canceled, call_data_cancel.filter(type_cancel='Отмена'))
+    dp.register_callback_query_handler(test_restart, call_data_cancel.filter(type_cancel='-1'))
 
