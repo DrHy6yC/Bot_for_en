@@ -45,7 +45,7 @@ async def test_handler(callback: types.CallbackQuery, callback_data: dict) -> No
         dict_str_cal[f'Запустить {name_test}'] = our_call_datas.run_test.new(
             name_test
         )
-        dict_str_cal['Отмена'] = our_call_datas.cancel.new('Отмена')
+        dict_str_cal['Отмена'] = our_call_datas.del_message.new('Отмена')
 
         await bot.edit_message_reply_markup(
             chat_id=callback.message.chat.id,
@@ -147,7 +147,8 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
         answer_user = UserAnswersORM(
             ID_USER_TG=user_tg_id,
             ID_USER_QUIZE=running_test_id,
-            ID_ANSWER=id_user_answer
+            ID_ANSWER=id_user_answer,
+            QUESTION_NUMBER=question_num
         )
         await orm.async_insert_data_list_to_bd([answer_user])
     ic(id_user_answer)
@@ -242,7 +243,7 @@ async def test_restart(callback: types.CallbackQuery) -> None:
 
 def register_call_handlers_user(dp: Dispatcher) -> None:
     # TODO Собрать в переменные части каллбэков
-    dp.register_callback_query_handler(delete_message, our_call_datas.cancel.filter(type_cancel='Удалить сообщение'))
+    dp.register_callback_query_handler(delete_message, our_call_datas.del_message.filter(type_cancel='Удалить сообщение'))
     dp.register_callback_query_handler(test_handler, our_call_datas.select_test.filter())
     dp.register_callback_query_handler(test_run, our_call_datas.run_test.filter())
     dp.register_callback_query_handler(test_progress, our_call_datas.start_test.filter())
