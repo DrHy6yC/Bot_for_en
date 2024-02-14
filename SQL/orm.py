@@ -1,17 +1,17 @@
-from typing import Type, Union
+from typing import Union
 
 from icecream import ic
-from sqlalchemy import Engine, select, func, and_, desc
+from sqlalchemy import select, func, and_, desc
 from sqlalchemy.orm import join
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.sql.functions import count
 
-from SQL.config import session_sql_connect, async_session_sql_connect
+from SQL.config import async_session_sql_connect
 from SQL.models import Base, UsersORM, QuizzesORM, ConstantsORM, UserQuizzesORM, UserLevelsORM, QuizeAnswersORM, \
     QuizeQuestionsORM, UserAnswersORM
-from Callback_datas import call_data_select_test
 
-ModelsORM = UsersORM, QuizzesORM, ConstantsORM, UserQuizzesORM, UserLevelsORM
+ModelsORM = UsersORM, QuizzesORM, ConstantsORM, UserQuizzesORM, UserLevelsORM, QuizeAnswersORM, \
+    QuizeQuestionsORM, UserAnswersORM
 
 
 # Example:
@@ -33,6 +33,14 @@ async def async_insert_data_list_to_bd(list_data: list[Union[ModelsORM]]) -> Non
         await session_sql.commit()
 
 
+async def async_insert_and_get_modelORM(model_orm: Union[ModelsORM]) -> Union[ModelsORM]:
+    async with async_session_sql_connect() as session_sql:
+        session_sql.add_all([model_orm])
+        await session_sql.get(model_orm.__class__, model_orm.ID)
+        await session_sql.commit()
+        return model_orm
+
+
 async def async_select_from_db(class_orm: Union[ModelsORM]) -> list[Union[ModelsORM]]:
     async with async_session_sql_connect() as session_sql:
         query = select(class_orm)
@@ -49,10 +57,10 @@ async def async_get_orm_by_pk(class_orm: Union[ModelsORM], id_orm: int) -> Union
         return result
 
 
-async def async_update_object(object_orm, new_user_param: str) -> None:
+async def async_update_object(model_orm, new_user_param: str) -> None:
     async with async_session_sql_connect() as session_sql:
-        object_orm = await session_sql.get(object_orm.__class__, object_orm.ID)
-        object_orm.USER_LOGIN = new_user_param
+        model_orm = await session_sql.get(model_orm.__class__, model_orm.ID)
+        model_orm.USER_LOGIN = new_user_param
         await session_sql.commit()
 
 
@@ -206,53 +214,3 @@ async def async_get_text_level(points: int) -> str:
         result = result_execute.scalars().first()
         ic(result)
         return result
-
-
-async def async_get_points(id_test: int) -> int:
-    async with async_session_sql_connect() as session_sql:
-        query = select(UserAnswersORM.ID_ANSWER).where(
-            and_(UserLevelsORM.MIN_LEVEL_SCORE <= points, UserLevelsORM.MAX_LEVEL_SCORE >= points))
-        result_execute = await session_sql.execute(query)
-        result = result_execute.scalars().first()
-        ic(result)
-        return result
-
-
-# =====================sync===================
-# def create_all_table(engine: Engine) -> None:
-#     """
-#     Пересоздает(Если есть) все таблицы наследуемые от Base
-#     :param engine: Принимает sql_engine/подключение
-#     :return: Ничего не возвращает
-#     """
-#     ic(Base.registry.metadata.tables)
-#     Base.metadata.drop_all(engine)
-#     Base.metadata.create_all(engine)
-#
-#
-# def insert_data_list_to_bd(list_data: list) -> None:
-#     with session_sql_connect() as session_sql:
-#         session_sql.add_all(list_data)
-#         session_sql.commit()
-#
-#
-# def insert_data_list_to_bd(list_data: list) -> None:
-#     with session_sql_connect() as session_sql:
-#         session_sql.add_all(list_data)
-#         session_sql.commit()
-#
-#
-# def select_from_db(class_orm: Type[UsersORM] | Type[QuizzesORM]) -> list:
-#     with session_sql_connect() as session_sql:
-#         query = select(class_orm)
-#         result_execute = session_sql.execute(query)
-#         result_select = result_execute.scalars().all()
-#         ic(result_select)
-#         return result_select
-#
-#
-# def update_object(object_orm, new_user_param: str) -> None:
-#     with session_sql_connect() as session_sql:
-#         object_orm = session_sql.get(object_orm.__class__, object_orm.ID)
-#         object_orm.USER_LOGIN = new_user_param
-#         session_sql.commit()

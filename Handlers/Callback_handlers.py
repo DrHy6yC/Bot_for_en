@@ -2,6 +2,7 @@ from icecream import ic
 from aiogram import types, Dispatcher
 
 from Create_bot import bot
+from SQL.config import async_session_sql_connect
 from SQL.models import UserQuizzesORM, UserAnswersORM
 from SQL import orm
 from Callback_datas.our_call_datas import call_data_select_test, call_data_cancel, call_data_run_test
@@ -60,84 +61,104 @@ async def test_handler(callback: types.CallbackQuery, callback_data: dict) -> No
 
 
 async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> None:
-    id_answer = int(callback_data.get('id_answer'))
-    ic(id_answer, type(id_answer))
-    user_tg_id = callback.from_user.id
-    run_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 1)
-    user_test_id = run_test.ID
-    if id_answer != 0:
-        answer_user = UserAnswersORM(
-            ID_USER_TG=user_tg_id,
-            ID_USER_QUIZE=user_test_id,
-            ID_ANSWER=id_answer
-        )
-        await orm.async_insert_data_list_to_bd([answer_user])
-    test_id = run_test.ID_QUIZE
-    MAX_QUESTION_SURVEY = await orm.async_get_count_question_test(test_id)
-    question_num = run_test.QUESTION_NUMBER
-    answers = await orm.async_get_answers_by_id_test_and_num_question(test_id, question_num)
-    ic(answers)
-    await bot.edit_message_reply_markup(
-        chat_id=user_tg_id,
-        message_id=callback.message.message_id,
-        reply_markup=None)
-    if question_num == 1:
+    async with async_session_sql_connect() as session_sql:
         ic()
-        question = await orm.async_get_question_by_id_test_num_question(
-            run_test.ID_QUIZE, run_test.QUESTION_NUMBER
-        )
-        await bot.send_message(chat_id=user_tg_id,
-                               text=question,
-                               reply_markup=KB_Reply.set_IKB_Survey(answers))
+        id_user_answer = int(callback_data.get('id_answer'))
+        ic(id_user_answer, type(id_user_answer))
+        user_tg_id = callback.from_user.id
+        ic.disable()
+        run_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 1)
+        user_test_id = run_test.ID
+        test_id = run_test.ID_QUIZE
+        MAX_QUESTION_SURVEY = await orm.async_get_count_question_test(test_id)
+        question_num = run_test.QUESTION_NUMBER
+        answers = await orm.async_get_answers_by_id_test_and_num_question(test_id, question_num)
+        ic.enable()
+        ic(id_user_answer)
+        answer_user = UserAnswersORM()
+        answer_user_text = ''
+        if id_user_answer != 0:
+            ic()
+            answer_user = UserAnswersORM(
+                ID_USER_TG=user_tg_id,
+                ID_USER_QUIZE=user_test_id,
+                ID_ANSWER=id_user_answer
+            )
+            session_sql.add(answer_user)
+            await session_sql.commit()
+            for answer in answers:
+                ic()
+                ic(id_user_answer, type(id_user_answer))
+                ic(answer.ID, type(answer.ID))
+                if id_user_answer == answer.ID:
+                    ic()
+                    answer_user_text = answer.ANSWER_TEXT
+        ic(answers)
+        await bot.edit_message_reply_markup(
+            chat_id=user_tg_id,
+            message_id=callback.message.message_id,
+            reply_markup=None)
+        if question_num == 1:
+            ic()
+            question_text = await orm.async_get_question_by_id_test_num_question(
+                run_test.ID_QUIZE, run_test.QUESTION_NUMBER
+            )
+            await bot.send_message(chat_id=user_tg_id,
+                                   text=question_text,
+                                   reply_markup=KB_Reply.set_IKB_Survey(answers))
 
-    elif MAX_QUESTION_SURVEY >= question_num > 1:
-        ic()
-        # answer_id = get_answer_id(test_id, question_num, int(answer_user))
-        # set_user_answer(answer_id, user_test_id, question_num - 1)
-        question = get_question_by_id_question(run_test[5])
-        previous_question = get_question_by_id_question(run_test[6])
-        answer_user_text = get_one_answer(question_num - 1, test_id, int(answer_user))
-        text_q = previous_question.replace('______', f'<u><em>{answer_user_text}</em></u>')
-        if previous_question != text_q:
-            await bot.edit_message_text(
-                chat_id=id_chat,
-                message_id=callback.message.message_id,
-                parse_mode="html",
-                text=text_q)
-        await bot.send_message(chat_id=id_chat,
-                               text=question,
-                               reply_markup=KB_Reply.set_IKB_Survey(answers))
-    elif question_num == MAX_QUESTION_SURVEY + 1:
-        ic()
-        answer_id = get_answer_id(test_id, question_num-1, int(answer_user))
-        ic(answer_id)
-        set_user_answer(answer_id, user_test_id, question_num - 1)
-        previous_question = get_question_by_id_question(run_test[6])
-        answer_user_text = get_one_answer(question_num - 1, test_id, int(answer_user))
-        text_q = previous_question.replace('______', f'<u><em>{answer_user_text}</em></u>')
-        if previous_question != text_q:
-            await bot.edit_message_text(
+        elif MAX_QUESTION_SURVEY >= question_num > 1:
+            ic()
+            # answer_id = get_answer_id(test_id, question_num, int(answer_user))
+            # set_user_answer(answer_id, user_test_id, question_num - 1)
+            question_text = await orm.async_get_question_by_id_test_num_question(test_id, question_num)
+            # previous_question = get_question_by_id_question(run_test[6])
+            ic(answer_user_text, type(answer_user_text))
+            ic(question_text, type(question_text))
+            text_q = question_text.replace('______', f'<u><em>{answer_user_text}</em></u>')
+            if question_text != text_q:
+                await bot.edit_message_text(
+                    chat_id=user_tg_id,
+                    message_id=callback.message.message_id,
+                    parse_mode="html",
+                    text=text_q)
+            await bot.send_message(chat_id=user_tg_id,
+                                   text=question_text,
+                                   reply_markup=KB_Reply.set_IKB_Survey(answers))
+        elif question_num == MAX_QUESTION_SURVEY + 1:
+            ic()
+            # answer_id = get_answer_id(test_id, question_num-1, int(answer_user))
+            # ic(answer_id)
+            # set_user_answer(answer_id, user_test_id, question_num - 1)
+            # previous_question = get_question_by_id_question(run_test[6])
+            # answer_user_text = get_one_answer(question_num - 1, test_id, int(answer_user))
+            question_text = await orm.async_get_question_by_id_test_num_question(test_id, question_num)
+            text_q = question_text.replace('______', f'<u><em>{answer_user_text}</em></u>')
+            if question_text != text_q:
+                await bot.edit_message_text(
+                    chat_id=user_tg_id,
+                    message_id=callback.message.message_id,
+                    parse_mode="html",
+                    text=text_q)
+            # await FSMTest.test_completed.set()
+            await orm.async_set_user_test_status(user_test_id, 5)
+            ic('Change state = 5')
+            await bot.edit_message_reply_markup(
                 chat_id=user_tg_id,
                 message_id=callback.message.message_id,
-                parse_mode="html",
-                text=text_q)
-        await FSMTest.test_completed.set()
-        set_user_survey_status_test(user_test_id, 5)
-        ic('Change state = 5')
-        await bot.edit_message_reply_markup(
-            chat_id=id_chat,
-            message_id=callback.message.message_id,
-            reply_markup=KB_Reply.set_IKB_one_but('Посмотреть результаты', 'view_result'))
-    else:
-        ic('ERROR')
-    question_num += 1
-    run_test.QUESTION_NUMBER = question_num
-    # TODO создать функцию сравнения
-    # balls_now = comparison_answer(user_test_id)
-    # run_test.QUIZE_SCORE = balls_now
-    # ic(balls_now)
-    await orm.async_insert_data_list_to_bd([run_test])
-    await callback.answer()
+                reply_markup=KB_Reply.set_IKB_one_but('Посмотреть результаты', 'view_result'))
+        else:
+            ic()
+            ic('ERROR')
+        ic()
+        question_num += 1
+        run_test.QUESTION_NUMBER = question_num
+        # TODO создать функцию сравнения
+        # balls_now = comparison_answer(user_test_id)
+        # run_test.QUIZE_SCORE = balls_now
+        # ic(balls_now)
+        await orm.async_insert_data_list_to_bd([run_test])
+        await callback.answer()
 
 
 async def test_canceled(callback: types.CallbackQuery) -> None:
