@@ -1,3 +1,4 @@
+import asyncio
 import sys
 
 from aiogram import types, Dispatcher, filters
@@ -44,8 +45,9 @@ async def send_welcome(message: types.Message) -> None:
 
 async def stop_bot(message: types.Message):
     dp.stop_polling()
+    await dp.wait_closed()
+    await bot.close()
     ic(f'{message.from_user.id} остановил бота')
-    sys.exit(0)
 
 
 async def select_test(message: types.Message) -> None:
