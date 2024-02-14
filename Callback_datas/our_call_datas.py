@@ -1,5 +1,6 @@
 from aiogram.utils.callback_data import CallbackData
 
-call_data_select_test = CallbackData('select_test', 'name_test')
-call_data_cancel = CallbackData('cancel', 'type_cancel')
-call_data_run_test = CallbackData('run_test', 'id_answer')
+select_test = CallbackData('select_test', 'name_test')
+cancel = CallbackData('cancel', 'type_cancel')
+run_test = CallbackData('run_test', 'id_answer')
+view_result = CallbackData('view_result')

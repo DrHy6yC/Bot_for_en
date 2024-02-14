@@ -30,6 +30,7 @@ def get_async_engine(async_dsn_db: str) -> AsyncEngine:
     engine = create_async_engine(
         url=async_dsn_db,
         echo=True
+
     )
     return engine
 

@@ -224,7 +224,7 @@ class UserQuizzesORM(Base):
     ID_USER_TG: Mapped[big_int] = mapped_column(
         ForeignKey('USERS.USER_TG_ID', ondelete='CASCADE', onupdate='CASCADE')
     )
-    ID_QUIZE: Mapped[int] = mapped_column(
+    ID_QUIZE: Mapped[int_serv_def_0] = mapped_column(
         ForeignKey('QUIZZES.ID', ondelete='CASCADE', onupdate='CASCADE')
     )
     QUIZE_STATUS: Mapped[int] = mapped_column(

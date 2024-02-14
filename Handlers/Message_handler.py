@@ -10,7 +10,7 @@ from Create_bot import bot, dp
 from Keyboards.KB_Reply import set_but_start, set_IKB_one_but, set_IKB_select_survey, set_IKB_grammar_test
 from SQL.models import UsersORM
 from SQL import orm
-from Callback_datas.our_call_datas import call_data_cancel
+from Callback_datas.our_call_datas import cancel
 
 
 async def send_welcome(message: types.Message) -> None:
@@ -20,7 +20,7 @@ async def send_welcome(message: types.Message) -> None:
     user_full_name = f'{message.from_user.full_name}'
     username = message.from_user.username
     reply_markup_start = set_but_start()
-    call_data = call_data_cancel.new('Удалить сообщение')
+    call_data = cancel.new('Удалить сообщение')
     reply_markup_delete = set_IKB_one_but('Ok', call_data)
     TEXT_HI_template = await orm.async_get_const('TEXT_HI')
     TEXT_HI = TEXT_HI_template.CONSTANT_VALUE.replace('@FIO', user_full_name)
@@ -61,7 +61,7 @@ async def help_command(message: types.Message) -> None:
     await message.delete()
     help_txt_temp = await orm.async_get_const('TEXT_HELP')
     TEXT_HELP = help_txt_temp.CONSTANT_VALUE
-    call_data = call_data_cancel.new('Удалить сообщение')
+    call_data = cancel.new('Удалить сообщение')
     await bot.send_message(chat_id=message.from_user.id,
                            text=TEXT_HELP,
                            reply_markup=set_IKB_one_but('Ok', call_data))

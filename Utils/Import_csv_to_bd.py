@@ -9,7 +9,6 @@ from SQL.models import QuizzesORM, QuizeQuestionsORM, QuizeAnswersORM, QuizeTrue
 
 def get_id_answer(answers: list[QuizeAnswersORM], num_true_answer: int) -> int:
     for answer in answers:
-        ic(num_true_answer, answer.ANSWER_NUMBER)
         if num_true_answer == answer.ANSWER_NUMBER:
             return answer.ID
 
@@ -81,11 +80,9 @@ async def async_import_survey_csv(path_file: str, description_test: str) -> None
             answers = await orm.async_get_answers_by_id_test_and_num_question(
                 test.ID, num_question
             )
-            ic(answers)
+
             num_answer = int(i['TrueAnswer'])
-            ic(num_answer)
             id_answer = get_id_answer(answers, num_answer)
-            ic(num_question, id_answer)
             true_answer = QuizeTrueAnswersORM(
                 ID_QUIZE=test.ID,
                 ID_ANSWER=id_answer,

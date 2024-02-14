@@ -1,6 +1,6 @@
 from typing import Union
 
-from icecream import ic
+# from icecream import ic
 from sqlalchemy import select, func, and_, desc
 from sqlalchemy.orm import join
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -46,14 +46,12 @@ async def async_select_from_db(class_orm: Union[ModelsORM]) -> list[Union[Models
         query = select(class_orm)
         result_execute = await session_sql.execute(query)
         result = result_execute.scalars().all()
-        ic(result)
         return result
 
 
 async def async_get_orm_by_pk(class_orm: Union[ModelsORM], id_orm: int) -> Union[ModelsORM]:
     async with async_session_sql_connect() as session_sql:
         result = await session_sql.get(class_orm.__class__, id_orm)
-        ic(result)
         return result
 
 
@@ -77,7 +75,6 @@ async def async_select_user_by_id(user_tg_id: int) -> UsersORM:
         query = select(UsersORM).where(UsersORM.USER_TG_ID == user_tg_id)
         result_execute = await session_sql.execute(query)
         result = result_execute.scalars().one()
-        ic(result)
         return result
 
 
@@ -108,8 +105,6 @@ async def async_get_is_user_status_test(user_tg_id: int, status: int) -> bool:
         user_exec = await session_sql.execute(query)
         user = user_exec.scalars().one_or_none()
     is_user_status_test: bool = user != 0
-    ic(user)
-    ic(is_user_status_test)
     return is_user_status_test
 
 
@@ -137,12 +132,11 @@ async def async_get_id_test(name_test: str) -> int:
 async def async_set_user_test_status(user_test_id: int, status: int) -> None:
     async with async_session_sql_connect() as session_sql:
         test = await session_sql.get(UserQuizzesORM, user_test_id)
-        ic(type(test))
         if test:
             test.QUIZE_STATUS = status
-        else:
-            ic(f"Теста id = {user_test_id} со статусом = {status} нет.")
-        ic(user_test_id, status)
+        # else:
+        #     ic(f"Теста id = {user_test_id} со статусом = {status} нет.")
+        # ic(user_test_id, status)
         await session_sql.commit()
 
 
@@ -172,7 +166,6 @@ async def async_get_test_by_name(name_test: str) -> QuizzesORM:
         query = select(QuizzesORM).where(QuizzesORM.QUIZE_NAME == name_test)
         test_execute = await session_sql.execute(query)
         test = test_execute.scalars().first()
-        ic(test, type(test))
         return test
 
 
@@ -183,7 +176,6 @@ async def async_get_answers_by_id_test_and_num_question(id_test: int, num_questi
         )
         result_execute = await session_sql.execute(query)
         result = result_execute.scalars().all()
-        ic(result)
         return result
 
 
@@ -192,7 +184,6 @@ async def async_get_count_question_test(id_test: int) -> int:
         query = select(count(QuizeQuestionsORM.ID)).where(QuizeQuestionsORM.ID_QUIZE == id_test)
         result_execute = await session_sql.execute(query)
         result = result_execute.scalars().first()
-        ic(result)
         return result
 
 
@@ -202,7 +193,6 @@ async def async_get_question_by_id_test_num_question(id_test: int, num_question:
             and_(QuizeQuestionsORM.ID_QUIZE == id_test, QuizeQuestionsORM.QUESTION_NUMBER == num_question))
         result_execute = await session_sql.execute(query)
         result = result_execute.scalars().first()
-        ic(result)
         return result
 
 
@@ -212,5 +202,11 @@ async def async_get_text_level(points: int) -> str:
             and_(UserLevelsORM.MIN_LEVEL_SCORE <= points, UserLevelsORM.MAX_LEVEL_SCORE >= points))
         result_execute = await session_sql.execute(query)
         result = result_execute.scalars().first()
-        ic(result)
+        return result
+
+
+async def async_get_answer_text_by_id(id_answer: int) -> str:
+    async with async_session_sql_connect() as session_sql:
+        answer = await session_sql.get(QuizeAnswersORM, id_answer)
+        result = answer.ANSWER_TEXT
         return result
