@@ -129,22 +129,18 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
             parse_mode="html",
             text=text_q)
         await orm.async_set_user_test_status(running_test_id, 5)
-        # await bot.edit_message_reply_markup(
-        #     chat_id=callback.message.chat.id,
-        #     message_id=callback.message.message_id,
-        #     reply_markup=None)
         await bot.send_message(chat_id=user_tg_id,
                                text='Тест завершён',
                                reply_markup=KB_Reply.set_IKB_one_but(
                                    text='Посмотреть результаты',
                                    call_data=our_call_datas.view_result.new()
                                ))
-    # # TODO создать функцию сравнения
-    # # balls_now = comparison_answer(user_test_id)
-    # # run_test.QUIZE_SCORE = balls_now
-    # # ic(balls_now)
+    # TODO создать функцию сравнения
+    # balls_now = comparison_answer(user_test_id)
+    # run_test.QUIZE_SCORE = balls_now
+    # ic(balls_now)
     # await orm.async_insert_data_list_to_bd([running_test])
-    # await callback.answer()
+    await callback.answer()
 
 
 async def test_canceled(callback: types.CallbackQuery) -> None:
@@ -184,14 +180,14 @@ async def test_continue(callback: types.CallbackQuery) -> None:
 
 
 async def test_completed(callback: types.CallbackQuery) -> None:
-    user_id = callback.from_user.id
-    test_info = get_user_survey(user_id, 5)[0]
-    user_test_id = test_info[0]
-    ball = get_balls(user_test_id)
-    test_id = test_info[2]
-    MAX_QUESTION_SURVEY = get_count_question(int(test_id))
-    percent = float(ball)/float(MAX_QUESTION_SURVEY) * 100
+    user_tg_id = callback.from_user.id
+    run_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 5)
+    points = run_test.QUIZE_SCORE
+    test_id = run_test.ID_QUIZE
+    MAX_QUESTION_SURVEY = await orm.async_get_count_question_test(test_id)
+    percent = float(points)/float(MAX_QUESTION_SURVEY) * 100
     percent = round(percent, 2)
+    level_user_text = await orm.async_get_text_level(points)
     await bot.edit_message_reply_markup(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
@@ -199,9 +195,9 @@ async def test_completed(callback: types.CallbackQuery) -> None:
     await bot.send_message(chat_id=callback.message.chat.id,
                            text=f'Тест закончен\n'
                                 f'Результат: {percent}%\n'
-                                f'{ball} правильных ответов\n'
+                                f'{points} правильных ответов\n'
                                 f'из {MAX_QUESTION_SURVEY} всех вопросов\n'
-                                f'"Это уровень: {getLevelUser(percent)}')
+                                f'"Это уровень: {level_user_text}')
     await callback.answer()
 
 

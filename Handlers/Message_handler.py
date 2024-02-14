@@ -1,6 +1,3 @@
-import asyncio
-import sys
-
 from aiogram import types, Dispatcher, filters
 from aiogram.dispatcher.filters import ChatTypeFilter, IDFilter
 from aiogram.types import ContentType, BotCommand
