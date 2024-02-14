@@ -22,7 +22,7 @@ str_50 = Annotated[str, mapped_column(String(50))]
 # TODO тригер меняющий UPDATE_TIME при изменении таблиц
 class Base(DeclarativeBase):
     """Базовый класс
-    Наследуемые от этого класса ОРМ создаются в orm.create_all_table
+    При запуске orm.create_all_table создаются все таблицы которые были унаследованны от класса Base
 
     Note:
         При создании в классе ForeignKey обратить внимание что имена колонок регистрозависимые!
@@ -255,5 +255,25 @@ class UserLevelsORM(Base):
     LEVEL_TEXT: Mapped[str_50]
     MIN_LEVEL_SCORE: Mapped[int]
     MAX_LEVEL_SCORE: Mapped[int]
+    CREATE_TIME: Mapped[date_now]
+    UPDATE_TIME: Mapped[date_now]
+
+
+class UserAnswersORM(Base):
+    """
+    При создании в классе ForeignKey обратить внимание что имена колонок регистрозависимые!
+    """
+
+    __tablename__ = 'USER_ANSWERS'
+    ID: Mapped[int_pk]
+    ID_USER_TG: Mapped[big_int] = mapped_column(
+        ForeignKey('USERS.USER_TG_ID', ondelete='CASCADE', onupdate='CASCADE')
+    )
+    ID_USER_QUIZE: Mapped[int] = mapped_column(
+        ForeignKey('USER_QUIZZES.ID', ondelete='CASCADE', onupdate='CASCADE')
+    )
+    ID_ANSWER: Mapped[int] = mapped_column(
+        ForeignKey('QUIZE_ANSWERS.ID', ondelete='CASCADE', onupdate='CASCADE')
+    )
     CREATE_TIME: Mapped[date_now]
     UPDATE_TIME: Mapped[date_now]
