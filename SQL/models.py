@@ -276,5 +276,6 @@ class UserAnswersORM(Base):
     ID_ANSWER: Mapped[int] = mapped_column(
         ForeignKey('QUIZE_ANSWERS.ID', ondelete='CASCADE', onupdate='CASCADE')
     )
+    QUESTION_NUMBER: Mapped[int_serv_def_0]
     CREATE_TIME: Mapped[date_now]
     UPDATE_TIME: Mapped[date_now]

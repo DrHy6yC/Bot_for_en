@@ -2,7 +2,7 @@ from icecream import ic
 from aiogram import types, Dispatcher
 
 from Create_bot import bot
-from SQL.models import UserQuizzesORM
+from SQL.models import UserQuizzesORM, UserAnswersORM
 from SQL import orm
 from Callback_datas import our_call_datas
 from Keyboards import KB_Reply
@@ -27,11 +27,8 @@ async def test_handler(callback: types.CallbackQuery, callback_data: dict) -> No
         user_test_id = run_test.ID
         await callback.answer('Уже есть запущенный тест, теперь он остановлен', show_alert=True)
         await orm.async_set_user_test_status(user_test_id, 3)
-        ic('Change state = 3')
-        ic(str(callback.data))
     else:
         id_test = await orm.async_get_id_test(name_test)
-        ic(user_tg_id, id_test, name_test)
         user_test = UserQuizzesORM(
             ID_USER_TG=user_tg_id,
             ID_QUIZE=id_test,
@@ -79,6 +76,7 @@ async def test_run(callback: types.CallbackQuery, callback_data: dict) -> None:
 
 
 async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> None:
+    ic()
     id_user_answer = int(callback_data.get('id_answer'))
     message_id = callback.message.message_id
     user_tg_id = callback.from_user.id
@@ -87,22 +85,24 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
     quize_id = running_test.ID_QUIZE
     question_num = running_test.QUESTION_NUMBER
     MAX_QUESTION_SURVEY = await orm.async_get_count_question_test(quize_id)
-    ic(question_num, id_user_answer)
     if question_num == 0:
+        ic()
+        ic(id_user_answer)
         await bot.edit_message_reply_markup(
             chat_id=user_tg_id,
             message_id=message_id,
             reply_markup=None
         )
         question_num += 1
-        running_test.QUESTION_NUMBER = question_num
+        await orm.async_update_running_test_num_question(running_test_id, question_num)
         answers = await orm.async_get_answers_by_id_test_and_num_question(quize_id, question_num)
         question_text = await orm.async_get_question_by_id_test_num_question(quize_id, question_num)
         await bot.send_message(chat_id=user_tg_id,
                                text=question_text,
                                reply_markup=KB_Reply.set_IKB_Survey(answers))
-        await orm.async_insert_data_list_to_bd([running_test])
     elif 1 <= question_num < MAX_QUESTION_SURVEY:
+        ic()
+        ic(id_user_answer)
         question_text = await orm.async_get_question_by_id_test_num_question(quize_id, question_num)
         answer_user_text = await orm.async_get_answer_text_by_id(id_user_answer)
         text_q = question_text.replace('______', f'<u><em>{answer_user_text}</em></u>')
@@ -110,16 +110,20 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
             chat_id=user_tg_id,
             message_id=callback.message.message_id,
             parse_mode="html",
-            text=text_q)
+            text=text_q
+        )
         question_num += 1
-        running_test.QUESTION_NUMBER = question_num
+        await orm.async_update_running_test_num_question(running_test_id, question_num)
         answers = await orm.async_get_answers_by_id_test_and_num_question(quize_id, question_num)
         question_text = await orm.async_get_question_by_id_test_num_question(quize_id, question_num)
-        await bot.send_message(chat_id=user_tg_id,
-                               text=question_text,
-                               reply_markup=KB_Reply.set_IKB_Survey(answers))
-        await orm.async_insert_data_list_to_bd([running_test])
+        await bot.send_message(
+            chat_id=user_tg_id,
+            text=question_text,
+            reply_markup=KB_Reply.set_IKB_Survey(answers)
+        )
     else:
+        ic()
+        ic(id_user_answer)
         question_text = await orm.async_get_question_by_id_test_num_question(quize_id, question_num)
         answer_user_text = await orm.async_get_answer_text_by_id(id_user_answer)
         text_q = question_text.replace('______', f'<u><em>{answer_user_text}</em></u>')
@@ -127,19 +131,35 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
             chat_id=user_tg_id,
             message_id=callback.message.message_id,
             parse_mode="html",
-            text=text_q)
+            text=text_q
+        )
         await orm.async_set_user_test_status(running_test_id, 5)
-        await bot.send_message(chat_id=user_tg_id,
-                               text='Тест завершён',
-                               reply_markup=KB_Reply.set_IKB_one_but(
-                                   text='Посмотреть результаты',
-                                   call_data=our_call_datas.view_result.new()
-                               ))
+        await bot.send_message(
+            chat_id=user_tg_id,
+            text='Тест завершён',
+            reply_markup=KB_Reply.set_IKB_one_but(
+                text='Посмотреть результаты',
+                call_data=our_call_datas.view_result.new()
+            )
+        )
+    ic()
+    if id_user_answer != 0:
+        answer_user = UserAnswersORM(
+            ID_USER_TG=user_tg_id,
+            ID_USER_QUIZE=running_test_id,
+            ID_ANSWER=id_user_answer
+        )
+        await orm.async_insert_data_list_to_bd([answer_user])
+    ic(id_user_answer)
     # TODO создать функцию сравнения
-    # balls_now = comparison_answer(user_test_id)
-    # run_test.QUIZE_SCORE = balls_now
-    # ic(balls_now)
-    # await orm.async_insert_data_list_to_bd([running_test])
+    # running_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 2)
+    # ic(running_test_id, question_num)
+    # answer_true_id = await orm.get_true_answer_id_by_id_test_and_num_question(quize_id, question_num)
+    # balls_now = running_test.QUIZE_SCORE
+    # ic(id_user_answer, answer_true_id)
+    # if id_user_answer == answer_true_id:
+    #     balls_now += 1
+    # await orm.async_update_running_test_score(running_test_id, balls_now)
     await callback.answer()
 
 
@@ -147,7 +167,8 @@ async def test_canceled(callback: types.CallbackQuery) -> None:
     await bot.edit_message_reply_markup(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
-        reply_markup=None)
+        reply_markup=None
+    )
     user_tg_id = callback.from_user.id
     run_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 3)
     user_test_id = run_test.ID
@@ -180,6 +201,18 @@ async def test_continue(callback: types.CallbackQuery) -> None:
 
 
 async def test_completed(callback: types.CallbackQuery) -> None:
+    """
+    Notes:
+    Находиться последний запушенный тест со статусом 5
+
+    Parameters
+    ----------
+    callback
+
+    Returns
+    -------
+
+    """
     user_tg_id = callback.from_user.id
     run_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 5)
     points = run_test.QUIZE_SCORE
