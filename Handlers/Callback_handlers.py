@@ -40,7 +40,7 @@ async def test_handler(callback: types.CallbackQuery, callback_data: dict) -> No
             QUIZE_STATUS=1,
             QUESTION_NUMBER=1
         )
-        # TODO переделать так, что бы тест запускался в test_progress
+        # TODO переделать так, что бы тест сохранялся в бд в test_progress
         await orm.async_insert_data_list_to_bd([user_test])
         await bot.edit_message_text(
             chat_id=callback.message.chat.id,
@@ -92,8 +92,8 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
 
     elif MAX_QUESTION_SURVEY >= question_num > 1:
         ic()
-        answer_id = get_answer_id(test_id, question_num, int(answer_user))
-        set_user_answer(answer_id, user_test_id, question_num - 1)
+        # answer_id = get_answer_id(test_id, question_num, int(answer_user))
+        # set_user_answer(answer_id, user_test_id, question_num - 1)
         question = get_question_by_id_question(run_test[5])
         previous_question = get_question_by_id_question(run_test[6])
         answer_user_text = get_one_answer(question_num - 1, test_id, int(answer_user))
@@ -117,7 +117,7 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
         text_q = previous_question.replace('______', f'<u><em>{answer_user_text}</em></u>')
         if previous_question != text_q:
             await bot.edit_message_text(
-                chat_id=id_chat,
+                chat_id=user_tg_id,
                 message_id=callback.message.message_id,
                 parse_mode="html",
                 text=text_q)
