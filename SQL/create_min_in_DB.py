@@ -1,8 +1,10 @@
 import datetime
 
-from SQL.config import sql_async_engine
+from icecream import ic
+
+from SQL.config import sql_async_engine, db_mysql
 from SQL.models import QuizzesORM, ConstantsORM, QuizeStatusesORM, UserLevelsORM, QuizeQuestionsORM
-from SQL.orm import async_create_all_table, async_insert_data_list_to_bd
+from SQL.orm import async_create_all_table, async_insert_data_list_to_bd, async_execute_custom_request
 from Utils.Import_csv_to_bd import async_import_survey_csv
 
 
@@ -104,30 +106,35 @@ async def filling_min_db() -> None:
         MIN_LEVEL_SCORE=91,
         MAX_LEVEL_SCORE=100
     )
+    # # Для MYSQL нужно сбросить автоинкримент до 0 в таблицах с вопросом и тестом
+    # # ALTER TABLE tablename AUTO_INCREMENT = 1
+    # ic(db_mysql.DB_DBMS)
+    # if db_mysql.DB_DBMS == 'MYSQL':
+    #     query = """
+    #     ALTER TABLE QUIZZES AUTO_INCREMENT = 0;
+    #     ALTER TABLE QUIZE_QUESTIONS AUTO_INCREMENT = 0;
+    #     """
+    #     await async_execute_custom_request(query)
 
-    zero_test = QuizzesORM(
-        ID=0,
-        QUIZE_NAME='Zero test',
-        QUIZE_DESCRIPTION=''
-    )
-
-    zero_question = QuizeQuestionsORM(
-        ID=0,
-        ID_QUIZE=0,
-        QUESTION_NUMBER=0,
-        QUESTION_TEXT=''
-    )
+    # zero_test = QuizzesORM(
+    #     QUIZE_NAME='Zero test',
+    #     QUIZE_DESCRIPTION=''
+    # )
+    #
+    # zero_question = QuizeQuestionsORM(
+    #     ID_QUIZE=0,
+    #     QUESTION_NUMBER=0,
+    #     QUESTION_TEXT=''
+    # )
 
     await async_create_all_table(sql_async_engine)
     await async_insert_data_list_to_bd([
-        zero_test,
         TEXT_HI, TEXT_HELP, CREATE_TIME_BD,
         status_quize_Selected, status_quize_Launched, status_quize_Stopped,
         status_quize_Revoked, status_quize_Completed, status_quize_Deleted,
         level_A0, level_A1, level_A2, level_B1, level_B2,
     ])
 
-    await async_insert_data_list_to_bd([zero_question])
     await async_import_survey_csv("English Level test. Grammar.csv",
                                   "Основной тест для проверки уровня английского (грамматика)")
 

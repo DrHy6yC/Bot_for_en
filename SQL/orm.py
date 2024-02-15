@@ -1,12 +1,13 @@
 from typing import Union
 
+from icecream import ic
 # from icecream import ic
-from sqlalchemy import select, func, and_, desc
+from sqlalchemy import select, func, and_, desc, text
 from sqlalchemy.orm import join
-from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
 from sqlalchemy.sql.functions import count
 
-from SQL.config import async_session_sql_connect
+from SQL.config import async_session_sql_connect, sql_async_engine
 from SQL.models import Base, UsersORM, QuizzesORM, ConstantsORM, UserQuizzesORM, UserLevelsORM, QuizeAnswersORM, \
     QuizeQuestionsORM, UserAnswersORM, QuizeTrueAnswersORM
 
@@ -257,3 +258,8 @@ async def get_score_test(id_user_test: int) -> int:
         result_execute = await session_sql.execute(query)
         true_answers = result_execute.scalars().all()
 
+
+async def async_get_user_test_by_id(user_test_id: int) -> UserQuizzesORM:
+    async with async_session_sql_connect() as session_sql:
+        user_test = await session_sql.get(UserQuizzesORM, user_test_id)
+        return user_test

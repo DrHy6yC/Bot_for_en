@@ -67,8 +67,8 @@ class UsersORM(Base):
 
     __tablename__ = 'USERS'
     ID: Mapped[int_pk]
-    USER_TG_ID: Mapped[big_int_uniq]
-    USER_LOGIN: Mapped[str_256]
+    USER_TG_ID: Mapped[big_int_uniq] = mapped_column(unique=True)
+    USER_LOGIN: Mapped[str_256] = mapped_column(unique=True)
     USER_FULL_NAME: Mapped[str_256]
     USER_LEVEL: Mapped[int_serv_def_1] = mapped_column(
         ForeignKey('USER_LEVELS.ID', ondelete='CASCADE', onupdate='CASCADE')
@@ -150,7 +150,7 @@ class QuizeAnswersORM(Base):
     """
 
     __tablename__ = 'QUIZE_ANSWERS'
-    ID: Mapped[int_pk]
+    ID: Mapped[int_pk] = mapped_column(autoincrement=True, )
     ID_QUIZE: Mapped[int] = mapped_column(
         ForeignKey('QUIZZES.ID', ondelete='CASCADE', onupdate='CASCADE')
     )
@@ -186,7 +186,7 @@ class QuizeStatusesORM(Base):
 
     __tablename__ = 'QUIZE_STATUSES'
     ID: Mapped[int_pk]
-    STATUS_TEXT: Mapped[str_50]
+    STATUS_TEXT: Mapped[str_50] = mapped_column(unique=True)
     CREATE_TIME: Mapped[date_now]
     UPDATE_TIME: Mapped[date_now]
 
@@ -240,7 +240,7 @@ class UserQuizzesORM(Base):
 class ConstantsORM(Base):
     __tablename__ = "CONSTANTS"
     ID: Mapped[int_pk]
-    CONSTANT_NAME: Mapped[str_50]
+    CONSTANT_NAME: Mapped[str_50] = mapped_column(unique=True)
     CONSTANT_VALUE: Mapped[str_512]
     CREATE_TIME: Mapped[date_now]
     UPDATE_TIME: Mapped[date_now]
@@ -253,7 +253,7 @@ class UserLevelsORM(Base):
 
     __tablename__ = 'USER_LEVELS'
     ID: Mapped[int_pk]
-    LEVEL_TEXT: Mapped[str_50]
+    LEVEL_TEXT: Mapped[str_50] = mapped_column(unique=True)
     MIN_LEVEL_SCORE: Mapped[int]
     MAX_LEVEL_SCORE: Mapped[int]
     CREATE_TIME: Mapped[date_now]

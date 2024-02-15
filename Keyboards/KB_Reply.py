@@ -1,9 +1,8 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.callback_data import CallbackData
 
-from Callback_datas.our_call_datas import del_message, start_test
 from SQL.models import QuizeAnswersORM
-from Callback_datas import select_test
+from Callback_datas import select_test, del_message, start_test, cancel
 
 
 def set_but_start() -> ReplyKeyboardMarkup:
@@ -62,12 +61,12 @@ def set_IKB_many_but(dictionary: dict[str, CallbackData]) -> InlineKeyboardMarku
     return ikb
 
 
-def set_IKB_Survey(answers: list[QuizeAnswersORM]) -> InlineKeyboardMarkup:
+def set_IKB_Survey(running_test_id: int, answers: list[QuizeAnswersORM]) -> InlineKeyboardMarkup:
     dictionary = dict()
     for answer in answers:
         call_data = start_test.new(answer.ID)
         dictionary[answer.ANSWER_TEXT] = call_data
-    call_data_x = del_message.new('Отмена')
+    call_data_x = cancel.new('Отмена', running_test_id)
     dictionary['Остановить тест'] = call_data_x
     ikb = set_IKB_many_but(dictionary)
     return ikb
@@ -84,7 +83,7 @@ def set_IKB_select_survey(names_tests: list) -> InlineKeyboardMarkup:
         call_data = select_test.new(name_test)
         ikb.add(InlineKeyboardButton(text=f'{name_test}',
                                      callback_data=call_data))
-    call_data = del_message.new('Удалить сообщение')
+    call_data = del_message.new()
     ikb.add(InlineKeyboardButton(text=f'Отмена',
                                  callback_data=call_data))
     return ikb
@@ -95,7 +94,7 @@ def set_IKB_grammar_test() -> InlineKeyboardMarkup:
     # TODO сделать выбор теста по умолчанию
     name_test = 'English Level test. Grammar'
     call_data_1 = select_test.new(name_test)
-    call_data_2 = del_message.new('Удалить сообщение')
+    call_data_2 = del_message.new()
     dictionary[name_test] = call_data_1
     dictionary['Отмена'] = call_data_2
     ikb = set_IKB_many_but(dictionary)

@@ -41,11 +41,10 @@ async def test_handler(callback: types.CallbackQuery, callback_data: dict) -> No
             message_id=callback.message.message_id,
             parse_mode="html",
             text=f'Выбран тест: {name_test}')
+        run_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 1)
         dict_str_cal = dict()
-        dict_str_cal[f'Запустить {name_test}'] = our_call_datas.run_test.new(
-            name_test
-        )
-        dict_str_cal['Отмена'] = our_call_datas.del_message.new('Отмена')
+        dict_str_cal[f'Запустить {name_test}'] = our_call_datas.run_test.new(name_test)
+        dict_str_cal['Отмена'] = our_call_datas.cancel.new('Отмена', run_test.ID)
 
         await bot.edit_message_reply_markup(
             chat_id=callback.message.chat.id,
@@ -99,7 +98,7 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
         question_text = await orm.async_get_question_by_id_test_num_question(quize_id, question_num)
         await bot.send_message(chat_id=user_tg_id,
                                text=question_text,
-                               reply_markup=KB_Reply.set_IKB_Survey(answers))
+                               reply_markup=KB_Reply.set_IKB_Survey(running_test_id, answers))
     elif 1 <= question_num < MAX_QUESTION_SURVEY:
         ic()
         ic(id_user_answer)
@@ -119,7 +118,7 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
         await bot.send_message(
             chat_id=user_tg_id,
             text=question_text,
-            reply_markup=KB_Reply.set_IKB_Survey(answers)
+            reply_markup=KB_Reply.set_IKB_Survey(running_test_id, answers)
         )
     else:
         ic()
@@ -164,21 +163,21 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
     await callback.answer()
 
 
-async def test_canceled(callback: types.CallbackQuery) -> None:
+async def test_canceled(callback: types.CallbackQuery, callback_data: dict) -> None:
     await bot.edit_message_reply_markup(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
         reply_markup=None
     )
     user_tg_id = callback.from_user.id
-    run_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 3)
-    user_test_id = run_test.ID
+    user_tset_id = int(callback_data.get('id_user_test'))
+    await orm.async_set_user_test_status(user_tg_id, 3)
+    run_test = await orm.async_get_user_test_by_id(user_tset_id)
     points = run_test.QUIZE_SCORE
     test_id = run_test.ID_QUIZE
     MAX_QUESTION_SURVEY = await orm.async_get_count_question_test(test_id)
     percent = float(points) / float(MAX_QUESTION_SURVEY) * 100
     percent = round(percent, 2)
-    await orm.async_set_user_test_status(user_test_id, 4)
     level_user_text = await orm.async_get_text_level(points)
     await bot.send_message(chat_id=callback.message.chat.id,
                            text=f'Тест отменен\n'
@@ -243,7 +242,7 @@ async def test_restart(callback: types.CallbackQuery) -> None:
 
 def register_call_handlers_user(dp: Dispatcher) -> None:
     # TODO Собрать в переменные части каллбэков
-    dp.register_callback_query_handler(delete_message, our_call_datas.del_message.filter(type_cancel='Удалить сообщение'))
+    dp.register_callback_query_handler(delete_message, our_call_datas.del_message.filter())
     dp.register_callback_query_handler(test_handler, our_call_datas.select_test.filter())
     dp.register_callback_query_handler(test_run, our_call_datas.run_test.filter())
     dp.register_callback_query_handler(test_progress, our_call_datas.start_test.filter())

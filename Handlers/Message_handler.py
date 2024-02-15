@@ -22,7 +22,7 @@ async def send_welcome(message: types.Message) -> None:
     user_full_name = f'{message.from_user.full_name}'
     username = message.from_user.username
     reply_markup_start = set_but_start()
-    call_data = del_message.new('Удалить сообщение')
+    call_data = del_message.new()
     reply_markup_delete = set_IKB_one_but('Ok', call_data)
     TEXT_HI_template = await orm.async_get_const('TEXT_HI')
     TEXT_HI = TEXT_HI_template.CONSTANT_VALUE.replace('@FIO', user_full_name)
@@ -64,7 +64,7 @@ async def help_command(message: types.Message) -> None:
     await message.delete()
     help_txt_temp = await orm.async_get_const('TEXT_HELP')
     TEXT_HELP = help_txt_temp.CONSTANT_VALUE
-    call_data = del_message.new('Удалить сообщение')
+    call_data = del_message.new()
     await bot.send_message(chat_id=message.from_user.id,
                            text=TEXT_HELP,
                            reply_markup=set_IKB_one_but('Ok', call_data))
