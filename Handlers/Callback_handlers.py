@@ -177,13 +177,13 @@ async def test_canceled(callback: types.CallbackQuery, callback_data: dict) -> N
     MAX_QUESTION_SURVEY = await orm.async_get_count_question_test(test_id)
     percent = float(points) / float(MAX_QUESTION_SURVEY) * 100
     percent = round(percent, 2)
-    level_user_text = await orm.async_get_text_level(percent)
+    level_id, level_user_text = await orm.async_get_text_level(percent)
     await bot.send_message(chat_id=user_tg_id,
                            text=f'Тест отменен\n'
                                 f'Результат: {percent}%\n'
                                 f'{points} правильных ответов\n'
                                 f'из {MAX_QUESTION_SURVEY} всех вопросов\n'
-                                f'"Это уровень: {level_user_text}')
+                                f'Это уровень: {level_user_text}')
     await callback.answer()
 
 
@@ -200,28 +200,17 @@ async def test_continue(callback: types.CallbackQuery) -> None:
 
 
 async def test_completed(callback: types.CallbackQuery, callback_data: dict) -> None:
-    """
-    Notes:
-    Находиться последний запушенный тест со статусом 5
-
-    Parameters
-    ----------
-    callback
-
-    Returns
-    -------
-
-    """
     user_tg_id = callback.from_user.id
     user_tset_id = int(callback_data.get('id_user_test'))
     run_test = await orm.async_get_user_test_by_id(user_tset_id)
     await orm.async_set_user_test_status(user_tset_id, 5)
+
     points = run_test.QUIZE_SCORE
     test_id = run_test.ID_QUIZE
     MAX_QUESTION_SURVEY = await orm.async_get_count_question_test(test_id)
     percent = float(points)/float(MAX_QUESTION_SURVEY) * 100
     percent = round(percent, 2)
-    level_user_text = await orm.async_get_text_level(percent)
+    level_id, level_user_text = await orm.async_get_text_level(percent)
     await bot.edit_message_reply_markup(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
@@ -231,8 +220,10 @@ async def test_completed(callback: types.CallbackQuery, callback_data: dict) -> 
                                 f'Результат: {percent}%\n'
                                 f'{points} правильных ответов\n'
                                 f'из {MAX_QUESTION_SURVEY} всех вопросов\n'
-                                f'"Это уровень: {level_user_text}')
+                                f'Это уровень: {level_user_text}')
     # TODO установить уровень пользователю если он завершил правильный тест
+    if test_id == 1:
+        await orm.async_set_user_level(user_tg_id, level_id)
     await callback.answer()
 
 
@@ -249,7 +240,7 @@ def register_call_handlers_user(dp: Dispatcher) -> None:
     dp.register_callback_query_handler(test_run, our_call_datas.run_test.filter())
     dp.register_callback_query_handler(test_progress, our_call_datas.start_test.filter())
     dp.register_callback_query_handler(test_completed, our_call_datas.view_result.filter())
-    dp.register_callback_query_handler(test_continue, our_call_datas.cancel.filter(type_cancel='1'))
-    dp.register_callback_query_handler(test_canceled, our_call_datas.cancel.filter(type_cancel='Отмена'))
-    dp.register_callback_query_handler(test_restart, our_call_datas.cancel.filter(type_cancel='-1'))
+    dp.register_callback_query_handler(test_continue, our_call_datas.continue_test.filter())
+    dp.register_callback_query_handler(test_canceled, our_call_datas.cancel.filter())
+    dp.register_callback_query_handler(test_restart, our_call_datas.restart_test.filter())
 

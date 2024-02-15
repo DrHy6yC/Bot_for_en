@@ -25,9 +25,9 @@ async def check_db():
 
 
 async def tasks():
-    result = await orm.async_get_user_answer(16, 2)
+    result = await orm.async_get_text_level(45)
     ic(type(result))
-    ic(result.ID, result.CREATE_TIME)
+    ic(result)
 
 if __name__ == "__main__":
     # asyncio.run(rewrite_DB())

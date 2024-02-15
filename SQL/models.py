@@ -73,7 +73,6 @@ class UsersORM(Base):
     USER_LEVEL: Mapped[int_serv_def_1] = mapped_column(
         ForeignKey('USER_LEVELS.ID', ondelete='CASCADE', onupdate='CASCADE')
     )
-    USER_POINTS: Mapped[int_serv_def_0]
     USER_ACCESS: Mapped[int_serv_def_0]
     CREATE_TIME: Mapped[date_now]
     UPDATE_TIME: Mapped[date_now]

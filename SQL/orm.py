@@ -163,6 +163,15 @@ async def async_set_user_test_status(user_test_id: int, status: int) -> None:
         await session_sql.commit()
 
 
+async def async_set_user_level(user_tg_id: int, level: int) -> None:
+    async with async_session_sql_connect() as session_sql:
+        query = select(UsersORM).where(UsersORM.USER_TG_ID == user_tg_id)
+        user_exec = await session_sql.execute(query)
+        user = user_exec.scalars().first()
+        user.USER_LEVEL = level
+        await session_sql.commit()
+
+
 async def async_get_level_user_text(user_tg_id: int) -> str:
     async with async_session_sql_connect() as session_sql:
         query = select(UserLevelsORM.LEVEL_TEXT). \
@@ -219,12 +228,13 @@ async def async_get_question_by_id_test_num_question(id_test: int, num_question:
         return result
 
 
-async def async_get_text_level(points: int) -> str:
+async def async_get_text_level(points: int) -> list[int, str]:
     async with async_session_sql_connect() as session_sql:
-        query = select(UserLevelsORM.LEVEL_TEXT).where(
+        query = select(UserLevelsORM).where(
             and_(UserLevelsORM.MIN_LEVEL_SCORE <= points, UserLevelsORM.MAX_LEVEL_SCORE >= points))
         result_execute = await session_sql.execute(query)
-        result = result_execute.scalars().first()
+        user_level = result_execute.scalars().first()
+        result = [user_level.ID, user_level.LEVEL_TEXT]
         return result
 
 

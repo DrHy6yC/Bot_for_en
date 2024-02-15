@@ -1,6 +1,7 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.callback_data import CallbackData
 
+from Callback_datas.our_call_datas import continue_test, restart_test
 from SQL.models import QuizeAnswersORM
 from Callback_datas import select_test, del_message, start_test, cancel
 
@@ -101,6 +102,10 @@ def set_IKB_grammar_test() -> InlineKeyboardMarkup:
     return ikb
 
 
-def set_IKB_continue_finish() -> InlineKeyboardMarkup:
-    dict_but = {'Остановить тест': '-1', 'Продолжить тест': '0', 'Перезапустить тест': '1'}
+def set_IKB_continue_finish(user_test_id: int) -> InlineKeyboardMarkup:
+    dict_but = {
+        'Остановить тест': cancel.new(user_test_id),
+        'Продолжить тест': continue_test.new(user_test_id),
+        'Перезапустить тест': restart_test.new(user_test_id)
+    }
     return set_IKB_many_but(dict_but)
