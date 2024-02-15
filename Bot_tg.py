@@ -19,7 +19,7 @@ async def on_shutdown(_) -> None:
 
 if __name__ == '__main__':
     mh.register_handlers_user(dp)
-    # ch.register_call_handlers_user(dp)
+    ch.register_call_handlers_user(dp)
     ih.register_inline_handler(dp)
 
 
