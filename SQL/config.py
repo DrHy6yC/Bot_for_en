@@ -15,7 +15,7 @@ def get_engine(dsn_db: str) -> Engine:
     """
     engine = create_engine(
         url=dsn_db,
-        echo=db_mysql.get_db_is_echo()
+        echo=True
     )
     return engine
 
@@ -29,7 +29,7 @@ def get_async_engine(async_dsn_db: str) -> AsyncEngine:
     """
     engine = create_async_engine(
         url=async_dsn_db,
-        echo=db_mysql.get_db_is_echo()
+        echo=True
 
     )
     return engine
