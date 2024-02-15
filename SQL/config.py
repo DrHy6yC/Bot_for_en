@@ -15,7 +15,7 @@ def get_engine(dsn_db: str) -> Engine:
     """
     engine = create_engine(
         url=dsn_db,
-        echo=True
+        echo=db_mysql.get_db_is_echo()
     )
     return engine
 
@@ -29,7 +29,7 @@ def get_async_engine(async_dsn_db: str) -> AsyncEngine:
     """
     engine = create_async_engine(
         url=async_dsn_db,
-        echo=True
+        echo=db_mysql.get_db_is_echo()
 
     )
     return engine
@@ -37,7 +37,6 @@ def get_async_engine(async_dsn_db: str) -> AsyncEngine:
 
 db_mysql = DBMYSQL()
 is_created_db = db_mysql.get_db_is_created()
-ic(is_created_db)
 # TODO включение/отключение заполнение основы базы
 # if is_created_db:
 #     await filling_min_db()

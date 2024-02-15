@@ -13,7 +13,7 @@ class DBMYSQL:
         Для работы с двумя  и более разными СУБД можно наследоваться от этого класса,
          переопределив необходимые атрибуты
 
-    Attributes
+    Attributes:
     ----------
     DB_IS_CREATED : str
         По этому параметру определяется будет ли созданы и пересозданы таблицы в БД(если True)
@@ -32,8 +32,10 @@ class DBMYSQL:
         Путь и имя файла к БД SQL lite (name_db.db)
     DB_DBMS : str
         Основной тип СУБД для работы (MYSQL/PGSQL/SQLite)
+    ECHO_DB : str
+        Отключение логирования движка
 
-    Methods
+    Methods:
     -------
     get_dsn()
         Необходим для получения строки подключения(dsn)
@@ -50,6 +52,7 @@ class DBMYSQL:
     DB_NAME: str = getenv('DB_NAME')
     DB_SQLite: str = getenv('DB_SQLite')
     DB_DBMS: str = getenv('DB_DBMS')
+    ECHO_DB: str = getenv('ECHO_DB')
 
     def get_dsn(self) -> str:
         """Метод для получения строки подключения из .env
@@ -92,8 +95,17 @@ class DBMYSQL:
         Переводит строку из .env в python bool
         :return: Возвращает True когда DB_IS_CREATED=True, в остальных случаях -> False
         """
-        ic(self.DB_IS_CREATED)
         if self.DB_IS_CREATED == 'True':
+            return True
+        else:
+            return False
+
+    def get_db_is_echo(self) -> bool:
+        """
+        Переводит строку из .env в python bool
+        :return: Возвращает True когда DB_IS_CREATED=True, в остальных случаях -> False
+        """
+        if self.ECHO_DB == 'True':
             return True
         else:
             return False

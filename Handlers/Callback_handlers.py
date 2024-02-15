@@ -92,8 +92,12 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
             QUESTION_NUMBER=question_num
         )
         await orm.async_insert_data_list_to_bd([answer_user])
-        user_answer = await orm.async_get_user_answer(running_test_id, question_num)
-        ic(user_answer.QUESTION_NUMBER, user_answer.ID_ANSWER)
+        true_answer = await orm.async_get_true_answer(quize_id, question_num)
+        ic(id_user_answer, true_answer.ID_ANSWER)
+        score = running_test.QUIZE_SCORE
+        if id_user_answer == true_answer.ID_ANSWER:
+            score += 1
+        await orm.async_update_running_test_score(running_test_id, score)
     if question_num == 0:
         ic()
         ic(id_user_answer)
@@ -148,21 +152,12 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
             text='Тест завершён',
             reply_markup=KB_Reply.set_IKB_one_but(
                 text='Посмотреть результаты',
-                call_data=our_call_datas.view_result.new()
+                call_data=our_call_datas.view_result.new(running_test_id)
             )
         )
     ic()
     ic(question_num, id_user_answer)
     ic(id_user_answer)
-    # TODO создать функцию сравнения
-    # running_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 2)
-    # ic(running_test_id, question_num)
-    # answer_true_id = await orm.get_true_answer_id_by_id_test_and_num_question(quize_id, question_num)
-    # balls_now = running_test.QUIZE_SCORE
-    # ic(id_user_answer, answer_true_id)
-    # if id_user_answer == answer_true_id:
-    #     balls_now += 1
-    # await orm.async_update_running_test_score(running_test_id, balls_now)
     await callback.answer()
 
 
@@ -174,15 +169,16 @@ async def test_canceled(callback: types.CallbackQuery, callback_data: dict) -> N
     )
     user_tg_id = callback.from_user.id
     user_tset_id = int(callback_data.get('id_user_test'))
-    await orm.async_set_user_test_status(user_tg_id, 3)
+    await orm.async_set_user_test_status(user_tset_id, 3)
     run_test = await orm.async_get_user_test_by_id(user_tset_id)
+    ic(run_test.ID)
     points = run_test.QUIZE_SCORE
     test_id = run_test.ID_QUIZE
     MAX_QUESTION_SURVEY = await orm.async_get_count_question_test(test_id)
     percent = float(points) / float(MAX_QUESTION_SURVEY) * 100
     percent = round(percent, 2)
-    level_user_text = await orm.async_get_text_level(points)
-    await bot.send_message(chat_id=callback.message.chat.id,
+    level_user_text = await orm.async_get_text_level(percent)
+    await bot.send_message(chat_id=user_tg_id,
                            text=f'Тест отменен\n'
                                 f'Результат: {percent}%\n'
                                 f'{points} правильных ответов\n'
@@ -203,7 +199,7 @@ async def test_continue(callback: types.CallbackQuery) -> None:
     await callback.answer('Сейчас можно только остановить тест', show_alert=True)
 
 
-async def test_completed(callback: types.CallbackQuery) -> None:
+async def test_completed(callback: types.CallbackQuery, callback_data: dict) -> None:
     """
     Notes:
     Находиться последний запушенный тест со статусом 5
@@ -217,13 +213,15 @@ async def test_completed(callback: types.CallbackQuery) -> None:
 
     """
     user_tg_id = callback.from_user.id
-    run_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 5)
+    user_tset_id = int(callback_data.get('id_user_test'))
+    run_test = await orm.async_get_user_test_by_id(user_tset_id)
+    await orm.async_set_user_test_status(user_tset_id, 5)
     points = run_test.QUIZE_SCORE
     test_id = run_test.ID_QUIZE
     MAX_QUESTION_SURVEY = await orm.async_get_count_question_test(test_id)
     percent = float(points)/float(MAX_QUESTION_SURVEY) * 100
     percent = round(percent, 2)
-    level_user_text = await orm.async_get_text_level(points)
+    level_user_text = await orm.async_get_text_level(percent)
     await bot.edit_message_reply_markup(
         chat_id=callback.message.chat.id,
         message_id=callback.message.message_id,
@@ -234,6 +232,7 @@ async def test_completed(callback: types.CallbackQuery) -> None:
                                 f'{points} правильных ответов\n'
                                 f'из {MAX_QUESTION_SURVEY} всех вопросов\n'
                                 f'"Это уровень: {level_user_text}')
+    # TODO установить уровень пользователю если он завершил правильный тест
     await callback.answer()
 
 

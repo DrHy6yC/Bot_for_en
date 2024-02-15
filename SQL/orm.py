@@ -157,9 +157,9 @@ async def async_set_user_test_status(user_test_id: int, status: int) -> None:
         test = await session_sql.get(UserQuizzesORM, user_test_id)
         if test:
             test.QUIZE_STATUS = status
-        # else:
-        #     ic(f"Теста id = {user_test_id} со статусом = {status} нет.")
-        # ic(user_test_id, status)
+        else:
+            ic(f"Теста id = {user_test_id} со статусом = {status} нет.")
+        ic(user_test_id, status)
         await session_sql.commit()
 
 
@@ -244,47 +244,22 @@ async def get_true_answer_id_by_id_test_and_num_question(id_test: int, num_quest
         return result
 
 
-async def get_score_test(id_user_test: int) -> int:
-    async with async_session_sql_connect() as session_sql:
-        # UQ = aliased(UserQuizzesORM)
-        # UA = aliased(UserAnswersORM)
-        # QTA = aliased(QuizeTrueAnswersORM)
-        # subq = (
-        #     select(
-        #         r,
-        #         w,
-        #         func.avg(r.compensation).over(partition_by=r.workload).cast(Integer).label("avg_workload_compensation"),
-        #     )
-        #     # .select_from(r)
-        #     .join(r, r.worker_id == w.id).subquery("helper1")
-        # )
-        # cte = (
-        #     select(
-        #         subq.c.worker_id,
-        #         subq.c.username,
-        #         subq.c.compensation,
-        #         subq.c.workload,
-        #         subq.c.avg_workload_compensation,
-        #         (subq.c.compensation - subq.c.avg_workload_compensation).label("compensation_diff"),
-        #     )
-        #     .cte("helper2")
-        # )
-        # query = (
-        #     select(cte)
-        #     .order_by(cte.c.compensation_diff.desc())
-        # )
-        # result_execute = await session_sql.execute(query)
-        # result = result_execute.scalars().all()
-        # ic(user_answers, type(user_answers))
-        # ic(true_answers, type(true_answers))
-     pass
-
-
 async def async_get_user_answer(user_test_id: int, num_question: int) -> UserAnswersORM:
     async with async_session_sql_connect() as session_sql:
         query = select(UserAnswersORM).\
             where(
             and_(UserAnswersORM.ID_USER_QUIZE == user_test_id, UserAnswersORM.QUESTION_NUMBER == num_question)
+        )
+        user_answer_execute = await session_sql.execute(query)
+        user_answer = user_answer_execute.scalars().first()
+        return user_answer
+
+
+async def async_get_true_answer(test_id: int, num_question: int) -> QuizeTrueAnswersORM:
+    async with async_session_sql_connect() as session_sql:
+        query = select(QuizeTrueAnswersORM).\
+            where(
+            and_(QuizeTrueAnswersORM.ID_QUIZE == test_id, QuizeTrueAnswersORM.QUESTION_NUMBER == num_question)
         )
         user_answer_execute = await session_sql.execute(query)
         user_answer = user_answer_execute.scalars().first()
