@@ -1,10 +1,11 @@
 from icecream import ic
 from aiogram import types, Dispatcher
 
+from Callback_datas.our_call_datas import continue_test, restart_test
 from Create_bot import bot
 from SQL.models import UserQuizzesORM, UserAnswersORM
 from SQL import orm
-from Callback_datas import our_call_datas
+from Callback_datas import our_call_datas, cancel_test
 from Keyboards import KB_Reply
 
 
@@ -44,7 +45,7 @@ async def test_handler(callback: types.CallbackQuery, callback_data: dict) -> No
         run_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 1)
         dict_str_cal = dict()
         dict_str_cal[f'Запустить {name_test}'] = our_call_datas.run_test.new(name_test)
-        dict_str_cal['Отмена'] = our_call_datas.cancel.new('Отмена', run_test.ID)
+        dict_str_cal['Отмена'] = our_call_datas.cancel_test.new(run_test.ID)
 
         await bot.edit_message_reply_markup(
             chat_id=callback.message.chat.id,
@@ -110,6 +111,7 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
         await orm.async_update_running_test_num_question(running_test_id, question_num)
         answers = await orm.async_get_answers_by_id_test_and_num_question(quize_id, question_num)
         question_text = await orm.async_get_question_by_id_test_num_question(quize_id, question_num)
+        ic(running_test_id)
         await bot.send_message(chat_id=user_tg_id,
                                text=question_text,
                                reply_markup=KB_Reply.set_IKB_Survey(running_test_id, answers))
@@ -161,13 +163,23 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
     await callback.answer()
 
 
-async def test_canceled(callback: types.CallbackQuery, callback_data: dict) -> None:
+async def test_stopped(callback: types.CallbackQuery, callback_data: dict) -> None:
+    user_tg_id = callback.from_user.id
+    user_tset_id = int(callback_data.get('id_user_test'))
     await bot.edit_message_reply_markup(
-        chat_id=callback.message.chat.id,
+        chat_id=user_tg_id,
+        message_id=callback.message.message_id,
+        reply_markup=KB_Reply.set_IKB_stop_test(user_tset_id)
+    )
+
+
+async def test_canceled(callback: types.CallbackQuery, callback_data: dict) -> None:
+    user_tg_id = callback.from_user.id
+    await bot.edit_message_reply_markup(
+        chat_id=user_tg_id,
         message_id=callback.message.message_id,
         reply_markup=None
     )
-    user_tg_id = callback.from_user.id
     user_tset_id = int(callback_data.get('id_user_test'))
     await orm.async_set_user_test_status(user_tset_id, 3)
     run_test = await orm.async_get_user_test_by_id(user_tset_id)
@@ -189,7 +201,6 @@ async def test_canceled(callback: types.CallbackQuery, callback_data: dict) -> N
 
 # TODO Sql+Test -> TODO Sql+Test 1. Реализовать продолжение теста
 async def test_continue(callback: types.CallbackQuery) -> None:
-    # TODO Sql+Test. Выбор из ранее запущенных (остановленных и прерванных)
     # user_id = callback.from_user.id
     # test_info = get_user_survey(user_id, 1)[0]
     # user_test_id = test_info[0]
@@ -221,7 +232,6 @@ async def test_completed(callback: types.CallbackQuery, callback_data: dict) -> 
                                 f'{points} правильных ответов\n'
                                 f'из {MAX_QUESTION_SURVEY} всех вопросов\n'
                                 f'Это уровень: {level_user_text}')
-    # TODO установить уровень пользователю если он завершил правильный тест
     if test_id == 1:
         await orm.async_set_user_level(user_tg_id, level_id)
     await callback.answer()
@@ -229,18 +239,17 @@ async def test_completed(callback: types.CallbackQuery, callback_data: dict) -> 
 
 # TODO Sql+Test -> TODO Sql+Test 1. Реализовать перезапуск теста
 async def test_restart(callback: types.CallbackQuery) -> None:
-    # TODO Sql+Test. Выбор из ранее запущенных (остановленных и прерванных)
     await callback.answer('Сейчас можно только остановить тест', show_alert=True)
 
 
 def register_call_handlers_user(dp: Dispatcher) -> None:
-    # TODO Собрать в переменные части каллбэков
     dp.register_callback_query_handler(delete_message, our_call_datas.del_message.filter())
     dp.register_callback_query_handler(test_handler, our_call_datas.select_test.filter())
     dp.register_callback_query_handler(test_run, our_call_datas.run_test.filter())
     dp.register_callback_query_handler(test_progress, our_call_datas.start_test.filter())
     dp.register_callback_query_handler(test_completed, our_call_datas.view_result.filter())
     dp.register_callback_query_handler(test_continue, our_call_datas.continue_test.filter())
-    dp.register_callback_query_handler(test_canceled, our_call_datas.cancel.filter())
+    dp.register_callback_query_handler(test_canceled, our_call_datas.cancel_test.filter())
     dp.register_callback_query_handler(test_restart, our_call_datas.restart_test.filter())
+    dp.register_callback_query_handler(test_stopped, our_call_datas.stop_test.filter())
 
