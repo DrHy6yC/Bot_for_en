@@ -84,6 +84,16 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
     quize_id = running_test.ID_QUIZE
     question_num = running_test.QUESTION_NUMBER
     MAX_QUESTION_SURVEY = await orm.async_get_count_question_test(quize_id)
+    if id_user_answer != 0:
+        answer_user = UserAnswersORM(
+            ID_USER_TG=user_tg_id,
+            ID_USER_QUIZE=running_test_id,
+            ID_ANSWER=id_user_answer,
+            QUESTION_NUMBER=question_num
+        )
+        await orm.async_insert_data_list_to_bd([answer_user])
+        user_answer = await orm.async_get_user_answer(running_test_id, question_num)
+        ic(user_answer.QUESTION_NUMBER, user_answer.ID_ANSWER)
     if question_num == 0:
         ic()
         ic(id_user_answer)
@@ -142,14 +152,7 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
             )
         )
     ic()
-    if id_user_answer != 0:
-        answer_user = UserAnswersORM(
-            ID_USER_TG=user_tg_id,
-            ID_USER_QUIZE=running_test_id,
-            ID_ANSWER=id_user_answer,
-            QUESTION_NUMBER=question_num
-        )
-        await orm.async_insert_data_list_to_bd([answer_user])
+    ic(question_num, id_user_answer)
     ic(id_user_answer)
     # TODO создать функцию сравнения
     # running_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 2)

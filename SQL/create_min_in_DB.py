@@ -106,26 +106,6 @@ async def filling_min_db() -> None:
         MIN_LEVEL_SCORE=91,
         MAX_LEVEL_SCORE=100
     )
-    # # Для MYSQL нужно сбросить автоинкримент до 0 в таблицах с вопросом и тестом
-    # # ALTER TABLE tablename AUTO_INCREMENT = 1
-    # ic(db_mysql.DB_DBMS)
-    # if db_mysql.DB_DBMS == 'MYSQL':
-    #     query = """
-    #     ALTER TABLE QUIZZES AUTO_INCREMENT = 0;
-    #     ALTER TABLE QUIZE_QUESTIONS AUTO_INCREMENT = 0;
-    #     """
-    #     await async_execute_custom_request(query)
-
-    # zero_test = QuizzesORM(
-    #     QUIZE_NAME='Zero test',
-    #     QUIZE_DESCRIPTION=''
-    # )
-    #
-    # zero_question = QuizeQuestionsORM(
-    #     ID_QUIZE=0,
-    #     QUESTION_NUMBER=0,
-    #     QUESTION_TEXT=''
-    # )
 
     await async_create_all_table(sql_async_engine)
     await async_insert_data_list_to_bd([
