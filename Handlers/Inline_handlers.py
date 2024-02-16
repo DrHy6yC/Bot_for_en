@@ -23,4 +23,3 @@ async def inline_translate(inline_query: types.InlineQuery) -> None:
 
 def register_inline_handler(router: Router) -> None:
     router.inline_query.register(inline_translate)
-    print('Inline registered')

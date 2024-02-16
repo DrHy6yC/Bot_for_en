@@ -1,11 +1,11 @@
 from icecream import ic
-from aiogram import types, Dispatcher
+from aiogram import types, Router
 
-from Callback_datas.our_call_datas import continue_test, restart_test
+from Callback_datas import DelMessageCal
 from Create_bot import bot
 from SQL.models import UserQuizzesORM, UserAnswersORM
 from SQL import orm
-from Callback_datas import our_call_datas, cancel_test
+# from Callback_datas import our_call_datas, cancel_test
 from Keyboards import KB_Reply
 
 
@@ -242,14 +242,15 @@ async def test_restart(callback: types.CallbackQuery) -> None:
     await callback.answer('Сейчас можно только остановить тест', show_alert=True)
 
 
-def register_call_handlers_user(dp: Dispatcher) -> None:
-    dp.register_callback_query_handler(delete_message, our_call_datas.del_message.filter())
-    dp.register_callback_query_handler(test_handler, our_call_datas.select_test.filter())
-    dp.register_callback_query_handler(test_run, our_call_datas.run_test.filter())
-    dp.register_callback_query_handler(test_progress, our_call_datas.start_test.filter())
-    dp.register_callback_query_handler(test_completed, our_call_datas.view_result.filter())
-    dp.register_callback_query_handler(test_continue, our_call_datas.continue_test.filter())
-    dp.register_callback_query_handler(test_canceled, our_call_datas.cancel_test.filter())
-    dp.register_callback_query_handler(test_restart, our_call_datas.restart_test.filter())
-    dp.register_callback_query_handler(test_stopped, our_call_datas.stop_test.filter())
+def register_call_handlers_user(router: Router) -> None:
+    router.callback_query.register(delete_message, DelMessageCal.filter())
+    # dp.register_callback_query_handler(delete_message, our_call_datas.del_message.filter())
+    # dp.register_callback_query_handler(test_handler, our_call_datas.select_test.filter())
+    # dp.register_callback_query_handler(test_run, our_call_datas.run_test.filter())
+    # dp.register_callback_query_handler(test_progress, our_call_datas.start_test.filter())
+    # dp.register_callback_query_handler(test_completed, our_call_datas.view_result.filter())
+    # dp.register_callback_query_handler(test_continue, our_call_datas.continue_test.filter())
+    # dp.register_callback_query_handler(test_canceled, our_call_datas.cancel_test.filter())
+    # dp.register_callback_query_handler(test_restart, our_call_datas.restart_test.filter())
+    # dp.register_callback_query_handler(test_stopped, our_call_datas.stop_test.filter())
 
