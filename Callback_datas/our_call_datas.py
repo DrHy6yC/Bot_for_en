@@ -1,4 +1,4 @@
-from aiogram.utils.callback_data import CallbackData
+from aiogram.filters.callback_data import CallbackData
 
 select_test = CallbackData('select_test', 'name_test')
 del_message = CallbackData('del_message')

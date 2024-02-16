@@ -1,24 +1,16 @@
+import asyncio
+import logging
 import sys
 
-from icecream import ic
-
-from Create_bot import dp
-from aiogram import executor, types
-from Handlers import Callback_handlers as ch
-from Handlers import Message_handler as mh
-from Handlers import Inline_handlers as ih
+from Create_bot import dp, bot
+from Handlers.Inline_handlers import register_inline_handler
 
 
-async def on_startup(_) -> None:
-    print('Run')
+async def main() -> None:
+    register_inline_handler(dp)
+    await dp.start_polling(bot)
 
 
-async def on_shutdown(_) -> None:
-    print('Off')
-
-if __name__ == '__main__':
-    mh.register_handlers_user(dp)
-    ch.register_call_handlers_user(dp)
-    ih.register_inline_handler(dp)
-
-    executor.start_polling(dp, skip_updates=True, on_startup=on_startup, on_shutdown=on_shutdown)
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+    asyncio.run(main())
