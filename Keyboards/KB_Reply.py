@@ -9,14 +9,21 @@ from SQL.models import QuizeAnswersORM
 # from Callback_datas import select_test, del_message, start_test, cancel_test
 
 
-def set_but_start() -> ReplyKeyboardMarkup:
+# def set_kb(callback: CallbackData):
+#     builder = InlineKeyboardBuilder()
+#     builder.button(
+#         text='Ok',
+#         callback_data=callback.pack(),
+#     )
+#     return builder.as_markup()
+
+
+def set_buts(text_buts) -> ReplyKeyboardMarkup:
     kb = ReplyKeyboardBuilder()
-    b1 = KeyboardButton(text='Помощь')
-    b2 = KeyboardButton(text='Пройти тест')
-    b3 = KeyboardButton(text='Узнать уровень')
-    kb.add(b3, b1, b2)
-    kb.as_markup()
-    return kb
+    for text_btn in text_buts:
+        button = KeyboardButton(text=text_btn)
+        kb.add(button)
+    return kb.as_markup()
 
 
 def set_IKB_one_but(text: str, call_data: CallbackData) -> InlineKeyboardMarkup:
@@ -36,33 +43,31 @@ def set_IKB_one_but(text: str, call_data: CallbackData) -> InlineKeyboardMarkup:
 
     """
     ikb = InlineKeyboardBuilder()
-    ib = InlineKeyboardButton(text=text,
-                              callback_data=call_data.pack())
-    ikb.add(ib).as_markup()
+    ikb.button(text=text, callback_data=call_data.pack())
+    ikb.as_markup()
     return ikb
-#
-#
-# def set_IKB_many_but(dictionary: dict[str, CallbackData]) -> InlineKeyboardMarkup:
-#     """
-#         Генерирует inline клавиатуру с одной кнопкой на которой будет текст полученный из параметров(text),
-#         при нажатии на которую будет отправлен пользовательский CallbackData (call_data) для дальнейшего отлавливания
-#
-#         Parameters:
-#         ----------
-#         text - Строка которая будет отображатся на кнопке
-#
-#         call_data - CallbackData которую нужно будет ловить call_data.filter()
-#
-#         Returns:
-#         -------
-#         InlineKeyboardMarkup - inline клавиатура состоящая из одной кнопки
-#
-#         """
-#     ikb = InlineKeyboardMarkup(row_width=1)
-#     for text, call in dictionary.items():
-#         ikb.add(InlineKeyboardButton(text=text,
-#                                      callback_data=call))
-#     return ikb
+
+
+def set_IKB_many_but(dictionary: dict[str, CallbackData]) -> InlineKeyboardMarkup:
+    """
+        Генерирует inline клавиатуру с одной кнопкой на которой будет текст полученный из параметров(text),
+        при нажатии на которую будет отправлен пользовательский CallbackData (call_data) для дальнейшего отлавливания
+
+        Parameters:
+        ----------
+        text - Строка которая будет отображатся на кнопке
+
+        call_data - CallbackData которую нужно будет ловить call_data.filter()
+
+        Returns:
+        -------
+        InlineKeyboardMarkup - inline клавиатура состоящая из одной кнопки
+
+        """
+    ikb = InlineKeyboardBuilder()
+    for text, call in dictionary.items():
+        ikb.button(text=text, callback_data=call.pack())
+    return ikb.as_markup()
 
 
 # def set_IKB_Survey(running_test_id: int, answers: list[QuizeAnswersORM]) -> InlineKeyboardMarkup:

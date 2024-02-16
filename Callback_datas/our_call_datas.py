@@ -10,7 +10,7 @@ class SelectTestCal(CallbackData, prefix='select_test'):
 
 
 # select_test = CallbackData('select_test', 'name_test')
-# del_message = DelMessageCal().pack()
+del_message = DelMessageCal()
 # cancel_test = CallbackData('cancel', 'id_user_test')
 # run_test = CallbackData('run_test', 'name_test')
 # start_test = CallbackData('start_test', 'id_answer')
