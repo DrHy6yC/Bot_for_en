@@ -27,7 +27,7 @@ async def async_import_survey_csv(path_file: str, description_test: str) -> None
     -------
 
     """
-    path = Path(__file__).parent / f"../{path_file}"
+    path = Path(__file__).parent.parent/f"Tests/{path_file}"
     csv_file = import_csv(path)
     name_test = path_file.replace('.csv', '')
 

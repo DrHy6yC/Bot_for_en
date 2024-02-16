@@ -9,7 +9,6 @@ import orm
 
 async def rewrite_DB():
     await filling_min_db()
-    pass
 
 
 async def check_db():
@@ -30,6 +29,6 @@ async def tasks():
     ic(result)
 
 if __name__ == "__main__":
-    # asyncio.run(rewrite_DB())
+    asyncio.run(rewrite_DB())
     # asyncio.run(check_db())
-    asyncio.run(tasks())
+    # asyncio.run(tasks())
