@@ -9,6 +9,18 @@ class SelectTestCal(CallbackData, prefix='select_test'):
     name_test: str
 
 
+class ProgressTestCal(CallbackData, prefix='progress_test'):
+    id_answer: str
+
+
+class CanceledTestCal(CallbackData, prefix='canceled_test'):
+    id_user_test: int
+
+
+class ViewResultTestCal(CallbackData, prefix='view_result_test'):
+    id_user_test: int
+
+
 # select_test = CallbackData('select_test', 'name_test')
 del_message = DelMessageCal()
 # cancel_test = CallbackData('cancel', 'id_user_test')

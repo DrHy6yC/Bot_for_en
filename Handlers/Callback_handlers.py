@@ -1,12 +1,11 @@
 from icecream import ic
 from aiogram import types, Router
 
-from Callback_datas import DelMessageCal
+from Callback_datas import DelMessageCal, ProgressTestCal, SelectTestCal, CanceledTestCal, ViewResultTestCal
 from Create_bot import bot
 from SQL.models import UserQuizzesORM, UserAnswersORM
 from SQL import orm
-# from Callback_datas import our_call_datas, cancel_test
-from Keyboards import KB_Reply
+from Keyboards import set_IKB_many_but, set_IKB_one_but
 
 
 async def delete_message(callback: types.CallbackQuery) -> None:
@@ -14,14 +13,14 @@ async def delete_message(callback: types.CallbackQuery) -> None:
     await bot.delete_message(callback.message.chat.id, callback.message.message_id)
 
 
-async def test_handler(callback: types.CallbackQuery, callback_data: dict) -> None:
+async def test_handler(callback: types.CallbackQuery, callback_data: SelectTestCal) -> None:
     """
     Notes:
         Убедиться что пользователь нажимал старт и зарегистрирован в БД бота!
 
     """
 
-    name_test = callback_data.get('name_test')
+    name_test = callback_data.name_test
     user_tg_id = callback.from_user.id
     if await orm.async_get_is_user_status_test(int(user_tg_id), 2):
         run_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 2)
@@ -44,43 +43,23 @@ async def test_handler(callback: types.CallbackQuery, callback_data: dict) -> No
             text=f'Выбран тест: {name_test}')
         run_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 1)
         dict_str_cal = dict()
-        dict_str_cal[f'Запустить {name_test}'] = our_call_datas.run_test.new(name_test)
-        dict_str_cal['Отмена'] = our_call_datas.cancel_test.new(run_test.ID)
+        dict_str_cal[f'Запустить {name_test}'] = ProgressTestCal(id_answer='0')
+        dict_str_cal['Отмена'] = CanceledTestCal(id_user_test=run_test.ID)
 
         await bot.edit_message_reply_markup(
             chat_id=callback.message.chat.id,
             message_id=callback.message.message_id,
-            reply_markup=KB_Reply.set_IKB_many_but(dict_str_cal)
+            reply_markup=set_IKB_many_but(dict_str_cal)
         )
         await callback.answer()
 
 
-async def test_run(callback: types.CallbackQuery, callback_data: dict) -> None:
-    name_test = callback_data.get('name_test')
-    message_id = callback.message.message_id
-    user_tg_id = callback.from_user.id
-    run_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 1)
-    id_answer = 0
-    call_data = our_call_datas.start_test.new(id_answer)
-    await bot.edit_message_text(
-        chat_id=user_tg_id,
-        message_id=message_id,
-        text=f'Запущен {name_test}'
-    )
-    await bot.edit_message_reply_markup(
-        chat_id=user_tg_id,
-        message_id=message_id,
-        reply_markup=KB_Reply.set_IKB_one_but('Ok', call_data)
-    )
-    await orm.async_set_user_test_status(run_test.ID, 2)
-
-
-async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> None:
+async def test_progress(callback: types.CallbackQuery, callback_data: ProgressTestCal) -> None:
     ic()
-    id_user_answer = int(callback_data.get('id_answer'))
+    id_user_answer = int(callback_data.id_answer)
     message_id = callback.message.message_id
     user_tg_id = callback.from_user.id
-    running_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 2)
+    running_test = await orm.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 1)
     running_test_id = running_test.ID
     quize_id = running_test.ID_QUIZE
     question_num = running_test.QUESTION_NUMBER
@@ -112,9 +91,15 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
         answers = await orm.async_get_answers_by_id_test_and_num_question(quize_id, question_num)
         question_text = await orm.async_get_question_by_id_test_num_question(quize_id, question_num)
         ic(running_test_id)
-        await bot.send_message(chat_id=user_tg_id,
-                               text=question_text,
-                               reply_markup=KB_Reply.set_IKB_Survey(running_test_id, answers))
+        dict_buts = dict()
+        for answer in answers:
+            dict_buts[answer.ANSWER_TEXT] = ProgressTestCal(id_answer=str(answer.ID))
+        dict_buts['Отмена'] = CanceledTestCal(id_user_test=str(running_test_id))
+        await bot.send_message(
+            chat_id=user_tg_id,
+            text=question_text,
+            reply_markup=set_IKB_many_but(dict_buts)
+        )
     elif 1 <= question_num < MAX_QUESTION_SURVEY:
         ic()
         ic(id_user_answer)
@@ -131,10 +116,14 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
         await orm.async_update_running_test_num_question(running_test_id, question_num)
         answers = await orm.async_get_answers_by_id_test_and_num_question(quize_id, question_num)
         question_text = await orm.async_get_question_by_id_test_num_question(quize_id, question_num)
+        dict_buts = dict()
+        for answer in answers:
+            dict_buts[answer.ANSWER_TEXT] = ProgressTestCal(id_answer=str(answer.ID))
+        dict_buts['Отмена'] = CanceledTestCal(id_user_test=str(running_test_id))
         await bot.send_message(
             chat_id=user_tg_id,
             text=question_text,
-            reply_markup=KB_Reply.set_IKB_Survey(running_test_id, answers)
+            reply_markup=set_IKB_many_but(dict_buts)
         )
     else:
         ic()
@@ -152,9 +141,9 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
         await bot.send_message(
             chat_id=user_tg_id,
             text='Тест завершён',
-            reply_markup=KB_Reply.set_IKB_one_but(
+            reply_markup=set_IKB_one_but(
                 text='Посмотреть результаты',
-                call_data=our_call_datas.view_result.new(running_test_id)
+                call_data=ViewResultTestCal(id_user_test=running_test_id)
             )
         )
     ic()
@@ -163,24 +152,24 @@ async def test_progress(callback: types.CallbackQuery, callback_data: dict) -> N
     await callback.answer()
 
 
-async def test_stopped(callback: types.CallbackQuery, callback_data: dict) -> None:
-    user_tg_id = callback.from_user.id
-    user_tset_id = int(callback_data.get('id_user_test'))
-    await bot.edit_message_reply_markup(
-        chat_id=user_tg_id,
-        message_id=callback.message.message_id,
-        reply_markup=KB_Reply.set_IKB_stop_test(user_tset_id)
-    )
+# async def test_stopped(callback: types.CallbackQuery, callback_data: ) -> None:
+#     user_tg_id = callback.from_user.id
+#     user_tset_id = int(callback_data.get('id_user_test'))
+#     await bot.edit_message_reply_markup(
+#         chat_id=user_tg_id,
+#         message_id=callback.message.message_id,
+#         reply_markup=KB_Reply.set_IKB_stop_test(user_tset_id)
+#     )
 
 
-async def test_canceled(callback: types.CallbackQuery, callback_data: dict) -> None:
+async def test_canceled(callback: types.CallbackQuery, callback_data: CanceledTestCal) -> None:
     user_tg_id = callback.from_user.id
     await bot.edit_message_reply_markup(
         chat_id=user_tg_id,
         message_id=callback.message.message_id,
         reply_markup=None
     )
-    user_tset_id = int(callback_data.get('id_user_test'))
+    user_tset_id = int(callback_data.id_user_test)
     await orm.async_set_user_test_status(user_tset_id, 3)
     run_test = await orm.async_get_user_test_by_id(user_tset_id)
     ic(run_test.ID)
@@ -210,9 +199,9 @@ async def test_continue(callback: types.CallbackQuery) -> None:
     await callback.answer('Сейчас можно только остановить тест', show_alert=True)
 
 
-async def test_completed(callback: types.CallbackQuery, callback_data: dict) -> None:
+async def test_completed(callback: types.CallbackQuery, callback_data: ViewResultTestCal) -> None:
     user_tg_id = callback.from_user.id
-    user_tset_id = int(callback_data.get('id_user_test'))
+    user_tset_id = int(callback_data.id_user_test)
     run_test = await orm.async_get_user_test_by_id(user_tset_id)
     await orm.async_set_user_test_status(user_tset_id, 5)
 
@@ -244,13 +233,12 @@ async def test_restart(callback: types.CallbackQuery) -> None:
 
 def register_call_handlers_user(router: Router) -> None:
     router.callback_query.register(delete_message, DelMessageCal.filter())
-    # dp.register_callback_query_handler(delete_message, our_call_datas.del_message.filter())
-    # dp.register_callback_query_handler(test_handler, our_call_datas.select_test.filter())
+    router.callback_query.register(test_handler, SelectTestCal.filter())
     # dp.register_callback_query_handler(test_run, our_call_datas.run_test.filter())
-    # dp.register_callback_query_handler(test_progress, our_call_datas.start_test.filter())
-    # dp.register_callback_query_handler(test_completed, our_call_datas.view_result.filter())
+    router.callback_query.register(test_progress, ProgressTestCal.filter())
+    router.callback_query.register(test_completed, ViewResultTestCal.filter())
     # dp.register_callback_query_handler(test_continue, our_call_datas.continue_test.filter())
-    # dp.register_callback_query_handler(test_canceled, our_call_datas.cancel_test.filter())
+    router.callback_query.register(test_canceled, CanceledTestCal.filter())
     # dp.register_callback_query_handler(test_restart, our_call_datas.restart_test.filter())
     # dp.register_callback_query_handler(test_stopped, our_call_datas.stop_test.filter())
 

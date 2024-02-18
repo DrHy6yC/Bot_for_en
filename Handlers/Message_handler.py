@@ -1,3 +1,5 @@
+from copy import copy
+
 from icecream import ic
 from aiogram import types, Router
 from aiogram.filters import Command
@@ -45,10 +47,10 @@ async def send_welcome(message: types.Message) -> None:
 
 
 async def stop_bot(message: types.Message):
-    dp.stop_polling()
-    await dp.wait_closed()
+    user_tg_id = copy(message.from_user.id)
+    await dp.stop_polling()
+    ic(f'{user_tg_id} остановил бота')
     await bot.close()
-    ic(f'{message.from_user.id} остановил бота')
 
 
 async def select_test(message: types.Message) -> None:
@@ -101,7 +103,6 @@ async def my_keyboard(message: types.Message) -> None:
 
 
 async def get_level_English(message: types.Message) -> None:
-    await message.answer("You levels")
     user_tg_id = message.from_user.id
     await bot.delete_message(chat_id=user_tg_id,
                              message_id=message.message_id)

@@ -72,7 +72,7 @@ def set_IKB_many_but(dictionary: dict[str, CallbackData]) -> InlineKeyboardMarku
 # def set_IKB_Survey(running_test_id: int, answers: list[QuizeAnswersORM]) -> InlineKeyboardMarkup:
 #     dictionary = dict()
 #     for answer in answers:
-#         call_data = start_test.new(answer.ID)
+#         call_data = (answer.ID)
 #         dictionary[answer.ANSWER_TEXT] = call_data
 #     call_data_x = stop_test.new(running_test_id)
 #     dictionary['Остановить тест'] = call_data_x
