@@ -1,5 +1,10 @@
+from os import getenv
 import requests
 import json
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 
 def detect_lang(text: str) -> str:
@@ -44,7 +49,7 @@ def translate_text(text: str, en_ru=False) -> str:
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "Authorization": "a_FpZIkZUTL1JqY3dRoy8KrBwH4pswhz53CAoOZgEXgk400VMCKqAgbhRT9li2Ho5gFp5rtPBha4m3AoCg"
+        "Authorization": getenv('API_LINGVANEX')
     }
     response = requests.post(url, json=payload, headers=headers)
     res = json.loads(response.text)

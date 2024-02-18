@@ -115,14 +115,14 @@ async def get_level_English(message: types.Message) -> None:
     else:
         text = f'Твой уровень еще не определен, пройди для начала тест: English Level test. Grammar'
         name_test = 'English Level test. Grammar'
-        dict_but = dict()
+        dict_buts = dict()
         call_data_1 = SelectTestCal(name_test=name_test)
         call_data_2 = DelMessageCal()
-        dict_but[name_test] = call_data_1
-        dict_but['Отмена'] = call_data_2
+        dict_buts[name_test] = call_data_1
+        dict_buts['Отмена'] = call_data_2
     await bot.send_message(chat_id=user_tg_id,
                            text=text,
-                           reply_markup=set_IKB_many_but(dict_but))
+                           reply_markup=set_IKB_many_but(dict_buts))
 
 
 def register_handlers_message(router: Router) -> None:

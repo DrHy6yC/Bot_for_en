@@ -1,4 +1,9 @@
+from os import getenv
 import requests
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 
 def detect_lang(text: str) -> str:
@@ -46,7 +51,7 @@ def translate_text(text: str, en_ru=False, is_detected=False) -> str:
     headers = {
         "content-type": "application/x-www-form-urlencoded",
         "Accept-Encoding": "application/gzip",
-        "X-RapidAPI-Key": "316f25f77emshc29da0dac219ba0p1d50b6jsn9c1c76ea8927",
+        "X-RapidAPI-Key": getenv('API_GOOGLE_TRANSLATE'),
         "X-RapidAPI-Host": "google-translate1.p.rapidapi.com"
     }
 
