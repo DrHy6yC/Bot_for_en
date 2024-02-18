@@ -9,10 +9,10 @@ from SQL.models import QuizeAnswersORM
 # from Callback_datas import select_test, del_message, start_test, cancel_test
 
 
-# def set_kb(callback: CallbackData):
+# def set_kb(text: str, callback: CallbackData):
 #     builder = InlineKeyboardBuilder()
 #     builder.button(
-#         text='Ok',
+#         text=text,
 #         callback_data=callback.pack(),
 #     )
 #     return builder.as_markup()
@@ -20,10 +20,10 @@ from SQL.models import QuizeAnswersORM
 
 def set_buts(text_buts) -> ReplyKeyboardMarkup:
     kb = ReplyKeyboardBuilder()
-    for text_btn in text_buts:
-        button = KeyboardButton(text=text_btn)
+    for text_but in text_buts:
+        button = KeyboardButton(text=text_but)
         kb.add(button)
-    return kb.as_markup()
+    return kb.as_markup(resize_keyboard=True)
 
 
 def set_IKB_one_but(text: str, call_data: CallbackData) -> InlineKeyboardMarkup:
@@ -44,8 +44,7 @@ def set_IKB_one_but(text: str, call_data: CallbackData) -> InlineKeyboardMarkup:
     """
     ikb = InlineKeyboardBuilder()
     ikb.button(text=text, callback_data=call_data.pack())
-    ikb.as_markup()
-    return ikb
+    return ikb.as_markup()
 
 
 def set_IKB_many_but(dictionary: dict[str, CallbackData]) -> InlineKeyboardMarkup:
@@ -66,7 +65,7 @@ def set_IKB_many_but(dictionary: dict[str, CallbackData]) -> InlineKeyboardMarku
         """
     ikb = InlineKeyboardBuilder()
     for text, call in dictionary.items():
-        ikb.button(text=text, callback_data=call.pack())
+        ikb.button(text=text, callback_data=call.pack()).adjust(1)
     return ikb.as_markup()
 
 
