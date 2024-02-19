@@ -4,3 +4,6 @@ from .our_call_datas import ProgressTestCal
 from .our_call_datas import del_message
 from .our_call_datas import CanceledTestCal
 from .our_call_datas import ViewResultTestCal
+from .our_call_datas import ContinueTestCal
+from .our_call_datas import StopTestCal
+from .our_call_datas import RestartTestCal

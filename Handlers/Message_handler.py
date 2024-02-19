@@ -58,8 +58,8 @@ async def select_test(message: types.Message) -> None:
     name_tests = await orm.async_get_name_test()
     dict_buts = dict()
     for name_test in name_tests:
-        callback = SelectTestCal(name_test=name_test)
-        dict_buts[name_test] = callback
+        dict_buts[name_test] = SelectTestCal(name_test=name_test)
+    dict_buts['Отмена'] = DelMessageCal()
     await bot.send_message(chat_id=message.from_user.id,
                            text='Выберите тест',
                            reply_markup=set_IKB_many_but(dict_buts))

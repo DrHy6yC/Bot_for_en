@@ -1,7 +1,8 @@
 from icecream import ic
 from aiogram import types, Router
 
-from Callback_datas import DelMessageCal, ProgressTestCal, SelectTestCal, CanceledTestCal, ViewResultTestCal
+from Callback_datas import DelMessageCal, ProgressTestCal, SelectTestCal, CanceledTestCal, ViewResultTestCal, \
+    StopTestCal, RestartTestCal, ContinueTestCal
 from Create_bot import bot
 from SQL.models import UserQuizzesORM, UserAnswersORM
 from SQL import orm
@@ -94,7 +95,7 @@ async def test_progress(callback: types.CallbackQuery, callback_data: ProgressTe
         dict_buts = dict()
         for answer in answers:
             dict_buts[answer.ANSWER_TEXT] = ProgressTestCal(id_answer=str(answer.ID))
-        dict_buts['Отмена'] = CanceledTestCal(id_user_test=str(running_test_id))
+        dict_buts['Отмена'] = StopTestCal(id_user_test=str(running_test_id))
         await bot.send_message(
             chat_id=user_tg_id,
             text=question_text,
@@ -119,7 +120,7 @@ async def test_progress(callback: types.CallbackQuery, callback_data: ProgressTe
         dict_buts = dict()
         for answer in answers:
             dict_buts[answer.ANSWER_TEXT] = ProgressTestCal(id_answer=str(answer.ID))
-        dict_buts['Отмена'] = CanceledTestCal(id_user_test=str(running_test_id))
+        dict_buts['Отмена'] = StopTestCal(id_user_test=str(running_test_id))
         await bot.send_message(
             chat_id=user_tg_id,
             text=question_text,
@@ -152,17 +153,24 @@ async def test_progress(callback: types.CallbackQuery, callback_data: ProgressTe
     await callback.answer()
 
 
-# async def test_stopped(callback: types.CallbackQuery, callback_data: ) -> None:
-#     user_tg_id = callback.from_user.id
-#     user_tset_id = int(callback_data.get('id_user_test'))
-#     await bot.edit_message_reply_markup(
-#         chat_id=user_tg_id,
-#         message_id=callback.message.message_id,
-#         reply_markup=KB_Reply.set_IKB_stop_test(user_tset_id)
-#     )
+async def test_stopped(callback: types.CallbackQuery, callback_data: StopTestCal) -> None:
+    ic(callback_data, type(callback_data))
+    user_tg_id = callback.from_user.id
+    user_tset_id = int(callback_data.id_user_test)
+    dict_but = {
+                'Остановить тест': CanceledTestCal(id_user_test=user_tset_id),
+                'Продолжить тест': ContinueTestCal(id_user_test=user_tset_id),
+                'Перезапустить тест': RestartTestCal(id_user_test=user_tset_id)
+            }
+    await bot.edit_message_reply_markup(
+        chat_id=user_tg_id,
+        message_id=callback.message.message_id,
+        reply_markup=set_IKB_many_but(dict_but)
+    )
 
 
 async def test_canceled(callback: types.CallbackQuery, callback_data: CanceledTestCal) -> None:
+    ic(callback_data, type(callback_data))
     user_tg_id = callback.from_user.id
     await bot.edit_message_reply_markup(
         chat_id=user_tg_id,
@@ -189,13 +197,7 @@ async def test_canceled(callback: types.CallbackQuery, callback_data: CanceledTe
 
 
 # TODO Sql+Test -> TODO Sql+Test 1. Реализовать продолжение теста
-async def test_continue(callback: types.CallbackQuery) -> None:
-    # user_id = callback.from_user.id
-    # test_info = get_user_survey(user_id, 1)[0]
-    # user_test_id = test_info[0]
-    # set_user_survey_status_test(user_test_id, 4)
-    # FSMTest.test_continue.set()
-    # ic(await state.get_state())
+async def test_continue(callback: types.CallbackQuery, callback_data: ContinueTestCal) -> None:
     await callback.answer('Сейчас можно только остановить тест', show_alert=True)
 
 
@@ -227,18 +229,17 @@ async def test_completed(callback: types.CallbackQuery, callback_data: ViewResul
 
 
 # TODO Sql+Test -> TODO Sql+Test 1. Реализовать перезапуск теста
-async def test_restart(callback: types.CallbackQuery) -> None:
+async def test_restart(callback: types.CallbackQuery, callback_data: RestartTestCal) -> None:
     await callback.answer('Сейчас можно только остановить тест', show_alert=True)
 
 
 def register_call_handlers_user(router: Router) -> None:
     router.callback_query.register(delete_message, DelMessageCal.filter())
     router.callback_query.register(test_handler, SelectTestCal.filter())
-    # dp.register_callback_query_handler(test_run, our_call_datas.run_test.filter())
     router.callback_query.register(test_progress, ProgressTestCal.filter())
     router.callback_query.register(test_completed, ViewResultTestCal.filter())
-    # dp.register_callback_query_handler(test_continue, our_call_datas.continue_test.filter())
+    router.callback_query.register(test_continue, ContinueTestCal.filter())
     router.callback_query.register(test_canceled, CanceledTestCal.filter())
-    # dp.register_callback_query_handler(test_restart, our_call_datas.restart_test.filter())
-    # dp.register_callback_query_handler(test_stopped, our_call_datas.stop_test.filter())
+    router.callback_query.register(test_restart, RestartTestCal.filter())
+    router.callback_query.register(test_stopped, StopTestCal.filter())
 
