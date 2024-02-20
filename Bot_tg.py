@@ -3,9 +3,9 @@ import logging
 import sys
 
 from Create_bot import dp, bot
-from Handlers.Callback_handlers import register_call_handlers_user
-from Handlers.Inline_handlers import register_inline_handler
-from Handlers.Message_handler import register_handlers_message
+from Handlers import register_call_handlers_user
+from Handlers import register_inline_handler
+from Handlers import register_handlers_message
 
 
 async def main() -> None:

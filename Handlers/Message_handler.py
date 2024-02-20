@@ -10,7 +10,7 @@ from Commands import my_command, start_command, help_command, stop_bot_command, 
 from Keyboards import set_buts, set_IKB_one_but, set_IKB_many_but
 from SQL.models import UsersORM
 from SQL import orm
-from Callback_datas.our_call_datas import DelMessageCal, SelectTestCal, del_message
+from Callback_datas.custom_call_datas import DelMessageCal, SelectTestCal, del_message
 
 
 async def delete_message(message: types.Message) -> None:
