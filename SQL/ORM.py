@@ -228,7 +228,7 @@ async def async_get_question_by_id_test_num_question(id_test: int, num_question:
         return result
 
 
-async def async_get_text_level(points: int) -> list[int, str]:
+async def async_get_text_level(points: float) -> list[int, str]:
     async with async_session_sql_connect() as session_sql:
         query = select(UserLevelsORM).where(
             and_(UserLevelsORM.MIN_LEVEL_SCORE <= points, UserLevelsORM.MAX_LEVEL_SCORE >= points))

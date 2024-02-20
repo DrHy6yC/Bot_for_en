@@ -5,15 +5,15 @@ from aiogram.types import KeyboardButton
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 
-def set_buts(text_buts) -> ReplyKeyboardMarkup:
+def set_buts(text_buttons: list[str]) -> ReplyKeyboardMarkup:
     kb = ReplyKeyboardBuilder()
-    for text_but in text_buts:
-        button = KeyboardButton(text=text_but)
+    for text_button in text_buttons:
+        button = KeyboardButton(text=text_button)
         kb.add(button)
     return kb.as_markup(resize_keyboard=True)
 
 
-def set_IKB_one_but(text: str, call_data: CallbackData) -> InlineKeyboardMarkup:
+def set_IKB_one_but(text_button: str, call_data: CallbackData) -> InlineKeyboardMarkup:
     """
     Генерирует inline клавиатуру с одной кнопкой на которой будет текст полученный из параметров(text),
     при нажатии на которую будет отправлен пользовательский CallbackData (call_data) для дальнейшего отлавливания
@@ -30,7 +30,7 @@ def set_IKB_one_but(text: str, call_data: CallbackData) -> InlineKeyboardMarkup:
 
     """
     ikb = InlineKeyboardBuilder()
-    ikb.button(text=text, callback_data=call_data.pack())
+    ikb.button(text=text_button, callback_data=call_data.pack())
     return ikb.as_markup()
 
 
@@ -55,6 +55,6 @@ def set_IKB_many_but(dictionary: dict[str, CallbackData]) -> InlineKeyboardMarku
 
         """
     ikb = InlineKeyboardBuilder()
-    for text, call in dictionary.items():
-        ikb.button(text=text, callback_data=call.pack()).adjust(1)
+    for text_button, call in dictionary.items():
+        ikb.button(text=text_button, callback_data=call.pack()).adjust(1)
     return ikb.as_markup()
