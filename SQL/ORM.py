@@ -7,7 +7,7 @@ from sqlalchemy.orm import join
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
 from sqlalchemy.sql.functions import count
 
-from SQL.Config import async_session_sql_connect, sql_async_engine
+from Create_bot import async_session_sql_connect, sql_async_engine
 from SQL.Models import Base, UsersORM, QuizzesORM, ConstantsORM, UserQuizzesORM, UserLevelsORM, QuizeAnswersORM, \
     QuizeQuestionsORM, UserAnswersORM, QuizeTrueAnswersORM
 
