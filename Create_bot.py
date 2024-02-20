@@ -1,41 +1,37 @@
-import asyncio
 from os import getenv
 from dotenv import load_dotenv
 
-from aiogram import Bot, Dispatcher, Router
+from icecream import ic
+
+from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from sqlalchemy.ext.asyncio import async_sessionmaker
-from sqlalchemy.orm import sessionmaker
 
-from SQL.Create_SQL import get_engine, get_async_engine, filling_min_db
+from SQL.Engine import get_async_engine
 from SQL.Database import DBMYSQL
+from Utils import get_bool_from_str
 
 # TODO Bot. Проработать обычные кнопки для лички и для группы
 # TODO Bot. Реализовать запуск теста только в личку, если запускался в группе результат отправлялся еще и в группу
 # TODO Bot+Sql. Разграничить пользователей по ролям
 # TODO Bot+Sql. Админский режим, добавление тестов и заданий
-# TODO Bot+Test+Sql. Перейти на aiogram 3.0...
 
 
 load_dotenv()
 API_TOKEN = getenv('API_TOKEN_TG')
+is_logging = getenv('IS_LOGGING')
 
 dp = Dispatcher()
-# inline_router = Router()
 
 db_mysql = DBMYSQL()
-is_created_db = db_mysql.get_db_is_created()
-is_echo_db = db_mysql.get_db_is_echo()
-# sync
-dsn = db_mysql.get_dsn()
-sql_engine = get_engine(dsn, is_echo_db)
-session_sql_connect = sessionmaker(sql_engine)
 
-# async
+is_created_db = get_bool_from_str(db_mysql.DB_IS_CREATED)
+is_echo_db = get_bool_from_str(db_mysql.DB_ECHO)
+ic(is_created_db, is_echo_db)
+
 async_dsn = db_mysql.get_async_dsn()
 sql_async_engine = get_async_engine(async_dsn, is_echo_db)
 async_session_sql_connect = async_sessionmaker(sql_async_engine)
 
-if is_created_db:
-    asyncio.run(filling_min_db(sql_async_engine))
+
 bot = Bot(API_TOKEN, parse_mode=ParseMode.HTML)

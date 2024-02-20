@@ -51,7 +51,7 @@ class DBMYSQL:
     DB_NAME: str = getenv('DB_NAME')
     DB_SQLite: str = getenv('DB_SQLite')
     DB_DBMS: str = getenv('DB_DBMS')
-    DB_ECHO: str = getenv('ECHO_DB')
+    DB_ECHO: str = getenv('DB_ECHO')
 
     def get_dsn(self) -> str:
         """Метод для получения строки подключения из .env
@@ -61,7 +61,7 @@ class DBMYSQL:
         driver = ""
         db_params = f"{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
         match self.DB_DBMS:
-            case  'MYSQL':
+            case 'MYSQL':
                 driver = f"mysql+mysqlconnector://"
             case 'PGSQL':
                 driver = f"postgresql+psycopg://"
@@ -88,23 +88,3 @@ class DBMYSQL:
                 db_params = f"/{self.DB_SQLite}"
         dsn_self = f"{driver}{db_params}"
         return dsn_self
-
-    def get_db_is_created(self) -> bool:
-        """
-        Переводит строку из .env в python bool
-        :return: Возвращает True когда DB_IS_CREATED=True, в остальных случаях -> False
-        """
-        if self.DB_IS_CREATED == 'True':
-            return True
-        else:
-            return False
-
-    def get_db_is_echo(self) -> bool:
-        """
-        Переводит строку из .env в python bool
-        :return: Возвращает True когда DB_IS_CREATED=True, в остальных случаях -> False
-        """
-        if self.DB_ECHO == 'True':
-            return True
-        else:
-            return False
