@@ -65,7 +65,7 @@ async def select_test(message: types.Message,  state: FSMContext) -> None:
     await bot.send_message(chat_id=message.from_user.id,
                            text='Выберите тест',
                            reply_markup=set_IKB_many_but(dict_buts))
-    await state.set_state(TestStates.select)
+    # await state.set_state(TestStates.select)
 
 
 async def help_func(message: types.Message) -> None:
@@ -126,7 +126,7 @@ async def get_level_English(message: types.Message, state: FSMContext) -> None:
     await bot.send_message(chat_id=user_tg_id,
                            text=text,
                            reply_markup=set_IKB_many_but(dict_buts))
-    await state.set_state(TestStates.select)
+    # await state.set_state(TestStates.select)
 
 
 def register_handlers_message(router: Router) -> None:

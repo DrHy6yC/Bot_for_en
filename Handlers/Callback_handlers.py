@@ -15,7 +15,7 @@ from Callback_datas import DelMessageCal, ProgressTestCal, SelectTestCal, Cancel
 async def delete_message(callback: types.CallbackQuery, state: FSMContext) -> None:
     ic('Message delete')
     await bot.delete_message(callback.message.chat.id, callback.message.message_id)
-    await state.clear()
+    # await state.clear()
 
 
 async def test_handler(callback: types.CallbackQuery, callback_data: SelectTestCal, state: FSMContext) -> None:
@@ -24,6 +24,7 @@ async def test_handler(callback: types.CallbackQuery, callback_data: SelectTestC
         Убедиться что пользователь нажимал старт и зарегистрирован в БД бота!
 
     """
+    await state.set_state(TestStates.select)
     data = await state.get_data()
     ic(data, type(data))
     name_test = callback_data.name_test
@@ -244,7 +245,7 @@ async def test_restart(callback: types.CallbackQuery, callback_data: RestartTest
 
 def register_call_handlers_user(router: Router) -> None:
     router.callback_query.register(delete_message, DelMessageCal.filter())
-    router.callback_query.register(test_handler, SelectTestCal.filter(), StateFilter(TestStates.select))
+    router.callback_query.register(test_handler, SelectTestCal.filter(), StateFilter(None))
     router.callback_query.register(test_progress, ProgressTestCal.filter(), StateFilter(TestStates.select))
     router.callback_query.register(test_completed, ViewResultTestCal.filter(), StateFilter(TestStates.select))
     router.callback_query.register(test_continue, ContinueTestCal.filter(), StateFilter(TestStates.select))
