@@ -3,8 +3,8 @@ from pathlib import Path
 from icecream import ic
 
 from Utils.Read_file import import_csv
-from SQL import orm
-from SQL.models import QuizzesORM, QuizeQuestionsORM, QuizeAnswersORM, QuizeTrueAnswersORM
+from SQL import ORM
+from SQL.Models import QuizzesORM, QuizeQuestionsORM, QuizeAnswersORM, QuizeTrueAnswersORM
 
 
 def get_id_answer(answers: list[QuizeAnswersORM], num_true_answer: int) -> int:

@@ -8,9 +8,9 @@ from aiogram import F
 from Create_bot import bot, dp
 from Commands import my_command, start_command, help_command, stop_bot_command, get_private_command
 from Keyboards import set_buts, set_IKB_one_but, set_IKB_many_but
-from SQL.models import UsersORM
-from SQL import orm
-from Callback_datas.custom_call_datas import DelMessageCal, SelectTestCal, del_message
+from SQL.Models import UsersORM
+from SQL import ORM
+from Callback_datas.Custom_call_datas import DelMessageCal, SelectTestCal, del_message
 
 
 async def delete_message(message: types.Message) -> None:

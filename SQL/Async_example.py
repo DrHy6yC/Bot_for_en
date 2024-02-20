@@ -1,10 +1,10 @@
 from icecream import ic
 import asyncio
 
-from SQL.create_min_in_DB import filling_min_db
+from SQL.Create_min_in_DB import filling_min_db
 # from SQL.create_min_in_DB import filling_min_db
-from models import UsersORM, QuizzesORM, ConstantsORM, QuizeStatusesORM
-import orm
+from Models import UsersORM, QuizzesORM, ConstantsORM, QuizeStatusesORM
+import ORM
 
 
 async def rewrite_DB():

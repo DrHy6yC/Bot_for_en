@@ -4,8 +4,8 @@ from aiogram import types, Router
 from Callback_datas import DelMessageCal, ProgressTestCal, SelectTestCal, CanceledTestCal, ViewResultTestCal, \
     StopTestCal, RestartTestCal, ContinueTestCal
 from Create_bot import bot
-from SQL.models import UserQuizzesORM, UserAnswersORM
-from SQL import orm
+from SQL.Models import UserQuizzesORM, UserAnswersORM
+from SQL import ORM
 from Keyboards import set_IKB_many_but, set_IKB_one_but
 
 

@@ -2,9 +2,9 @@ import datetime
 
 from icecream import ic
 
-from SQL.config import sql_async_engine
-from SQL.models import ConstantsORM, QuizeStatusesORM, UserLevelsORM
-from SQL.orm import async_create_all_table, async_insert_data_list_to_bd
+from SQL.Config import sql_async_engine
+from SQL.Models import ConstantsORM, QuizeStatusesORM, UserLevelsORM
+from SQL.ORM import async_create_all_table, async_insert_data_list_to_bd
 from Utils.Import_csv_to_bd import async_import_survey_csv
 
 
