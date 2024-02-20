@@ -25,9 +25,9 @@ async def send_welcome(message: types.Message) -> None:
     user_full_name = f'{message.from_user.full_name}'
     username = message.from_user.username
     text_buts = ['Помощь', 'Пройти тест', 'Узнать уровень']
-    TEXT_HI_template = await orm.async_get_const('TEXT_HI')
+    TEXT_HI_template = await ORM.async_get_const('TEXT_HI')
     TEXT_HI = TEXT_HI_template.CONSTANT_VALUE.replace('@FIO', user_full_name)
-    IS_USER = await orm.async_is_user_in_bd(user_tg_id)
+    IS_USER = await ORM.async_is_user_in_bd(user_tg_id)
     ic(IS_USER)
     if IS_USER:
         await bot.send_message(chat_id=user_tg_id,
@@ -43,7 +43,7 @@ async def send_welcome(message: types.Message) -> None:
             USER_LOGIN=user_full_name,
             USER_FULL_NAME=username
         )
-        await orm.async_insert_data_list_to_bd([new_user])
+        await ORM.async_insert_data_list_to_bd([new_user])
 
 
 async def stop_bot(message: types.Message):
@@ -55,7 +55,7 @@ async def stop_bot(message: types.Message):
 
 async def select_test(message: types.Message) -> None:
     await delete_message(message)
-    name_tests = await orm.async_get_name_test()
+    name_tests = await ORM.async_get_name_test()
     dict_buts = dict()
     for name_test in name_tests:
         dict_buts[name_test] = SelectTestCal(name_test=name_test)
@@ -67,7 +67,7 @@ async def select_test(message: types.Message) -> None:
 
 async def help_func(message: types.Message) -> None:
     await message.delete()
-    help_txt_temp = await orm.async_get_const('TEXT_HELP')
+    help_txt_temp = await ORM.async_get_const('TEXT_HELP')
     TEXT_HELP = help_txt_temp.CONSTANT_VALUE
     call_data = del_message
     await bot.send_message(chat_id=message.from_user.id,
@@ -106,7 +106,7 @@ async def get_level_English(message: types.Message) -> None:
     user_tg_id = message.from_user.id
     await bot.delete_message(chat_id=user_tg_id,
                              message_id=message.message_id)
-    user_level = await orm.async_get_level_user_text(user_tg_id)
+    user_level = await ORM.async_get_level_user_text(user_tg_id)
     if user_level != "No level":
         text = f'Твой уровень: {user_level}\n' \
                f'Если хочешь повысить уровень,\n' \
