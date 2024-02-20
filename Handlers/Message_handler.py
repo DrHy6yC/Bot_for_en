@@ -1,18 +1,17 @@
 from copy import copy
 
-from aiogram.fsm.context import FSMContext
 from icecream import ic
+
 from aiogram import types, Router
 from aiogram.filters import Command, StateFilter
 from aiogram import F
 
 from Create_bot import bot, dp
+from SQL import ORM
+from SQL.Models import UsersORM
 from Commands import my_command, start_command, help_command, stop_bot_command, get_private_command
 from Keyboards import set_buts, set_IKB_one_but, set_IKB_many_but
-from SQL.Models import UsersORM
-from SQL import ORM
-from Callback_datas.Custom_call_datas import DelMessageCal, SelectTestCal, del_message
-from States import TestStates
+from Callback_datas import DelMessageCal, SelectTestCal, del_message
 
 
 async def delete_message(message: types.Message) -> None:
@@ -55,7 +54,7 @@ async def stop_bot(message: types.Message):
     await bot.close()
 
 
-async def select_test(message: types.Message,  state: FSMContext) -> None:
+async def select_test(message: types.Message) -> None:
     await delete_message(message)
     name_tests = await ORM.async_get_name_test()
     dict_buts = dict()
@@ -65,7 +64,6 @@ async def select_test(message: types.Message,  state: FSMContext) -> None:
     await bot.send_message(chat_id=message.from_user.id,
                            text='Выберите тест',
                            reply_markup=set_IKB_many_but(dict_buts))
-    # await state.set_state(TestStates.select)
 
 
 async def help_func(message: types.Message) -> None:
@@ -79,7 +77,6 @@ async def help_func(message: types.Message) -> None:
 
 
 async def spam_group_sticker_filter_handler(message: types.Message) -> None:
-    ic(message)
     id_user = message.from_user.id
     id_chat = message.chat.id
     id_message = message.message_id
@@ -105,7 +102,7 @@ async def my_keyboard(message: types.Message) -> None:
                            reply_markup=set_buts(text_buts))
 
 
-async def get_level_English(message: types.Message, state: FSMContext) -> None:
+async def get_level_English(message: types.Message) -> None:
     user_tg_id = message.from_user.id
     await bot.delete_message(chat_id=user_tg_id,
                              message_id=message.message_id)
@@ -126,7 +123,6 @@ async def get_level_English(message: types.Message, state: FSMContext) -> None:
     await bot.send_message(chat_id=user_tg_id,
                            text=text,
                            reply_markup=set_IKB_many_but(dict_buts))
-    # await state.set_state(TestStates.select)
 
 
 def register_handlers_message(router: Router) -> None:

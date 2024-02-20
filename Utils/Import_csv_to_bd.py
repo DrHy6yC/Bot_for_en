@@ -2,6 +2,7 @@ from pathlib import Path
 
 from icecream import ic
 
+from Create_bot import bot
 from Utils.Read_file import import_csv
 from SQL import ORM
 from SQL.Models import QuizzesORM, QuizeQuestionsORM, QuizeAnswersORM, QuizeTrueAnswersORM
@@ -32,7 +33,8 @@ async def async_import_survey_csv(path_file: str, description_test: str) -> None
     name_test = path_file.replace('.csv', '')
 
     if await ORM.async_is_test_in_bd(name_test):
-        # TODO Bot. При ошибке отправлялось сообшение в телеграм о неудачной загрузке
+        await bot.send_message(chat_id=809916411,
+                               text='Тест с таким именем уже есть')
         ic("Тест с таким именем уже есть")
     else:
         test = QuizzesORM(
