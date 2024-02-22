@@ -12,10 +12,9 @@ from Callback_datas import DelMessageCal, ProgressTestCal, SelectTestCal, Cancel
     StopTestCal, RestartTestCal, ContinueTestCal
 
 
-async def delete_message(callback: types.CallbackQuery, state: FSMContext) -> None:
+async def delete_message(callback: types.CallbackQuery) -> None:
     ic('Message delete')
     await bot.delete_message(callback.message.chat.id, callback.message.message_id)
-    # await state.clear()
 
 
 async def test_handler(callback: types.CallbackQuery, callback_data: SelectTestCal, state: FSMContext) -> None:
@@ -70,6 +69,8 @@ async def test_progress(callback: types.CallbackQuery, callback_data: ProgressTe
     user_tg_id = callback.from_user.id
     running_test = await ORM.async_get_user_test_by_user_tg_id_and_status(user_tg_id, 1)
     running_test_id = running_test.ID
+    data['run_test'] = running_test
+    await state.update_data(data)
     quize_id = running_test.ID_QUIZE
     question_num = running_test.QUESTION_NUMBER
     MAX_QUESTION_SURVEY = await ORM.async_get_count_question_test(quize_id)
@@ -80,6 +81,8 @@ async def test_progress(callback: types.CallbackQuery, callback_data: ProgressTe
             ID_ANSWER=id_user_answer,
             QUESTION_NUMBER=question_num
         )
+        data['answer_user'] = id_user_answer
+        await state.update_data(data)
         await ORM.async_insert_data_list_to_bd([answer_user])
         true_answer = await ORM.async_get_true_answer(quize_id, question_num)
         ic(id_user_answer, true_answer.ID_ANSWER)
@@ -207,6 +210,7 @@ async def test_canceled(callback: types.CallbackQuery, callback_data: CanceledTe
 
 # TODO Sql+Test -> TODO Sql+Test 1. Реализовать продолжение теста
 async def test_continue(callback: types.CallbackQuery, callback_data: ContinueTestCal) -> None:
+
     await callback.answer('Сейчас можно только остановить тест', show_alert=True)
 
 
