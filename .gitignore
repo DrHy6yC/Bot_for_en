@@ -172,3 +172,6 @@ FSMStates/.DS_Store/
 .DS_Store
 FSMStates/.DS_Store
 
+/Bot.db
+/venv/
+venv/
