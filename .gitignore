@@ -175,3 +175,5 @@ FSMStates/.DS_Store
 /Bot.db
 /venv/
 venv/
+/bin/
+
