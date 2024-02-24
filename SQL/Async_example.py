@@ -1,13 +1,13 @@
 from icecream import ic
 import asyncio
 
-from SQL import filling_min_db
+
 from Models import UsersORM, QuizzesORM, ConstantsORM, QuizeStatusesORM
 import ORM
 
 
 async def rewrite_DB():
-    await filling_min_db()
+    await ORM.filling_min_db()
 
 
 async def check_db():
