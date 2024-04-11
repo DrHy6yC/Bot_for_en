@@ -29,7 +29,7 @@ async def async_import_survey_csv(path_file: str, description_test: str) -> None
 
     """
     path = Path(__file__).parent.parent/f"CSV_Files/{path_file}"
-    csv_file = import_csv(path)
+    csv_file = import_csv(str(path))
     name_test = path_file.replace('.csv', '')
 
     if await ORM.async_is_test_in_bd(name_test):
