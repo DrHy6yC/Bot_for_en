@@ -1,7 +1,10 @@
 import csv
+from icecream import ic
 
 
 def import_csv(path_csv: str) -> list:
+    ic(path_csv)
+    ic(type(path_csv))
     if type(path_csv) != str:
         raise TypeError("path_csv должна быть строка!")
     with open(path_csv, "r", newline="") as file:

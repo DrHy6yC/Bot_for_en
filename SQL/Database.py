@@ -1,5 +1,6 @@
 from os import getenv
 from dotenv import load_dotenv
+from icecream import ic
 
 load_dotenv()
 
@@ -86,4 +87,5 @@ class DBMYSQL:
                 driver = f"sqlite+aiosqlite://"
                 db_params = f"/{self.DB_SQLite}"
         dsn_self = f"{driver}{db_params}"
+        ic(dsn_self)
         return dsn_self
