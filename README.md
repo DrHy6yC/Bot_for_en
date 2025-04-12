@@ -15,6 +15,18 @@
 4) Установить модули с помощью requirements;
 5) Запустить Bot_tg.py
 
+Есть возможность запуска через Docker, но с SQLite
+Необходимо заполнить:
+ - DB_IS_CREATED=True (для первого запуска, что бы создалась БД)
+ - DB_DBMS=SQLite
+ - DB_NAME=Bot
+ - DB_ECHO=False/True(для отображения логов SQLAlchemy)
+ - DB_SQLite=Bot.db
+ - API_TOKEN_TG=4324534:AAECH9YcI0L0fef3434234 (Токен из botfather)
+
+Можно склонировать проект с Гита, создать и заполнить .env.
+Запустить командой - "docker-compose up -d"
+
 
 В будущем добавить:
 
