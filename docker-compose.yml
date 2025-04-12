@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+
+    environment:
+      - DB_IS_CREATED=${DB_IS_CREATED}
+      - DB_DBMS=${DB_DBMS}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - DB_ECHO=${DB_ECHO}
+      - DB_SQLite=${DB_SQLite}
+      - API_TOKEN_TG=${API_TOKEN_TG}
+      - API_LINGVANEX=${API_LINGVANEX}
+      - API_GOOGLE_TRANSLATE=${API_GOOGLE_TRANSLATE}
+    env_file:
+      - .env
