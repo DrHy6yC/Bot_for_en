@@ -1,5 +1,7 @@
 Телеграмм бот на aiogram 3, с поддержкой баз данных MYSQL/PGSQL/SQLite через sqlalchemy.
 
+Проверить работу можно написав боту @English_bot_help_HW_bot
+
 Функции Бота:
 
 * Переводить слова в инлайн режиме и вывод их в чат. (Перевод осуществялется Api lingvanex, есть Google Translate);
